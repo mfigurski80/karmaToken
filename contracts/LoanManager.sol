@@ -1,14 +1,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "./types/PeriodicLoanStruct.sol";
+struct PeriodicLoan {
+    bool active; // whether contract is still active or completed
+    address creditor; // 'owner' of contract
+    address borrower; // 'minter' of contract
+    uint256 period; // how often payments required
+    uint256 nextServiceTime; // next payment required
+    uint256 balance; // remaining payment amount
+    uint256 minimumPayment; // minimum payment amount
+    // Collateral[] collateral; // TODO: loan security
+}
 
 contract LoanManager {
     PeriodicLoan[] public loans;
     mapping(uint256 => uint256) public serviceReceived;
-
-    // mapping(uint256 => address) public loanToOwner;
-    // mapping(address => uint256) public ownerLoanCount;
 
     event LoanCreated(
         uint256 id,
@@ -23,7 +29,7 @@ contract LoanManager {
         uint256 _dueDate,
         uint256 _period,
         uint256 _totalBalance
-    ) internal returns (uint256) {
+    ) public returns (uint256) {
         uint256 id = loans.length;
         // figure out minimum payment such that _totalBalance is payed
         require(_dueDate - block.timestamp >= _period, "Period too small");
@@ -33,18 +39,16 @@ contract LoanManager {
             minPayment++;
         }
         // TODO: figure out collateral transfers
-        Collateral[] memory collateral;
         // add loan
         loans.push(
             PeriodicLoan(
-                false,
+                true,
                 msg.sender,
                 msg.sender,
                 _period,
                 block.timestamp + _period,
                 _totalBalance,
-                minPayment,
-                collateral
+                minPayment
             )
         );
         emit LoanCreated(id, msg.sender, _totalBalance, _dueDate);
@@ -55,7 +59,7 @@ contract LoanManager {
         uint256 _id,
         uint256 _with,
         address _by
-    ) internal {
+    ) public {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
         require(l.active, "Referenced token is not active");
@@ -88,7 +92,7 @@ contract LoanManager {
         serviceReceived[_id] = fullPayment - acceptedPayment;
     }
 
-    function _cancelLoan(uint256 _id) internal {
+    function _cancelLoan(uint256 _id) public {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
         require(l.active, "Referenced token is not active");
