@@ -32,10 +32,11 @@ contract LoanManager {
     ) public returns (uint256) {
         uint256 id = loans.length;
         // figure out minimum payment such that _totalBalance is payed
-        require(_dueDate - block.timestamp >= _period, "Period too small");
-        uint256 nPeriods = ((_dueDate - block.timestamp) / _period);
-        uint256 minPayment = _dueDate / nPeriods;
-        if ((_dueDate - block.timestamp) % nPeriods != 0) {
+        uint256 duration = _dueDate - block.timestamp;
+        require(duration >= _period, "Period too small");
+        uint256 nPeriods = duration / _period;
+        uint256 minPayment = _totalBalance / nPeriods;
+        if (duration % nPeriods != 0) {
             minPayment++;
         }
         // TODO: figure out collateral transfers

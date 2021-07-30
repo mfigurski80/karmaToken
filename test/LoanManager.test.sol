@@ -30,6 +30,18 @@ contract TestLoanManager {
             l.minimumPayment
         ) = loanManager.loans(id);
         Assert.isTrue(l.active, "Loan should be active");
+        Assert.equal(
+            l.creditor,
+            l.borrower,
+            "Creditor and borrower should be the same initially"
+        );
+        Assert.equal(l.period, 1 days, "Period should be 1 day");
+        Assert.equal(
+            l.nextServiceTime,
+            block.timestamp + 1 days,
+            "Next service time should be 7 days from now"
+        );
+        Assert.equal(l.balance, 70, "Balance should be 70 initially");
         Assert.equal(l.minimumPayment, 10, "Payment should be 10 (70/7)");
     }
 }
