@@ -4,6 +4,7 @@ pragma solidity >=0.7.0;
 import "./CollateralStruct.sol";
 
 struct PeriodicLoan {
+    bool active; // whether contract is still active or completed
     address creditor; // 'owner' of contract
     address borrower; // 'minter' of contract
     uint256 period; // how often payments required

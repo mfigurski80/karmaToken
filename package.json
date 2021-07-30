@@ -7,10 +7,13 @@
     "test": "test"
   },
   "scripts": {
-	"build": "truffle build",
-	"dev": "~/Documents/Ganache.AppImage > /dev/null &",
+    "build": "truffle build",
+    "dev": "~/Documents/Ganache.AppImage > /dev/null &",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.2.0"
+  }
 }
