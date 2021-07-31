@@ -8,7 +8,6 @@ import "../contracts/LoanManager.sol";
 
 contract TestLoanManager {
     uint256 public constant initialBalance = 1000 wei;
-    uint256 recievedBalance = 0;
     LoanManager loanManager = LoanManager(DeployedAddresses.LoanManager());
 
     // UTILITY FUNCTIONS
@@ -70,32 +69,30 @@ contract TestLoanManager {
         payable(address(loanManager)).transfer(1000 wei);
         PeriodicLoan memory original = _getPeriodicLoan(id);
 
-        loanManager._serviceLoan(id, 10, address(this));
-        // PeriodicLoan memory a = _getPeriodicLoan(id);
-        // Assert.equal(
-        //     original.nextServiceTime + 1 days,
-        //     a.nextServiceTime,
-        //     "Proper servicing should increment the service time"
-        // );
+        loanManager._serviceLoan(id, 10);
+        PeriodicLoan memory a = _getPeriodicLoan(id);
+        Assert.equal(
+            original.nextServiceTime + 1 days,
+            a.nextServiceTime,
+            "Proper servicing should increment the service time"
+        );
 
-        // loanManager._serviceLoan(id, 5, address(this));
-        // PeriodicLoan memory b = _getPeriodicLoan(id);
-        // Assert.equal(
-        //     a.nextServiceTime,
-        //     b.nextServiceTime,
-        //     "Insufficient servicing shouldn't increment the service time"
-        // );
+        loanManager._serviceLoan(id, 5);
+        PeriodicLoan memory b = _getPeriodicLoan(id);
+        Assert.equal(
+            a.nextServiceTime,
+            b.nextServiceTime,
+            "Insufficient servicing shouldn't increment the service time"
+        );
 
-        // loanManager._serviceLoan(id, 5, address(this));
-        // PeriodicLoan memory c = _getPeriodicLoan(id);
-        // Assert.equal(
-        //     b.nextServiceTime + 1 days,
-        //     c.nextServiceTime,
-        //     "Servicing can be split across transactions"
-        // );
+        loanManager._serviceLoan(id, 5);
+        PeriodicLoan memory c = _getPeriodicLoan(id);
+        Assert.equal(
+            b.nextServiceTime + 1 days,
+            c.nextServiceTime,
+            "Servicing can be split across transactions"
+        );
     }
 
-    receive() external payable {
-        recievedBalance += msg.value;
-    }
+    receive() external payable {}
 }

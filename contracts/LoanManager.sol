@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "./Debug.sol";
-
 struct PeriodicLoan {
     bool active; // whether contract is still active or completed
     address creditor; // 'owner' of contract
@@ -14,7 +12,7 @@ struct PeriodicLoan {
     // Collateral[] collateral; // TODO: loan security
 }
 
-contract LoanManager is Debug {
+contract LoanManager {
     PeriodicLoan[] public loans;
     mapping(uint256 => uint256) public serviceReceived;
 
@@ -68,12 +66,7 @@ contract LoanManager is Debug {
     ///         about lateness of payment.
     /// @param _id ID or index of loan you want to service
     /// @param _with Amount of eth the loan has been serviced by
-    /// @param _by In case loan is serviced by someone besides the borrower? TODO: remove
-    function _serviceLoan(
-        uint256 _id,
-        uint256 _with,
-        address _by
-    ) public {
+    function _serviceLoan(uint256 _id, uint256 _with) public {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
         require(l.active, "Referenced token is not active");
@@ -87,7 +80,7 @@ contract LoanManager is Debug {
             payable(l.creditor).transfer(l.balance);
             _completeLoan(l);
             if (l.balance < fullPayment) {
-                payable(_by).transfer(fullPayment - l.balance);
+                payable(l.borrower).transfer(fullPayment - l.balance);
             }
             emit LoanCompleted(_id, l.borrower);
             return;
@@ -95,10 +88,9 @@ contract LoanManager is Debug {
         // else if not fully paid...
         if (periodsCovered > 0) {
             // find next service time
-            l.nextServiceTime = l.nextServiceTime + periodsCovered * l.period;
+            l.nextServiceTime += periodsCovered * l.period;
             // update balance with period's payments
             acceptedPayment = l.minimumPayment * periodsCovered;
-            // require(false, address2str(l.creditor));
             payable(l.creditor).transfer(acceptedPayment);
             l.balance -= acceptedPayment;
             emit LoanServiced(_id, l.borrower, acceptedPayment);
