@@ -8,12 +8,15 @@
   },
   "scripts": {
     "build": "truffle compile",
-    "dev": "~/Documents/Ganache.AppImage > /dev/null &",
+    "dev": "truffle dev > /dev/null &",
     "test": "truffle test"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^4.2.0"
+  },
+  "devDependencies": {
+    "truffle": "^5.4.3"
   }
 }
