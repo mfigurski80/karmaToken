@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
+import "./Debug.sol";
+
 struct PeriodicLoan {
     bool active; // whether contract is still active or completed
     address creditor; // 'owner' of contract
@@ -12,7 +14,7 @@ struct PeriodicLoan {
     // Collateral[] collateral; // TODO: loan security
 }
 
-contract LoanManager {
+contract LoanManager is Debug {
     PeriodicLoan[] public loans;
     mapping(uint256 => uint256) public serviceReceived;
 
@@ -25,6 +27,11 @@ contract LoanManager {
     event LoanServiced(uint256 id, address servicer, uint256 amount);
     event LoanCompleted(uint256 id, address servicer);
 
+    /// @notice Allows easy creation of PeriodicLoan from given parameters
+    /// @param _dueDate Date loan should mature
+    /// @param _period How often payments are required
+    /// @param _totalBalance Total eth transfered once loan matures
+    /// @return The Id of the newly-created PeriodicLoan, ie it's index in the list
     function _createLoan(
         uint256 _dueDate,
         uint256 _period,
@@ -56,6 +63,12 @@ contract LoanManager {
         return id;
     }
 
+    /// @notice Allows user to service their loan with a set amount of ether. Allows
+    ///         for overserving, closes the loan if it's completed, and doesn't care
+    ///         about lateness of payment.
+    /// @param _id ID or index of loan you want to service
+    /// @param _with Amount of eth the loan has been serviced by
+    /// @param _by In case loan is serviced by someone besides the borrower? TODO: remove
     function _serviceLoan(
         uint256 _id,
         uint256 _with,
@@ -84,7 +97,8 @@ contract LoanManager {
             // find next service time
             l.nextServiceTime = l.nextServiceTime + periodsCovered * l.period;
             // update balance with period's payments
-            acceptedPayment = l.period * periodsCovered;
+            acceptedPayment = l.minimumPayment * periodsCovered;
+            // require(false, address2str(l.creditor));
             payable(l.creditor).transfer(acceptedPayment);
             l.balance -= acceptedPayment;
             emit LoanServiced(_id, l.borrower, acceptedPayment);
@@ -93,6 +107,8 @@ contract LoanManager {
         serviceReceived[_id] = fullPayment - acceptedPayment;
     }
 
+    /// @notice Cancels the given loan id, performing the required checks
+    /// @param _id Id of loan you want to cancel
     function _cancelLoan(uint256 _id) public {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
@@ -105,4 +121,6 @@ contract LoanManager {
         l.active = false;
         // TODO: release collateral
     }
+
+    receive() external payable {}
 }
