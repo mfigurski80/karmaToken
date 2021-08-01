@@ -26,18 +26,18 @@ contract LoanManager {
     event LoanCompleted(uint256 id, address servicer, bool isSuccessful);
 
     /// @notice Allows easy creation of PeriodicLoan from given parameters
-    /// @param _dueDate Date loan should mature
+    /// @param _maturity Date loan should mature
     /// @param _period How often payments are required
     /// @param _totalBalance Total eth transfered once loan matures
     /// @return The Id of the newly-created PeriodicLoan, ie it's index in the list
     function _createLoan(
-        uint256 _dueDate,
+        uint256 _maturity,
         uint256 _period,
         uint256 _totalBalance
-    ) public returns (uint256) {
+    ) internal returns (uint256) {
         uint256 id = loans.length;
         // figure out minimum payment such that _totalBalance is payed
-        uint256 duration = _dueDate - block.timestamp;
+        uint256 duration = _maturity - block.timestamp;
         require(duration >= _period, "Period too small");
         uint256 nPeriods = duration / _period;
         uint256 minPayment = _totalBalance / nPeriods;
@@ -57,7 +57,7 @@ contract LoanManager {
                 minPayment
             )
         );
-        emit LoanCreated(id, msg.sender, _totalBalance, _dueDate);
+        emit LoanCreated(id, msg.sender, _totalBalance, _maturity);
         return id;
     }
 
@@ -66,7 +66,7 @@ contract LoanManager {
     ///         about lateness of payment.
     /// @param _id ID or index of loan you want to service
     /// @param _with Amount of eth the loan has been serviced by
-    function _serviceLoan(uint256 _id, uint256 _with) public {
+    function _serviceLoan(uint256 _id, uint256 _with) internal {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
         require(l.active, "Referenced token is not active");
@@ -100,7 +100,7 @@ contract LoanManager {
 
     /// @notice Cancels the given loan id, performing the required checks
     /// @param _id Id of loan you want to cancel
-    function _cancelLoan(uint256 _id) public {
+    function _cancelLoan(uint256 _id) internal {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
         require(l.active, "Referenced token is not active");
@@ -111,7 +111,7 @@ contract LoanManager {
     /// @notice Checks to see if loan payments are overdue, and forfeits the
     ///         security to the creditor if so
     /// @param _id Id of loan you want to check
-    function _callLoan(uint256 _id) public returns (bool) {
+    function _callLoan(uint256 _id) internal returns (bool) {
         PeriodicLoan storage l = loans[_id];
         require(l.active, "Referenced token is not active");
 

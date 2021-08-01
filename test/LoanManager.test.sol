@@ -4,11 +4,15 @@ pragma abicoder v2;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
-import "../contracts/LoanManager.sol";
+import "../contracts/LoanManagerExposed.sol";
 
 contract TestLoanManager {
     uint256 public constant initialBalance = 10000 wei; // NOTE: increase as you see fit
-    LoanManager loanManager = LoanManager(DeployedAddresses.LoanManager());
+    LoanManagerExposed loanManager;
+
+    function beforeEach() public {
+        loanManager = new LoanManagerExposed();
+    }
 
     // UTILITY FUNCTIONS
 
@@ -33,7 +37,7 @@ contract TestLoanManager {
     // TESTS
 
     function testCreatingLoan() public {
-        uint256 id = loanManager._createLoan(
+        uint256 id = loanManager.createLoan(
             block.timestamp + 10 days,
             1 days,
             100
@@ -65,11 +69,16 @@ contract TestLoanManager {
     }
 
     function testServiceLoan() public {
+        // setup
         payable(address(loanManager)).transfer(100 wei);
-        uint256 id = 0;
+        uint256 id = loanManager.createLoan(
+            block.timestamp + 10 days,
+            1 days,
+            100
+        );
         PeriodicLoan memory original = _getPeriodicLoan(id);
 
-        loanManager._serviceLoan(id, 10);
+        loanManager.serviceLoan(id, 10);
         PeriodicLoan memory a = _getPeriodicLoan(id);
         Assert.equal(
             original.nextServiceTime + 1 days,
@@ -77,7 +86,7 @@ contract TestLoanManager {
             "Proper servicing should increment the service time"
         );
 
-        loanManager._serviceLoan(id, 5);
+        loanManager.serviceLoan(id, 5);
         PeriodicLoan memory b = _getPeriodicLoan(id);
         Assert.equal(
             a.nextServiceTime,
@@ -85,7 +94,7 @@ contract TestLoanManager {
             "Insufficient servicing shouldn't increment the service time"
         );
 
-        loanManager._serviceLoan(id, 5);
+        loanManager.serviceLoan(id, 5);
         PeriodicLoan memory c = _getPeriodicLoan(id);
         Assert.equal(
             b.nextServiceTime + 1 days,
@@ -93,7 +102,7 @@ contract TestLoanManager {
             "Servicing can be split across transactions to increment service time"
         );
 
-        loanManager._serviceLoan(id, 80);
+        loanManager.serviceLoan(id, 80);
         PeriodicLoan memory d = _getPeriodicLoan(id);
         Assert.isFalse(
             d.active,
@@ -102,30 +111,31 @@ contract TestLoanManager {
     }
 
     function testCancelLoan() public {
-        uint256 id = loanManager._createLoan(
+        uint256 id = loanManager.createLoan(
             block.timestamp + 10 days,
             1 days,
             100
         );
-        loanManager._cancelLoan(id);
+        loanManager.cancelLoan(id);
 
         PeriodicLoan memory l = _getPeriodicLoan(id);
         Assert.isFalse(l.active, "Cancellation should close loan");
 
         // TODO: expect failture to service loan
-        // loanManager._serviceLoan(id, 5);
+        // loanManager.serviceLoan(id, 5);
     }
 
     function testCallLoan() public {
-        uint256 id = loanManager._createLoan(
+        uint256 id = loanManager.createLoan(
             block.timestamp + 1 days,
             1 days,
             100
         );
-        // TODO: simulate bock timestamp passing
-        // block.timestamp += 2 days;
-        // bool hasDefaulted = loanManager._callLoan(id);
-        // Assert.isTrue(hasDefaulted, "Expected immediate default");
+
+        bool hasDefaulted = loanManager.callLoan(id);
+        Assert.isFalse(hasDefaulted, "Cannot call if not yet defaulted");
+        // simulate bock timestamp passing
+        // evm_increaseTime(2 days);
     }
 
     receive() external payable {}
