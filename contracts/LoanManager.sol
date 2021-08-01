@@ -23,7 +23,7 @@ contract LoanManager {
         uint256 dueDate
     );
     event LoanServiced(uint256 id, address servicer, uint256 amount);
-    event LoanCompleted(uint256 id, address servicer);
+    event LoanCompleted(uint256 id, address servicer, bool isSuccessful);
 
     /// @notice Allows easy creation of PeriodicLoan from given parameters
     /// @param _dueDate Date loan should mature
@@ -78,11 +78,10 @@ contract LoanManager {
         // check if loan is fully paid
         if (l.balance <= fullPayment) {
             payable(l.creditor).transfer(l.balance);
-            _completeLoan(l);
             if (l.balance < fullPayment) {
                 payable(l.borrower).transfer(fullPayment - l.balance);
             }
-            emit LoanCompleted(_id, l.borrower);
+            _completeLoan(_id, true);
             return;
         }
         // else if not fully paid...
@@ -106,12 +105,30 @@ contract LoanManager {
         PeriodicLoan storage l = loans[_id];
         require(l.active, "Referenced token is not active");
 
-        _completeLoan(l);
+        _completeLoan(_id, true);
     }
 
-    function _completeLoan(PeriodicLoan storage l) internal {
+    /// @notice Checks to see if loan payments are overdue, and forfeits the
+    ///         security to the creditor if so
+    /// @param _id Id of loan you want to check
+    function _callLoan(uint256 _id) public returns (bool) {
+        PeriodicLoan storage l = loans[_id];
+        require(l.active, "Referenced token is not active");
+
+        if (block.timestamp > l.nextServiceTime) {
+            // payment is overdue!
+            _completeLoan(_id, false);
+            return true;
+        }
+        return false;
+    }
+
+    function _completeLoan(uint256 _id, bool _successful) internal {
+        PeriodicLoan storage l = loans[_id];
         l.active = false;
-        // TODO: release collateral
+        // TODO: release collateral if _successful
+        //       otherwise, release to creditor
+        emit LoanCompleted(_id, l.borrower, _successful);
     }
 
     receive() external payable {}

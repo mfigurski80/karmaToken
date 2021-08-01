@@ -7,7 +7,7 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/LoanManager.sol";
 
 contract TestLoanManager {
-    uint256 public constant initialBalance = 1000 wei;
+    uint256 public constant initialBalance = 10000 wei; // NOTE: increase as you see fit
     LoanManager loanManager = LoanManager(DeployedAddresses.LoanManager());
 
     // UTILITY FUNCTIONS
@@ -34,9 +34,9 @@ contract TestLoanManager {
 
     function testCreatingLoan() public {
         uint256 id = loanManager._createLoan(
-            block.timestamp + 7 days,
+            block.timestamp + 10 days,
             1 days,
-            70
+            100
         );
         Assert.equal(id, 0, "Ids should start at 0");
         // PeriodicLoan[] memory loans = loanManager.getLoans();
@@ -60,13 +60,13 @@ contract TestLoanManager {
             block.timestamp + 1 days,
             "Next service time should be 7 days from now"
         );
-        Assert.equal(l.balance, 70, "Balance should be 70 initially");
-        Assert.equal(l.minimumPayment, 10, "Payment should be 10 (70/7)");
+        Assert.equal(l.balance, 100, "Balance should be 70 initially");
+        Assert.equal(l.minimumPayment, 10, "Payment should be 10 (100/10)");
     }
 
     function testServiceLoan() public {
+        payable(address(loanManager)).transfer(100 wei);
         uint256 id = 0;
-        payable(address(loanManager)).transfer(1000 wei);
         PeriodicLoan memory original = _getPeriodicLoan(id);
 
         loanManager._serviceLoan(id, 10);
@@ -90,8 +90,42 @@ contract TestLoanManager {
         Assert.equal(
             b.nextServiceTime + 1 days,
             c.nextServiceTime,
-            "Servicing can be split across transactions"
+            "Servicing can be split across transactions to increment service time"
         );
+
+        loanManager._serviceLoan(id, 80);
+        PeriodicLoan memory d = _getPeriodicLoan(id);
+        Assert.isFalse(
+            d.active,
+            "Full servicing should result in closure of loan"
+        );
+    }
+
+    function testCancelLoan() public {
+        uint256 id = loanManager._createLoan(
+            block.timestamp + 10 days,
+            1 days,
+            100
+        );
+        loanManager._cancelLoan(id);
+
+        PeriodicLoan memory l = _getPeriodicLoan(id);
+        Assert.isFalse(l.active, "Cancellation should close loan");
+
+        // TODO: expect failture to service loan
+        // loanManager._serviceLoan(id, 5);
+    }
+
+    function testCallLoan() public {
+        uint256 id = loanManager._createLoan(
+            block.timestamp + 1 days,
+            1 days,
+            100
+        );
+        // TODO: simulate bock timestamp passing
+        // block.timestamp += 2 days;
+        // bool hasDefaulted = loanManager._callLoan(id);
+        // Assert.isTrue(hasDefaulted, "Expected immediate default");
     }
 
     receive() external payable {}
