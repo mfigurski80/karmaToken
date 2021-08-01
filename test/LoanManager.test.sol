@@ -131,11 +131,12 @@ contract TestLoanManager {
             1 days,
             100
         );
-
         bool hasDefaulted = loanManager.callLoan(id);
         Assert.isFalse(hasDefaulted, "Cannot call if not yet defaulted");
-        // simulate bock timestamp passing
-        // evm_increaseTime(2 days);
+
+        loanManager._shiftTime(2 days);
+        hasDefaulted = loanManager.callLoan(id);
+        Assert.isTrue(hasDefaulted, "Can call if defaulted");
     }
 
     receive() external payable {}
