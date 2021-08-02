@@ -1,137 +1,34 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.7.0;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 import "./LoanManager.sol";
 
-contract LoanToken is LoanManager, IERC721 {
-    // STATE
+contract LoanToken is LoanManager, ERC721 {
+    constructor() ERC721("PeriodicLoanToken", "PLT") {}
 
-    mapping(uint256 => address) tokenToOwner;
-    mapping(address => uint256) ownerTokenCount;
-
-    mapping(uint256 => address) tokenToApproval;
-    mapping(address => address) ownerToApproval;
-
-    // MODIFIERS
-
-    modifier tokenExists(uint256 _tokenId) {
-        require(loans.length > _tokenId);
-        _;
-    }
-    modifier onlyOwner(uint256 _tokenId) {
-        require(tokenToOwner[_tokenId] == msg.sender);
-        _;
-    }
-    modifier onlyManager(uint256 _tokenId) {
+    /**
+     * @dev Mint a new loan token with given information
+     * @param maturity The maturity of the loan
+     * @param period The period of the loan
+     * @param totalBalance The total of service payments to the loan
+     */
+    function mintLoan(
+        uint256 maturity,
+        uint256 period,
+        uint256 totalBalance
+    ) external {
+        require(period >= 1 days, "LoanToken: Period must be at least 1 day");
         require(
-            tokenToOwner[_tokenId] == msg.sender ||
-                tokenToApproval[_tokenId] == msg.sender ||
-                ownerToApproval[tokenToOwner[_tokenId]] == msg.sender,
-            "Sender is not an authorized manager of this token"
+            maturity - block.timestamp >= period,
+            "LoanToken: Maturity must be at least one period after current block timestamp"
         );
-        _;
-    }
-
-    // INTERFACE METHODS
-
-    function balanceOf(address owner)
-        external
-        view
-        override
-        returns (uint256 balance)
-    {
-        return ownerTokenCount[owner];
-    }
-
-    function ownerOf(uint256 tokenId)
-        external
-        view
-        override
-        tokenExists(tokenId)
-        returns (address owner)
-    {
-        return tokenToOwner[tokenId];
-    }
-
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external override tokenExists(tokenId) onlyManager(tokenId) {
-        // TODO: implement
-    }
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokenId
-    ) external override tokenExists(tokenId) onlyManager(tokenId) {
         require(
-            tokenToOwner[tokenId] == from,
-            "Transfer from user does not own this token"
+            totalBalance > 0,
+            "LoanToken: Total balance must be greater than 0"
         );
-        ownerTokenCount[from]--;
-        tokenToOwner[tokenId] = to;
-        ownerTokenCount[to]++;
-        tokenToApproval[tokenId] = address(0);
-        emit Transfer(from, to, tokenId);
-    }
-
-    function approve(address to, uint256 tokenId)
-        external
-        override
-        tokenExists(tokenId)
-        onlyOwner(tokenId)
-    {
-        tokenToApproval[tokenId] = to;
-        emit Approval(msg.sender, to, tokenId);
-    }
-
-    function getApproved(uint256 tokenId)
-        external
-        view
-        override
-        tokenExists(tokenId)
-        returns (address operator)
-    {
-        return tokenToApproval[tokenId];
-    }
-
-    function setApprovalForAll(address operator, bool _approved)
-        external
-        override
-    {
-        if (!_approved) operator = address(0);
-        ownerToApproval[msg.sender] = operator;
-        emit ApprovalForAll(msg.sender, operator, _approved);
-    }
-
-    function isApprovedForAll(address owner, address operator)
-        external
-        view
-        override
-        returns (bool)
-    {
-        return ownerToApproval[owner] == operator;
-    }
-
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes calldata data
-    ) external override onlyManager(tokenId) {
-        // TODO: implement
-    }
-
-    function supportsInterface(bytes4 interfaceId)
-        external
-        view
-        override
-        returns (bool)
-    {
-        return false;
+        uint256 id = _createLoan(maturity, period, totalBalance);
+        _mint(msg.sender, id);
     }
 }

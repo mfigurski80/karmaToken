@@ -38,7 +38,6 @@ contract LoanManager {
         uint256 id = loans.length;
         // figure out minimum payment such that _totalBalance is payed
         uint256 duration = _maturity - block.timestamp;
-        require(duration >= _period, "Period too small");
         uint256 nPeriods = duration / _period;
         uint256 minPayment = _totalBalance / nPeriods;
         if (duration % nPeriods != 0) {
@@ -69,7 +68,7 @@ contract LoanManager {
     function _serviceLoan(uint256 _id, uint256 _with) internal {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
-        require(l.active, "Referenced token is not active");
+        require(l.active, "LoanManager: Referenced token is not active");
 
         // figure out periods covered by payment
         uint256 fullPayment = _with + serviceReceived[_id];
@@ -103,7 +102,7 @@ contract LoanManager {
     function _cancelLoan(uint256 _id) internal {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
-        require(l.active, "Referenced token is not active");
+        require(l.active, "LoanManager: Referenced token is not active");
 
         _completeLoan(_id, true);
     }
@@ -113,7 +112,7 @@ contract LoanManager {
     /// @param _id Id of loan you want to check
     function _callLoan(uint256 _id) internal returns (bool) {
         PeriodicLoan storage l = loans[_id];
-        require(l.active, "Referenced token is not active");
+        require(l.active, "LoanManager: Referenced token is not active");
 
         if (block.timestamp > l.nextServiceTime) {
             // payment is overdue!

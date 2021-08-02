@@ -1,5 +1,5 @@
-const LoanManager = artifacts.require('./LoanManager.sol');
+const LoanToken = artifacts.require('./LoanToken.sol');
 
 module.exports = function(deployer) {
-  deployer.deploy(LoanManager);
+  deployer.deploy(LoanToken);
 }
