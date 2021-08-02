@@ -25,11 +25,13 @@ contract LoanManager {
     event LoanServiced(uint256 id, address servicer, uint256 amount);
     event LoanCompleted(uint256 id, address servicer, bool isSuccessful);
 
-    /// @notice Allows easy creation of PeriodicLoan from given parameters
-    /// @param _maturity Date loan should mature
-    /// @param _period How often payments are required
-    /// @param _totalBalance Total eth transfered once loan matures
-    /// @return The Id of the newly-created PeriodicLoan, ie it's index in the list
+    /**
+     * @dev Allows easy creation of PeriodicLoan from given parameters
+     * @param _maturity Date loan should mature
+     * @param _period How often payments are required
+     * @param _totalBalance Total eth transfered once loan matures
+     * @return The Id of the newly-created PeriodicLoan, ie it's index in the list
+     */
     function _createLoan(
         uint256 _maturity,
         uint256 _period,
@@ -60,11 +62,13 @@ contract LoanManager {
         return id;
     }
 
-    /// @notice Allows user to service their loan with a set amount of ether. Allows
-    ///         for overserving, closes the loan if it's completed, and doesn't care
-    ///         about lateness of payment.
-    /// @param _id ID or index of loan you want to service
-    /// @param _with Amount of eth the loan has been serviced by
+    /**
+     * @dev Allows user to service their loan with a set amount of ether. Allows
+     *        for overserving, closes the loan if it's completed, and doesn't care
+     *        about lateness of payment.
+     * @param _id ID or index of loan you want to service
+     * @param _with Amount of eth the loan has been serviced by
+     */
     function _serviceLoan(uint256 _id, uint256 _with) internal {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
@@ -97,8 +101,10 @@ contract LoanManager {
         serviceReceived[_id] = fullPayment - acceptedPayment;
     }
 
-    /// @notice Cancels the given loan id, performing the required checks
-    /// @param _id Id of loan you want to cancel
+    /**
+     * @dev Cancels the given loan id, performing the required checks
+     * @param _id Id of loan you want to cancel
+     */
     function _cancelLoan(uint256 _id) internal {
         // get, check loan
         PeriodicLoan storage l = loans[_id];
@@ -107,9 +113,11 @@ contract LoanManager {
         _completeLoan(_id, true);
     }
 
-    /// @notice Checks to see if loan payments are overdue, and forfeits the
-    ///         security to the creditor if so
-    /// @param _id Id of loan you want to check
+    /**
+     * @dev Checks to see if loan payments are overdue, and forfeits the
+     *        security to the creditor if so
+     * @param _id Id of loan you want to check
+     */
     function _callLoan(uint256 _id) internal returns (bool) {
         PeriodicLoan storage l = loans[_id];
         require(l.active, "LoanManager: Referenced token is not active");
