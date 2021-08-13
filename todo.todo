@@ -1,0 +1,8 @@
+Debug:
+	[] Random issue with LoanToken 
+
+Collateral:
+	[] Create collateral holder interface
+	[] Add collateral transfers
+	[] Implement collateral holder interface somehow
+	[] Test collateral holder
