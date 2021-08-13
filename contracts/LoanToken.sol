@@ -17,7 +17,7 @@ contract LoanToken is LoanManager, ERC721URIStorage {
         uint256 maturity,
         uint256 period,
         uint256 totalBalance
-    ) external {
+    ) external returns (uint256) {
         // TODO: require collateral
         require(period >= 1 days, "LoanToken: Period must be at least 1 day");
         require(
@@ -28,7 +28,9 @@ contract LoanToken is LoanManager, ERC721URIStorage {
             totalBalance > 0,
             "LoanToken: Total balance must be greater than 0"
         );
+
         uint256 id = _createLoan(maturity, period, totalBalance);
         _mint(msg.sender, id);
+        return id;
     }
 }

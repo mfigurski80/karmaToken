@@ -1,8 +1,15 @@
 Debug:
-	[] Random issue with LoanToken 
+	[x] Random issue with LoanToken
+	[x] Make testing utilities
+
+LoanManager:
+	[] Remove references to loan owner in favor of accepting owner as a parameter from children
+
+LoanToken:
+	[] Add tests to ensure all requirements
 
 Collateral:
 	[] Create collateral holder interface
-	[] Add collateral transfers
+	[] Add collateral references to LoanManager, LoanToken
 	[] Implement collateral holder interface somehow
 	[] Test collateral holder

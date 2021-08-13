@@ -1,7 +1,31 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-abstract contract Debug {
+import "../contracts/LoanManager.sol";
+
+abstract contract Utility {
+    // ACTUAL UTILITIES
+
+    function _getPeriodicLoan(uint256 id, LoanManager loanManager)
+        internal
+        view
+        returns (PeriodicLoan memory)
+    {
+        PeriodicLoan memory l;
+        (
+            l.active,
+            l.creditor,
+            l.borrower,
+            l.period,
+            l.nextServiceTime,
+            l.balance,
+            l.minimumPayment
+        ) = LoanManager(payable(loanManager)).loans(id);
+        return l;
+    }
+
+    // TYPE CONVERSIONS
+
     function address2str(address x) internal pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint256 i = 0; i < 20; i++) {

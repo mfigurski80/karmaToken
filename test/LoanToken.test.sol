@@ -6,7 +6,9 @@ import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/LoanToken.sol";
 
-contract TestLoanToken {
+import "./Utility.sol";
+
+contract TestLoanToken is Utility {
     uint256 public constant initialBalance = 10000 wei; // NOTE: increase as you see fit
     LoanToken public token;
 
@@ -26,6 +28,30 @@ contract TestLoanToken {
         Assert.isFalse(
             token.supportsInterface(0xffffffff),
             "Does not support null interface"
+        );
+    }
+
+    function testHasSymbolAndName() public {
+        Assert.notEqual(token.symbol(), "", "Symbol is not empty");
+        Assert.notEqual(token.name(), "", "Name is not empty");
+    }
+
+    function testMintLoan() public {
+        uint256 id = token.mintLoan(block.timestamp + 7 days, 1 days, 100);
+        // Assert.isTrue(token.loans(id), "Exists once minted");
+        Assert.equal(token.ownerOf(id), address(this), "Owned by token minter");
+        Assert.equal(
+            token.balanceOf(address(this)),
+            1,
+            "Balance increases when minting token"
+        );
+
+        PeriodicLoan memory l = _getPeriodicLoan(id, token);
+        Assert.isTrue(l.active, "Minted loan should be active initially");
+        Assert.equal(
+            l.balance,
+            100,
+            "Balance should be same as mint paramenter"
         );
     }
 }

@@ -6,32 +6,14 @@ import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
 import "../contracts/LoanManagerExposed.sol";
 
-contract TestLoanManager {
+import "./Utility.sol";
+
+contract TestLoanManager is Utility {
     uint256 public constant initialBalance = 10000 wei; // NOTE: increase as you see fit
     LoanManagerExposed loanManager;
 
     function beforeEach() public {
         loanManager = new LoanManagerExposed();
-    }
-
-    // UTILITY FUNCTIONS
-
-    function _getPeriodicLoan(uint256 id)
-        internal
-        view
-        returns (PeriodicLoan memory)
-    {
-        PeriodicLoan memory l;
-        (
-            l.active,
-            l.creditor,
-            l.borrower,
-            l.period,
-            l.nextServiceTime,
-            l.balance,
-            l.minimumPayment
-        ) = loanManager.loans(id);
-        return l;
     }
 
     // TESTS
@@ -46,7 +28,7 @@ contract TestLoanManager {
         // PeriodicLoan[] memory loans = loanManager.getLoans();
         // Assert.equal(loans.length, 1, "There should be one loan");
 
-        PeriodicLoan memory l = _getPeriodicLoan(id);
+        PeriodicLoan memory l = _getPeriodicLoan(id, loanManager);
         Assert.isTrue(l.active, "Loan should be active");
         Assert.equal(
             l.creditor,
@@ -76,10 +58,10 @@ contract TestLoanManager {
             1 days,
             100
         );
-        PeriodicLoan memory original = _getPeriodicLoan(id);
+        PeriodicLoan memory original = _getPeriodicLoan(id, loanManager);
 
         loanManager.serviceLoan(id, 10);
-        PeriodicLoan memory a = _getPeriodicLoan(id);
+        PeriodicLoan memory a = _getPeriodicLoan(id, loanManager);
         Assert.equal(
             original.nextServiceTime + 1 days,
             a.nextServiceTime,
@@ -87,7 +69,7 @@ contract TestLoanManager {
         );
 
         loanManager.serviceLoan(id, 5);
-        PeriodicLoan memory b = _getPeriodicLoan(id);
+        PeriodicLoan memory b = _getPeriodicLoan(id, loanManager);
         Assert.equal(
             a.nextServiceTime,
             b.nextServiceTime,
@@ -95,7 +77,7 @@ contract TestLoanManager {
         );
 
         loanManager.serviceLoan(id, 5);
-        PeriodicLoan memory c = _getPeriodicLoan(id);
+        PeriodicLoan memory c = _getPeriodicLoan(id, loanManager);
         Assert.equal(
             b.nextServiceTime + 1 days,
             c.nextServiceTime,
@@ -103,7 +85,7 @@ contract TestLoanManager {
         );
 
         loanManager.serviceLoan(id, 80);
-        PeriodicLoan memory d = _getPeriodicLoan(id);
+        PeriodicLoan memory d = _getPeriodicLoan(id, loanManager);
         Assert.isFalse(
             d.active,
             "Full servicing should result in closure of loan"
@@ -118,7 +100,7 @@ contract TestLoanManager {
         );
         loanManager.cancelLoan(id);
 
-        PeriodicLoan memory l = _getPeriodicLoan(id);
+        PeriodicLoan memory l = _getPeriodicLoan(id, loanManager);
         Assert.isFalse(l.active, "Cancellation should close loan");
 
         // TODO: expect failture to service loan
