@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity >=0.7.0;
+pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./LoanManager.sol";
 
-contract LoanToken is LoanManager, ERC721 {
+contract LoanToken is LoanManager, ERC721URIStorage {
     constructor() ERC721("PeriodicLoanToken", "PLT") {}
 
     /**
@@ -19,6 +18,7 @@ contract LoanToken is LoanManager, ERC721 {
         uint256 period,
         uint256 totalBalance
     ) external {
+        // TODO: require collateral
         require(period >= 1 days, "LoanToken: Period must be at least 1 day");
         require(
             maturity - block.timestamp >= period,
