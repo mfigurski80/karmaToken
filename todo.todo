@@ -4,6 +4,7 @@ Debug:
 
 LoanManager:
 	[] Remove references to loan owner in favor of accepting owner as a parameter from children
+	[] Update loanManager references to new behavior ^^
 
 LoanToken:
 	[] Add tests to ensure all requirements
