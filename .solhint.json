@@ -6,6 +6,7 @@
     "modifier-name-mixedcase": "warning",
     "func-param-name-mixedcase": "warning",
     "mark-callable-contracts": "warning",
-    "code-complexity": "warning"
+    "code-complexity": "warning",
+    "reason-string": "off"
   }
 }
