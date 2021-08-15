@@ -138,5 +138,6 @@ contract LoanManager {
         emit LoanCompleted(_id, l.borrower, _successful);
     }
 
+    // solhint-disable-next-line
     receive() external payable {}
 }
