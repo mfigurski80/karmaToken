@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import "truffle/Assert.sol";
 import "truffle/DeployedAddresses.sol";
-import "../contracts/LoanManagerExposed.sol";
+import "./LoanManagerExposed.sol";
 
 import "./Utility.sol";
 

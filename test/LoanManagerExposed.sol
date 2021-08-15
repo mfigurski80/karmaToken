@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./LoanManager.sol";
+import "../contracts/LoanManager.sol";
 
 contract LoanManagerExposed is LoanManager {
     function createLoan(
