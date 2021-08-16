@@ -14,7 +14,6 @@ struct PeriodicLoan {
 
 contract LoanManager {
     PeriodicLoan[] public loans;
-    mapping(uint256 => uint256) public serviceReceived;
 
     event LoanCreated(
         uint256 id,
@@ -71,34 +70,32 @@ contract LoanManager {
      */
     function _serviceLoan(uint256 _id, uint256 _with) internal {
         // get, check loan
-        PeriodicLoan storage l = loans[_id];
-        require(l.active, "LoanManager: Referenced token is not active");
+        PeriodicLoan storage loan = loans[_id];
+        require(loan.active, "LoanManager: Referenced token is not active");
+        require(
+            _with >= loan.minimumPayment,
+            "LoanManager: Payment doesn't meet minimum level for this contract"
+        );
 
         // figure out periods covered by payment
-        uint256 fullPayment = _with + serviceReceived[_id];
-        uint256 acceptedPayment = 0;
-        uint256 periodsCovered = fullPayment / l.minimumPayment;
+        uint256 periodsCovered = _with / loan.minimumPayment;
         // check if loan is fully paid
-        if (l.balance <= fullPayment) {
-            payable(l.creditor).transfer(l.balance);
-            if (l.balance < fullPayment) {
-                payable(l.borrower).transfer(fullPayment - l.balance);
-            }
+        if (loan.balance <= _with) {
             _completeLoan(_id, true);
+            payable(loan.creditor).transfer(loan.balance);
+            if (loan.balance < _with) {
+                payable(loan.borrower).transfer(_with - loan.balance);
+            }
             return;
         }
         // else if not fully paid...
-        if (periodsCovered > 0) {
-            // find next service time
-            l.nextServiceTime += periodsCovered * l.period;
-            // update balance with period's payments
-            acceptedPayment = l.minimumPayment * periodsCovered;
-            payable(l.creditor).transfer(acceptedPayment);
-            l.balance -= acceptedPayment;
-            emit LoanServiced(_id, l.borrower, acceptedPayment);
-        }
-        // return overflow payment to storage
-        serviceReceived[_id] = fullPayment - acceptedPayment;
+        // find next service time
+        loan.nextServiceTime += periodsCovered * loan.period;
+        // update balance with period's payments
+        uint256 acceptedPayment = loan.minimumPayment * periodsCovered;
+        loan.balance -= acceptedPayment;
+        payable(loan.creditor).transfer(acceptedPayment); // watch for re-entrancy
+        emit LoanServiced(_id, loan.borrower, acceptedPayment);
     }
 
     /**
@@ -107,8 +104,8 @@ contract LoanManager {
      */
     function _cancelLoan(uint256 _id) internal {
         // get, check loan
-        PeriodicLoan storage l = loans[_id];
-        require(l.active, "LoanManager: Referenced token is not active");
+        PeriodicLoan storage loan = loans[_id];
+        require(loan.active, "LoanManager: Referenced token is not active");
 
         _completeLoan(_id, true);
     }
@@ -119,10 +116,10 @@ contract LoanManager {
      * @param _id Id of loan you want to check
      */
     function _callLoan(uint256 _id) internal returns (bool) {
-        PeriodicLoan storage l = loans[_id];
-        require(l.active, "LoanManager: Referenced token is not active");
+        PeriodicLoan storage loan = loans[_id];
+        require(loan.active, "LoanManager: Referenced token is not active");
 
-        if (block.timestamp > l.nextServiceTime) {
+        if (block.timestamp > loan.nextServiceTime) {
             // payment is overdue!
             _completeLoan(_id, false);
             return true;
@@ -131,11 +128,11 @@ contract LoanManager {
     }
 
     function _completeLoan(uint256 _id, bool _successful) internal {
-        PeriodicLoan storage l = loans[_id];
-        l.active = false;
+        PeriodicLoan storage loan = loans[_id];
+        loan.active = false;
         // TODO: release collateral if _successful
         //       otherwise, release to creditor
-        emit LoanCompleted(_id, l.borrower, _successful);
+        emit LoanCompleted(_id, loan.borrower, _successful);
     }
 
     // solhint-disable-next-line

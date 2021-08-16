@@ -68,23 +68,23 @@ contract TestLoanManager is Utility {
             "Proper servicing should increment the service time"
         );
 
-        loanManager.serviceLoan(id, 5);
+        try loanManager.serviceLoan(id, 5) {
+            Assert.equal(
+                true,
+                false,
+                "Partial servicing should revert/fail transaction"
+            );
+        } catch (bytes memory) {
+            // good revert, works
+        }
         PeriodicLoan memory b = _getPeriodicLoan(id, loanManager);
         Assert.equal(
             a.nextServiceTime,
             b.nextServiceTime,
-            "Insufficient servicing shouldn't increment the service time"
+            "Failed servicing shouldn't increment the service time"
         );
 
-        loanManager.serviceLoan(id, 5);
-        PeriodicLoan memory c = _getPeriodicLoan(id, loanManager);
-        Assert.equal(
-            b.nextServiceTime + 1 days,
-            c.nextServiceTime,
-            "Servicing can be split across transactions to increment service time"
-        );
-
-        loanManager.serviceLoan(id, 80);
+        loanManager.serviceLoan(id, 90);
         PeriodicLoan memory d = _getPeriodicLoan(id, loanManager);
         Assert.isFalse(
             d.active,
