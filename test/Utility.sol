@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "../contracts/LoanManager.sol";
+import "../contracts/CollateralManager.sol";
 
 abstract contract Utility {
     // ACTUAL UTILITIES
@@ -20,7 +21,7 @@ abstract contract Utility {
             l.nextServiceTime,
             l.balance,
             l.minimumPayment
-        ) = LoanManager(payable(loanManager)).loans(id);
+        ) = loanManager.loans(id);
         return l;
     }
 
