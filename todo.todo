@@ -10,7 +10,13 @@ LoanToken:
 	[] Add tests to ensure all requirements
 
 Collateral:
-	[] Create collateral holder interface
+	[x] Create collateral holder interface
 	[] Add collateral references to LoanManager, LoanToken
-	[] Implement collateral holder interface somehow
+	[x] Implement collateral holder interface somehow
 	[] Test collateral holder
+
+General:
+	[] Research LLC vs Corp C
+	[] Figure out co-founders
+	[] Figure out name? (Karma Token?)
+	[] Register company
