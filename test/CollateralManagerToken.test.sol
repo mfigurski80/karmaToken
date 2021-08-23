@@ -17,7 +17,8 @@ contract TestCollateralManagerToken {
 
     function beforeEach() public {
         manager = new CollateralManager();
-        // init token
+        // reset token
+        tokenContract.burn(tokenContract.balanceOf(address(this)));
         tokenContract.mint(address(this), 100);
     }
 
@@ -38,6 +39,42 @@ contract TestCollateralManagerToken {
         manager.reserveERC20(tokenCollateral, ID, address(this));
         // check reservation
         ERC20Collateral[] memory col = manager.listERC20(ID);
-        Assert.equal(col.length, 1, "Collateral token is added and stored");
+        Assert.equal(col.length, 1, "Collateral tokens are added and recorded");
+        // check ownership
+        Assert.equal(
+            tokenContract.balanceOf(address(this)),
+            90,
+            "Owner has 10 less tokens"
+        );
+        Assert.equal(
+            tokenContract.balanceOf(address(manager)),
+            10,
+            "Collateral manager has 10 tokens"
+        );
+    }
+
+    function testRelease() public {
+        tokenContract.increaseAllowance(address(manager), 10);
+        // reserve collateral
+        ERC20Collateral memory tokenCollateral = ERC20Collateral(
+            tokenContract,
+            10
+        );
+        manager.reserveERC20(tokenCollateral, ID, address(this));
+        // release
+        manager.release(ID, address(this));
+        // check reservation
+        ERC20Collateral[] memory col = manager.listERC20(ID);
+        Assert.equal(
+            col.length,
+            0,
+            "Collateral tokens no longer recorded by manager"
+        );
+        // check ownership
+        Assert.equal(
+            tokenContract.balanceOf(address(this)),
+            100,
+            "Owner has all his tokens returned on release"
+        );
     }
 }

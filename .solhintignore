@@ -1,1 +1,2 @@
 **/*.test.sol
+contracts/Migrations.sol

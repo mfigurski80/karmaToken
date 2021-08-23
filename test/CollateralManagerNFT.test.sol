@@ -32,14 +32,31 @@ contract TestCollateralManagerNFT {
         nftContract.mint(address(this));
         nftContract.approve(address(manager), 0);
         // reserve collateral
-        ERC721Collateral memory tokenCollateral = ERC721Collateral(
-            nftContract,
-            0
-        );
+        ERC721Collateral memory tokenCollateral = ERC721Collateral(nftContract, 0);
         manager.reserveERC721(tokenCollateral, ID, address(this));
         // check reservation
         ERC721Collateral[] memory col = manager.listERC721(ID);
-        Assert.equal(col.length, 1, "Collateral nft is added and stored");
+        Assert.equal(col.length, 1, "Collateral nft is added and recorded by manager");
+        // check ownership
+        address newOwner = nftContract.ownerOf(0);
+        Assert.equal(newOwner, address(manager), "Collateral nft is owned by manager");
+    }
+
+    function testRelease() public {
+        // init nft
+        nftContract.mint(address(this));
+        nftContract.approve(address(manager), 1);
+        // reserve collateral
+        ERC721Collateral memory tokenCollateral = ERC721Collateral(nftContract, 1);
+        manager.reserveERC721(tokenCollateral, ID, address(this));
+        // release
+        manager.release(ID, address(this));
+        // check reservation
+        ERC721Collateral[] memory col = manager.listERC721(ID);
+        Assert.equal(col.length, 0, "Collateral nft is no longer recorded by manager");
+        // check ownership
+        address newOwner = nftContract.ownerOf(1);
+        Assert.equal(newOwner, address(this), "Collateral nft is owned by address given at release");
     }
 
 }
