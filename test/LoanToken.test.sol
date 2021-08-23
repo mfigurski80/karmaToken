@@ -13,7 +13,8 @@ contract TestLoanToken is Utility {
     LoanToken public token;
 
     function beforeEach() public {
-        token = new LoanToken();
+        address man = address(0);
+        token = new LoanToken(man);
     }
 
     function testERC165() public {

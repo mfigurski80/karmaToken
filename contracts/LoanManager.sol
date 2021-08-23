@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "./CollateralManager.sol";
+
 struct PeriodicLoan {
     bool active; // whether contract is still active or completed
     address creditor; // 'owner' of contract
@@ -9,11 +11,11 @@ struct PeriodicLoan {
     uint256 nextServiceTime; // next payment required
     uint256 balance; // remaining payment amount
     uint256 minimumPayment; // minimum payment amount
-    // Collateral[] collateral; // TODO: loan security
 }
 
 contract LoanManager {
     PeriodicLoan[] public loans;
+    CollateralManager collateralManager;
 
     event LoanCreated(
         uint256 id,
@@ -23,6 +25,10 @@ contract LoanManager {
     );
     event LoanServiced(uint256 id, address servicer, uint256 amount);
     event LoanCompleted(uint256 id, address servicer, bool isSuccessful);
+
+    constructor(address managerAddress) {
+        collateralManager = CollateralManager(managerAddress);
+    }
 
     /**
      * @dev Allows easy creation of PeriodicLoan from given parameters
@@ -44,7 +50,6 @@ contract LoanManager {
         if (duration % nPeriods != 0) {
             minPayment++;
         }
-        // TODO: figure out collateral transfers
         // add loan
         loans.push(
             PeriodicLoan(
@@ -59,6 +64,42 @@ contract LoanManager {
         );
         emit LoanCreated(id, msg.sender, _totalBalance, _maturity);
         return id;
+    }
+
+    /**
+     * @dev allows you to add an ERC20 Collateral
+     * @param _id ID of loan being referenced
+     * @param _tokenAddress Location of ERC20 contract
+     * @param _count Amount of ERC20 to be held as collateral
+     */
+    function _reserveERC20Collateral(
+        uint256 _id,
+        address _tokenAddress,
+        uint256 _count
+    ) internal {
+        ERC20Collateral memory tok = ERC20Collateral(
+            IERC20(_tokenAddress),
+            _count
+        );
+        collateralManager.reserveERC20(tok, _id, msg.sender);
+    }
+
+    /**
+     * @dev allows you to add ERC721 Collateral
+     * @param _id ID of loan being referenced
+     * @param _nftAddress Location of ERC721 contract
+     * @param _nft ID of nft to hold as collateral
+     */
+    function _reserveERC721Collateral(
+        uint256 _id,
+        address _nftAddress,
+        uint256 _nft
+    ) internal {
+        ERC721Collateral memory nft = ERC721Collateral(
+            IERC721(_nftAddress),
+            _nft
+        );
+        collateralManager.reserveERC721(nft, _id, msg.sender);
     }
 
     /**
@@ -130,8 +171,11 @@ contract LoanManager {
     function _completeLoan(uint256 _id, bool _successful) internal {
         PeriodicLoan storage loan = loans[_id];
         loan.active = false;
-        // TODO: release collateral if _successful
-        //       otherwise, release to creditor
+        if (_successful) {
+            collateralManager.release(_id, loan.borrower);
+        } else {
+            collateralManager.release(_id, loan.creditor);
+        }
         emit LoanCompleted(_id, loan.borrower, _successful);
     }
 

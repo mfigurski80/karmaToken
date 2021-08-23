@@ -5,7 +5,10 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./LoanManager.sol";
 
 contract LoanToken is LoanManager, ERC721URIStorage {
-    constructor() ERC721("PeriodicLoanToken", "PLT") {}
+    constructor(address manager)
+        LoanManager(manager)
+        ERC721("PeriodicLoanToken", "PLT")
+    {}
 
     /**
      * @dev Mint a new loan token with given information

@@ -4,6 +4,10 @@ pragma solidity ^0.8.0;
 import "../contracts/LoanManager.sol";
 
 contract LoanManagerExposed is LoanManager {
+    CollateralManager private _man = new CollateralManager();
+
+    constructor() LoanManager(address(_man)) {}
+
     function createLoan(
         uint256 _maturity,
         uint256 _period,
