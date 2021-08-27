@@ -3,11 +3,14 @@ Debug:
 	[x] Make testing utilities
 
 LoanManager:
-	[] Remove references to loan owner in favor of accepting owner as a parameter from children
-	[] Update loanManager references to new behavior ^^
+	[x] Remove references to loan owner in favor of having beneficiary
+	[x] Add change_beneficiary method
+	[x] Update loanManager references to new behavior ^^
 
 LoanToken:
 	[] Add tests to ensure all requirements
+	[] Expose adding collateral
+	[] Expose beneficiary api
 
 Collateral:
 	[x] Create collateral holder interface
@@ -22,3 +25,7 @@ General:
 	[] Register company
 
 	[] Figure out monetization
+
+	[] FINAL: walk through full functionality (aka rubber duck debug)
+		[] Aaaand again with a code friend
+
