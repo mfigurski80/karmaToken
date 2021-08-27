@@ -15,7 +15,7 @@ abstract contract Utility {
         PeriodicLoan memory l;
         (
             l.active,
-            l.creditor,
+            l.beneficiary,
             l.borrower,
             l.period,
             l.nextServiceTime,

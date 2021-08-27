@@ -5,7 +5,7 @@ import "./CollateralManager.sol";
 
 struct PeriodicLoan {
     bool active; // whether contract is still active or completed
-    address creditor; // 'owner' of contract
+    address beneficiary; // address service payments should be made to
     address borrower; // 'minter' of contract
     uint256 period; // how often payments required
     uint256 nextServiceTime; // next payment required
@@ -28,6 +28,16 @@ contract LoanManager {
 
     constructor(address managerAddress) {
         collateralManager = CollateralManager(managerAddress);
+    }
+
+    /**
+     * @dev Allows updating the beneficiary of a specific loan
+     * @param _id ID of loan to be updated
+     * @param _newBeneficiary New address that will receive loan proceeds
+     */
+    function _updateBeneficiary(uint256 _id, address _newBeneficiary) internal {
+        PeriodicLoan storage loan = loans[_id];
+        loan.beneficiary = _newBeneficiary;
     }
 
     /**
@@ -113,29 +123,28 @@ contract LoanManager {
         // get, check loan
         PeriodicLoan storage loan = loans[_id];
         require(loan.active, "LoanManager: Referenced token is not active");
-        require(
-            _with >= loan.minimumPayment,
-            "LoanManager: Payment doesn't meet minimum level for this contract"
-        );
 
-        // figure out periods covered by payment
-        uint256 periodsCovered = _with / loan.minimumPayment;
         // check if loan is fully paid
         if (loan.balance <= _with) {
             _completeLoan(_id, true);
-            payable(loan.creditor).transfer(loan.balance);
+            payable(loan.beneficiary).transfer(loan.balance);
             if (loan.balance < _with) {
                 payable(loan.borrower).transfer(_with - loan.balance);
             }
             return;
         }
         // else if not fully paid...
-        // find next service time
+        require(
+            _with >= loan.minimumPayment,
+            "LoanManager: Payment doesn't meet minimum level for this contract"
+        );
+        // figure out periods covered by payment
+        uint256 periodsCovered = _with / loan.minimumPayment;
+        // find next service time && update balance
         loan.nextServiceTime += periodsCovered * loan.period;
-        // update balance with period's payments
         uint256 acceptedPayment = loan.minimumPayment * periodsCovered;
         loan.balance -= acceptedPayment;
-        payable(loan.creditor).transfer(acceptedPayment); // watch for re-entrancy
+        payable(loan.beneficiary).transfer(acceptedPayment); // watch for re-entrancy
         emit LoanServiced(_id, loan.borrower, acceptedPayment);
     }
 
@@ -174,7 +183,7 @@ contract LoanManager {
         if (_successful) {
             collateralManager.release(_id, loan.borrower);
         } else {
-            collateralManager.release(_id, loan.creditor);
+            collateralManager.release(_id, loan.beneficiary);
         }
         emit LoanCompleted(_id, loan.borrower, _successful);
     }

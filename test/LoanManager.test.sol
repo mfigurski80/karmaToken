@@ -11,6 +11,7 @@ import "./Utility.sol";
 contract TestLoanManager is Utility {
     uint256 public constant initialBalance = 10000 wei; // NOTE: increase as you see fit
     LoanManagerExposed loanManager;
+    address payable OWNER = payable(address(1));
 
     function beforeEach() public {
         loanManager = new LoanManagerExposed();
@@ -31,14 +32,14 @@ contract TestLoanManager is Utility {
         PeriodicLoan memory l = _getPeriodicLoan(id, loanManager);
         Assert.isTrue(l.active, "Loan should be active");
         Assert.equal(
-            l.creditor,
+            l.borrower,
             address(this),
-            "Should be initially owned by creator"
+            "Minter should be marked as contract borrower"
         );
         Assert.equal(
-            l.creditor,
-            l.borrower,
-            "Creditor and borrower should be the same initially"
+            l.beneficiary,
+            address(this),
+            "Minter should be marked as contract beneficiary"
         );
         Assert.equal(l.period, 1 days, "Period should be 1 day");
         Assert.equal(
@@ -102,9 +103,6 @@ contract TestLoanManager is Utility {
 
         PeriodicLoan memory l = _getPeriodicLoan(id, loanManager);
         Assert.isFalse(l.active, "Cancellation should close loan");
-
-        // TODO: expect failture to service loan
-        // loanManager.serviceLoan(id, 5);
     }
 
     function testCallLoan() public {
