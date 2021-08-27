@@ -6,6 +6,7 @@ LoanManager:
 	[x] Remove references to loan owner in favor of having beneficiary
 	[x] Add change_beneficiary method
 	[x] Update loanManager references to new behavior ^^
+	[] Test rest of methods
 
 LoanToken:
 	[] Add tests to ensure all requirements
@@ -20,6 +21,7 @@ Collateral:
 
 General:
 	[x] Research LLC vs Corp C vs Corp S
+	[] Make decision on type
 	[] Figure out co-founders
 	[] Figure out name? (Karma Token?)
 	[] Register company
