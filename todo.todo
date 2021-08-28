@@ -9,9 +9,17 @@ LoanManager:
 	[] Test rest of methods
 
 LoanToken:
+	[x] Implement
 	[] Add tests to ensure all requirements
 	[] Expose adding collateral
 	[] Expose beneficiary api
+
+MonetizedNFT:
+	[x] Init, extending LoanToken and Ownable?
+	[] Override and implement methods
+	[] Have dynamic prices for initial sale, resale, mint?
+	[] Write test for methods
+	[] Write tests for shifting prices
 
 Collateral:
 	[x] Create collateral holder interface
@@ -26,7 +34,7 @@ General:
 	[] Figure out name? (Karma Token?)
 	[] Register company
 
-	[] Figure out monetization
+	[x] Figure out monetization
 
 	[] FINAL: walk through full functionality (aka rubber duck debug)
 		[] Aaaand again with a code friend
