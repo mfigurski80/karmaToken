@@ -26,6 +26,14 @@ contract LoanManager {
     event LoanServiced(uint256 id, address servicer, uint256 amount);
     event LoanCompleted(uint256 id, address servicer, bool isSuccessful);
 
+    modifier onlyCreator(uint256 id) {
+        require(
+            loans[id].borrower == msg.sender,
+            "LoanManager: Caller must be creator of this loan"
+        );
+        _;
+    }
+
     constructor(address managerAddress) {
         collateralManager = CollateralManager(managerAddress);
     }

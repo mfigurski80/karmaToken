@@ -10,9 +10,11 @@ LoanManager:
 
 LoanToken:
 	[x] Implement
+	[x] Expose adding collateral
+	[x] Expose beneficiary api
+	[x] Expose other loanManager stuff
+	[] Add test to ensure connection between token and loan
 	[] Add tests to ensure all requirements
-	[] Expose adding collateral
-	[] Expose beneficiary api
 
 MonetizedNFT:
 	[x] Init, extending LoanToken and Ownable?
@@ -35,6 +37,8 @@ General:
 	[] Register company
 
 	[x] Figure out monetization
+
+	[] Change name to "LOAN on a network" ($LOAN) to be annoying
 
 	[] FINAL: walk through full functionality (aka rubber duck debug)
 		[] Aaaand again with a code friend
