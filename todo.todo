@@ -38,6 +38,15 @@ General:
 
 	[x] Figure out monetization
 
+	[] Go through all linter errors/warnings and fix or ignore
+		[] Figure out an actual security scanner?
+
+	[] Optimize for Gas usage
+		[] Figure out how to estimate
+		[] During deployment
+		[] Minting / transacting
+		[] Ghub action reporting
+
 	[] Change name to "LOAN on a network" ($LOAN) to be annoying
 
 	[] FINAL: walk through full functionality (aka rubber duck debug)

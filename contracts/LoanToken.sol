@@ -29,8 +29,10 @@ contract LoanToken is LoanManager, ERC721URIStorage {
         uint256 period,
         uint256 totalBalance
     ) external returns (uint256) {
-        // TODO: require collateral
-        require(period >= 1 days, "LoanToken: Period must be at least 1 day");
+        require(
+            period >= 900,
+            "LoanToken: Period must be at least 900 seconds"
+        );
         require(
             maturity - block.timestamp >= period,
             "LoanToken: Maturity must be at least one period after current block timestamp"
@@ -43,6 +45,15 @@ contract LoanToken is LoanManager, ERC721URIStorage {
         uint256 id = _createLoan(maturity, period, totalBalance);
         _mint(msg.sender, id);
         return id;
+    }
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override {
+        if (from == address(0) || to == address(0)) return;
+        loans[tokenId].beneficiary = to;
     }
 
     function updateLoanBeneficiary(uint256 id, address newBeneficiary)
