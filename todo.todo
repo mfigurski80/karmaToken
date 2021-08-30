@@ -13,13 +13,13 @@ LoanToken:
 	[x] Expose adding collateral
 	[x] Expose beneficiary api
 	[x] Expose other loanManager stuff
-	[] Add test to ensure connection between token and loan
+	[x] Add test to ensure connection between token and loan
 	[] Add tests to ensure all requirements
 
 MonetizedNFT:
 	[x] Init, extending LoanToken and Ownable?
-	[] Override and implement methods
-	[] Have dynamic prices for initial sale, resale, mint?
+	[x] Dynamic prices for minting, service payments...?
+	[x] Override existing functions
 	[] Write test for methods
 	[] Write tests for shifting prices
 

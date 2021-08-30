@@ -19,7 +19,8 @@ contract LoanToken is LoanManager, ERC721URIStorage {
     {}
 
     /**
-     * @dev Mint a new loan token with given information
+     * @dev Mint a new loan token with given information. Payable to
+     *  allow overriding to add mint fees
      * @param maturity The maturity of the loan
      * @param period The period of the loan
      * @param totalBalance The total of service payments to the loan
@@ -28,7 +29,7 @@ contract LoanToken is LoanManager, ERC721URIStorage {
         uint256 maturity,
         uint256 period,
         uint256 totalBalance
-    ) external returns (uint256) {
+    ) public payable virtual returns (uint256) {
         require(
             period >= 900,
             "LoanToken: Period must be at least 900 seconds"
@@ -79,16 +80,16 @@ contract LoanToken is LoanManager, ERC721URIStorage {
         _reserveERC721Collateral(id, nftContractAddress, nftId);
     }
 
-    function serviceLoan(uint256 id) external payable onlyCreator(id) {
+    function serviceLoan(uint256 id) public payable virtual onlyCreator(id) {
         _serviceLoan(id, msg.value);
     }
 
-    function cancelLoan(uint256 id) external onlyApprovedOrOwner(id) {
+    function cancelLoan(uint256 id) public onlyApprovedOrOwner(id) {
         _cancelLoan(id);
     }
 
     function callLoan(uint256 id)
-        external
+        public
         onlyApprovedOrOwner(id)
         returns (bool)
     {

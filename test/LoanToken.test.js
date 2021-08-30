@@ -1,18 +1,6 @@
 const LoanToken = artifacts.require('LoanToken');
 
-const truffleAssert = require('truffle-assertions');
-
-function getEvent(tx, event) {
-    return new Promise((resolve, reject) => {
-        truffleAssert.eventEmitted(tx, event, resolve);
-    });
-}
-
-const TIME_UNIT = {
-    DAY: 86400,
-    WEEK: 604800,
-    MONTH: 2592000,
-};
+const { TIME_UNIT, getEvent } = require('./utils');
 
 contract('LoanToken', accounts => {
     let instance;
