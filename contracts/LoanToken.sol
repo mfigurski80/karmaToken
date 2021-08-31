@@ -15,7 +15,7 @@ contract LoanToken is LoanManager, ERC721URIStorage {
 
     constructor(address manager)
         LoanManager(manager)
-        ERC721("PeriodicLoanToken", "PLT")
+        ERC721("LOANOnANetwork", "LOAN")
     {}
 
     /**
