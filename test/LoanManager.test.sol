@@ -47,7 +47,7 @@ contract TestLoanManager is Utility {
             block.timestamp + 1 days,
             "Next service time should be 7 days from now"
         );
-        Assert.equal(l.balance, 100, "Balance should be 70 initially");
+        Assert.equal(l.balance, 100, "Balance should be 100 initially");
         Assert.equal(l.minimumPayment, 10, "Payment should be 10 (100/10)");
     }
 

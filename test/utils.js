@@ -13,11 +13,12 @@ function getEvent(tx, event) {
     });
 }
 
-function getRevert(action) {
+function getRevert(action, m) {
     return new Promise((resolve, reject) => {
         action()
-            .then(() => assert.fail() && reject())
-            .catch(resolve);
+            .catch(resolve)
+            .then(() => assert.exists(null, m || "Expected revert but no error thrown"))
+            .catch(err => reject());
     });
 }
 

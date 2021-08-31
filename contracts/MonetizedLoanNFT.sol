@@ -5,7 +5,7 @@ import "./LoanToken.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MonetizedLoanNFT is LoanToken, Ownable {
-    uint256 public mintFee = .000 ether; // .001 ~ $3
+    uint256 public mintFee = .001 ether; // .001 ~ $3
     uint256 public serviceFee = 1_000; // percentage, divided by 1,000,000 (so .1% default)
 
     event FeeChanged(bool isMint, uint256 newFee);
@@ -43,7 +43,7 @@ contract MonetizedLoanNFT is LoanToken, Ownable {
         uint256 totalBalance
     ) public payable override returns (uint256) {
         require(
-            msg.value >= serviceFee,
+            msg.value >= mintFee,
             "MonetizedLoanNFT: ether sent does not cover mint fee"
         );
         return super.mintLoan(maturity, period, totalBalance);
@@ -54,7 +54,9 @@ contract MonetizedLoanNFT is LoanToken, Ownable {
      *  might be different based on what they're doing
      */
     function serviceLoan(uint256 id) public payable override {
-        uint256 trueValue = msg.value - (msg.value * serviceFee) / 1_000_000;
+        uint256 fee = (msg.value * serviceFee) / 1_000_000;
+        if (fee == 0) fee = 1;
+        uint256 trueValue = msg.value - fee;
         require(
             trueValue >= loans[id].minimumPayment ||
                 trueValue >= loans[id].balance,
