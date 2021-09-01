@@ -29,6 +29,23 @@ Collateral:
 	[x] Implement collateral holder interface somehow
 	[x] Test collateral holder
 
+Design:
+	[] Figure out what parameter will influence how NFT looks
+	[] Come up with 4-6 designs
+	[] Create target-testing website quiz
+		[] Should allow rating all 4-6 designs on a couple questions about parameters
+	[] Get people to take it?
+	[] Plan out the creation of an image generator based on the parameters
+
+Frontend:
+	[] Plan out
+
+Backend:
+	[] User profiles
+	[] NFT image links
+	[] Watch chain and hold history for each user
+
+
 General:
 	[x] Research LLC vs Corp C vs Corp S
 	[] Make decision on type
@@ -51,4 +68,4 @@ General:
 
 	[] FINAL: walk through full functionality (aka rubber duck debug)
 		[] Aaaand again with a code friend
-
+	[] Figure out how to deploy
