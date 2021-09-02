@@ -29,6 +29,12 @@ Collateral:
 	[x] Implement collateral holder interface somehow
 	[x] Test collateral holder
 
+Optimize for Gas usage
+	[x] Figure out how to estimate
+	[] Ghub action reporting
+	[] Optimize deployment
+	[] Optimize minting / transacting
+
 Design:
 	[] Figure out what parameter will influence how NFT looks
 	[] Come up with 4-6 designs
@@ -57,12 +63,6 @@ General:
 
 	[] Go through all linter errors/warnings and fix or ignore
 		[] Figure out an actual security scanner?
-
-	[] Optimize for Gas usage
-		[] Figure out how to estimate
-		[] During deployment
-		[] Minting / transacting
-		[] Ghub action reporting
 
 	[x] Change name to "LOAN on a network" ($LOAN) to be annoying
 
