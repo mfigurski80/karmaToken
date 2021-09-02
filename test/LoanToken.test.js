@@ -1,6 +1,6 @@
 const LoanToken = artifacts.require('LoanToken');
 
-const { TIME_UNIT, getEvent } = require('./utils');
+const { TIME_UNIT, now, getEvent, getRevert } = require('./utils');
 
 contract('LoanToken', accounts => {
     let instance;
@@ -27,7 +27,7 @@ contract('LoanToken', accounts => {
     });
 
     it('should allow minting loans', async () => {
-        let tx = await instance.mintLoan(Date.now() + TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
+        let tx = await instance.mintLoan(now() + TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
         let ev = await getEvent(tx, 'LoanCreated');
         assert.equal(ev.id, 0);
 
@@ -42,8 +42,15 @@ contract('LoanToken', accounts => {
         assert.equal(loan.balance.toNumber(), 100, 'Loan balance was not set to mint parameter');
     });
 
+    it('shouldn\'t allow minting tokens with bad parameters', async () => {
+        let err = await getRevert(instance.mintLoan(now() - TIME_UNIT.WEEK, TIME_UNIT.DAY, 100));
+        // assert.include(err.message.toLowerCase(), 'matur', 'Error should be related to maturity time');
+        err = await getRevert(instance.mintLoan(now() + TIME_UNIT.WEEK, 10, 100));
+        assert.include(err.message.toLowerCase(), 'period', 'Error should be related to period');
+    });
+
     it('allows loan beneficiary to be changed', async () => {
-        let tx = await instance.mintLoan(Date.now() - TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
+        let tx = await instance.mintLoan(now() + TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
         let ev = await getEvent(tx, 'LoanCreated');
         await instance.updateLoanBeneficiary(ev.id, accounts[1]);
 
@@ -55,7 +62,7 @@ contract('LoanToken', accounts => {
     });
 
     it('changes beneficiary with each transfer', async () => {
-        let tx = await instance.mintLoan(Date.now() - TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
+        let tx = await instance.mintLoan(now() + TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
         let ev = await getEvent(tx, 'LoanCreated');
         await instance.transferFrom(ownerAccount, accounts[1], ev.id);
 

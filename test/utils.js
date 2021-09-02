@@ -7,19 +7,23 @@ const TIME_UNIT = {
     MONTH: 2592000,
 };
 
+function now() {
+    return Math.floor(Date.now() / 1000);
+}
+
 function getEvent(tx, event) {
     return new Promise((resolve, reject) => {
         truffleAssert.eventEmitted(tx, event, resolve);
     });
 }
 
-function getRevert(action, m) {
+function getRevert(prom, m) {
     return new Promise((resolve, reject) => {
-        action()
+        prom
             .catch(resolve)
             .then(() => assert.exists(null, m || "Expected revert but no error thrown"))
-            .catch(err => reject());
+            .catch(reject);
     });
 }
 
-module.exports = { getEvent, getRevert, TIME_UNIT };
+module.exports = { getEvent, getRevert, now, TIME_UNIT };

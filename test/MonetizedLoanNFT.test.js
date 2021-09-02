@@ -34,7 +34,7 @@ contract('MonetizedLoanNFT', accounts => {
     });
 
     it('blocks non-owners from updating fees', async () => {
-        let err = await getRevert(() => instance.setMintFee(10, { from: foreignAccount }));
+        let err = await getRevert(instance.setMintFee(10, { from: foreignAccount }));
         assert.include(err.message, 'not the owner');
     });
 
@@ -52,7 +52,7 @@ contract('MonetizedLoanNFT', accounts => {
         assert.equal(ev.creator, ownerAccount, 'Creator is set in new loan');
         assert.equal(ev.amount.toNumber(), 70, 'Amount is set in new loan');
         // now try without fee
-        err = await getRevert(() => instance.mintLoan(
+        let err = await getRevert(instance.mintLoan(
             Math.floor(Date.now()/1000) + TIME_UNIT.WEEK,
             TIME_UNIT.DAY,
             70,
@@ -79,7 +79,7 @@ contract('MonetizedLoanNFT', accounts => {
         assert.equal(ev.servicer, ownerAccount, `Loan servicer ${ev.servicer} is not actual servicer`);
         assert.equal(ev.amount.toNumber(), 10, 'Servicing fee is being included in servicing');
         // now try without fee
-        err = await getRevert(() => instance.serviceLoan(id, { from: ownerAccount, value: 10 }))
+        err = await getRevert(instance.serviceLoan(id, { from: ownerAccount, value: 10 }))
             .catch(err => assert.fail('service payment with no fee accepted'));
         assert.include(err.message, 'service fee', `Got wrong error: \n(${err.message})\n`);
     });
