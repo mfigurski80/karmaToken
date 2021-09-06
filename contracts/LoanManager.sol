@@ -3,17 +3,8 @@ pragma solidity ^0.8.0;
 
 import "./CollateralManager.sol";
 
-// struct PeriodicLoan {
-//     bool active; // whether contract is still active or completed
-//     address beneficiary; // address service payments should be made to
-//     address borrower; // 'minter' of contract
-//     uint256 period; // how often payments required
-//     uint256 nextServiceTime; // next payment required
-//     uint256 balance; // remaining payment amount
-//     uint256 minimumPayment; // minimum payment amount
-// }
-
 struct PeriodicLoan {
+    bool failed; // whether service payments were missed
     address minter; // address that minted this contract
     uint16 nPeriods; // how many periods until maturity
     uint16 curPeriod; // current period (how much paid)
@@ -34,7 +25,8 @@ contract LoanManager {
         uint64 dueDate
     );
     event LoanServiced(uint256 id, address servicer, uint256 amount);
-    event LoanCompleted(uint256 id, address servicer, bool isSuccessful);
+    event LoanCompleted(uint256 id, address servicer);
+    event LoanCalled(uint256 id, address servicer);
 
     modifier onlyCreator(uint256 id) {
         require(
@@ -47,8 +39,9 @@ contract LoanManager {
     modifier onlyActive(uint256 id) {
         require(
             loans[id].nPeriods > loans[id].curPeriod,
-            "LoanManager: Referenced loan must be active",
+            "LoanManager: Referenced loan must be active"
         );
+        _;
     }
 
     constructor(address managerAddress) {
@@ -56,22 +49,11 @@ contract LoanManager {
     }
 
     /**
-     * @dev Allows updating the beneficiary of a specific loan
-     * @param _id ID of loan to be updated
-     * @param _newBeneficiary New address that will receive loan proceeds
-     */
-    // NOTE: REMOVED! No beneficiary specified -- owner must withdraw into an account
-    // function _updateBeneficiary(uint256 _id, address _newBeneficiary) internal {
-    //     PeriodicLoan storage loan = loans[_id];
-    //     loan.beneficiary = _newBeneficiary;
-    // }
-
-    /**
      * @dev Allows easy creation of PeriodicLoan from given parameters
-     * @param _maturity Date loan should mature
-     * @param _period How often payments are required
-     * @param _totalBalance Total eth transfered once loan matures
-     * @return The Id of the newly-created PeriodicLoan, ie it's index in the list
+     * @param _nPeriods How many periods should loan last
+     * @param _periodDuration How long a single period is
+     * @param _couponSize How much eth is transfered with one service payment
+     * @return The id of the newly-created PeriodicLoan, i.e it's index in the list
      */
     function _createLoan(
         uint16 _nPeriods,
@@ -84,6 +66,7 @@ contract LoanManager {
         // add loan
         loans.push(
             PeriodicLoan(
+                false,
                 msg.sender,
                 _nPeriods,
                 0,
@@ -140,76 +123,62 @@ contract LoanManager {
     /**
      * @dev Allows user to service their loan with a set amount of ether. Allows
      *        for overserving, closes the loan if it's completed, and doesn't care
-     *        about lateness of payment.
+     *        about lateness of payment. NOTE: eventually, won't transfer payement
+     *        directly, but will instead associate it with the loan for withdrawal
      * @param _id ID or index of loan you want to service
      * @param _with Amount of eth the loan has been serviced by
+     * @param _to Address of beneficiary of coupon payments
      */
-    function _serviceLoan(uint256 _id, uint256 _with) internal onlyActive(_id) {
+    function _serviceLoan(
+        uint256 _id,
+        uint256 _with,
+        address _to
+    ) internal onlyActive(_id) {
         // get, check loan
         PeriodicLoan storage loan = loans[_id];
 
-        // check if loan is fully paid
-        if (loan.balance <= _with) {
-            _completeLoan(_id, true);
-            payable(loan.beneficiary).transfer(loan.balance);
-            if (loan.balance < _with) {
-                payable(loan.borrower).transfer(_with - loan.balance);
-            }
-            return;
-        }
-        // else if not fully paid...
-        require(
-            _with >= loan.minimumPayment,
-            "LoanManager: Payment doesn't meet minimum level for this contract"
-        );
         // figure out periods covered by payment
-        uint256 periodsCovered = _with / loan.minimumPayment;
-        // find next service time && update balance
-        loan.nextServiceTime += periodsCovered * loan.period;
-        uint256 acceptedPayment = loan.minimumPayment * periodsCovered;
-        loan.balance -= acceptedPayment;
-        payable(loan.beneficiary).transfer(acceptedPayment); // watch for re-entrancy
-        emit LoanServiced(_id, loan.borrower, acceptedPayment);
+        uint16 periodsCovered = uint16(_with / loan.couponSize);
+        require(
+            _with > loan.couponSize,
+            "LoanManager: Payment doesn't meet coupon size"
+        );
+        // perform state changes
+        loan.curPeriod += periodsCovered;
+        // transfer value to beneficiary
+        uint256 acceptedPayment = periodsCovered * loan.couponSize;
+        assert(acceptedPayment <= _with);
+        payable(_to).transfer(acceptedPayment);
+
+        // emit events
+        emit LoanServiced(_id, msg.sender, acceptedPayment);
+        if (loan.curPeriod > loan.nPeriods) {
+            emit LoanCompleted(_id, msg.sender);
+        }
     }
 
     /**
      * @dev Cancels the given loan id, performing the required checks
      * @param _id Id of loan you want to cancel
      */
-    function _cancelLoan(uint256 _id) internal {
-        // get, check loan
-        PeriodicLoan storage loan = loans[_id];
-        require(loan.active, "LoanManager: Referenced token is not active");
-
-        _completeLoan(_id, true);
+    function _cancelLoan(uint256 _id) internal onlyActive(_id) {
+        loans[_id].curPeriod = loans[_id].nPeriods;
     }
 
     /**
-     * @dev Checks to see if loan payments are overdue, and forfeits the
-     *        security to the creditor if so
+     * @dev Checks to see if loan payments are overdue, and allows creditor
+     *      access to the collateral if so
      * @param _id Id of loan you want to check
      */
-    function _callLoan(uint256 _id) internal returns (bool) {
+    function _callLoan(uint256 _id) internal onlyActive(_id) {
         PeriodicLoan storage loan = loans[_id];
-        require(loan.active, "LoanManager: Referenced token is not active");
-
-        if (block.timestamp > loan.nextServiceTime) {
-            // payment is overdue!
-            _completeLoan(_id, false);
-            return true;
-        }
-        return false;
-    }
-
-    function _completeLoan(uint256 _id, bool _successful) internal {
-        PeriodicLoan storage loan = loans[_id];
-        loan.active = false;
-        if (_successful) {
-            _collateralManager.release(_id, loan.borrower);
-        } else {
-            _collateralManager.release(_id, loan.beneficiary);
-        }
-        emit LoanCompleted(_id, loan.borrower, _successful);
+        require(
+            block.timestamp >
+                loan.startTime + (loan.curPeriod + 1) * loan.periodDuration,
+            "LoanManager: loan contract has not been breached"
+        );
+        loan.failed = true;
+        emit LoanCalled(_id, loan.minter);
     }
 
     // solhint-disable-next-line
