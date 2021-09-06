@@ -21,9 +21,9 @@ contract LoanToken is LoanManager, ERC721URIStorage {
     /**
      * @dev Mint a new loan token with given information. Payable to
      *  allow overriding to add mint fees
-     * @param maturity The maturity of the loan
-     * @param period The period of the loan
-     * @param totalBalance The total of service payments to the loan
+     * @param nPeriods The number of periods in the loan
+     * @param periodDuration The duration of each period
+     * @param couponSize How much wei each coupon payment will be
      */
     function mintLoan(
         uint16 nPeriods,
