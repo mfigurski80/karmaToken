@@ -3,39 +3,56 @@ pragma solidity ^0.8.0;
 
 import "./CollateralManager.sol";
 
+// struct PeriodicLoan {
+//     bool active; // whether contract is still active or completed
+//     address beneficiary; // address service payments should be made to
+//     address borrower; // 'minter' of contract
+//     uint256 period; // how often payments required
+//     uint256 nextServiceTime; // next payment required
+//     uint256 balance; // remaining payment amount
+//     uint256 minimumPayment; // minimum payment amount
+// }
+
 struct PeriodicLoan {
-    bool active; // whether contract is still active or completed
-    address beneficiary; // address service payments should be made to
-    address borrower; // 'minter' of contract
-    uint256 period; // how often payments required
-    uint256 nextServiceTime; // next payment required
-    uint256 balance; // remaining payment amount
-    uint256 minimumPayment; // minimum payment amount
+    address minter; // address that minted this contract
+    uint16 nPeriods; // how many periods until maturity
+    uint16 curPeriod; // current period (how much paid)
+    uint32 periodDuration; // how much time a single period lasts
+    uint64 startTime; // block time this contract was minted
+    uint128 couponSize; // how large a coupon is every period
+    // note: uints add to 256. Efficiency, and realistic limitations
 }
 
 contract LoanManager {
     PeriodicLoan[] public loans;
-    CollateralManager collateralManager;
+    CollateralManager private _collateralManager;
 
     event LoanCreated(
         uint256 id,
-        address creator,
+        address minter,
         uint256 amount,
-        uint256 dueDate
+        uint64 dueDate
     );
     event LoanServiced(uint256 id, address servicer, uint256 amount);
     event LoanCompleted(uint256 id, address servicer, bool isSuccessful);
 
     modifier onlyCreator(uint256 id) {
         require(
-            loans[id].borrower == msg.sender,
+            loans[id].minter == msg.sender,
             "LoanManager: Caller must be creator of this loan"
         );
         _;
     }
 
+    modifier onlyActive(uint256 id) {
+        require(
+            loans[id].nPeriods > loans[id].curPeriod,
+            "LoanManager: Referenced loan must be active",
+        );
+    }
+
     constructor(address managerAddress) {
-        collateralManager = CollateralManager(managerAddress);
+        _collateralManager = CollateralManager(managerAddress);
     }
 
     /**
@@ -43,10 +60,11 @@ contract LoanManager {
      * @param _id ID of loan to be updated
      * @param _newBeneficiary New address that will receive loan proceeds
      */
-    function _updateBeneficiary(uint256 _id, address _newBeneficiary) internal {
-        PeriodicLoan storage loan = loans[_id];
-        loan.beneficiary = _newBeneficiary;
-    }
+    // NOTE: REMOVED! No beneficiary specified -- owner must withdraw into an account
+    // function _updateBeneficiary(uint256 _id, address _newBeneficiary) internal {
+    //     PeriodicLoan storage loan = loans[_id];
+    //     loan.beneficiary = _newBeneficiary;
+    // }
 
     /**
      * @dev Allows easy creation of PeriodicLoan from given parameters
@@ -56,31 +74,30 @@ contract LoanManager {
      * @return The Id of the newly-created PeriodicLoan, ie it's index in the list
      */
     function _createLoan(
-        uint256 _maturity,
-        uint256 _period,
-        uint256 _totalBalance
+        uint16 _nPeriods,
+        uint32 _periodDuration,
+        uint128 _couponSize
     ) internal returns (uint256) {
         uint256 id = loans.length;
-        // figure out minimum payment such that _totalBalance is payed
-        uint256 duration = _maturity - block.timestamp;
-        uint256 nPeriods = duration / _period;
-        uint256 minPayment = _totalBalance / nPeriods;
-        if (duration % nPeriods != 0) {
-            minPayment++;
-        }
+        uint64 nowTime = uint64(block.timestamp);
+
         // add loan
         loans.push(
             PeriodicLoan(
-                true,
                 msg.sender,
-                msg.sender,
-                _period,
-                block.timestamp + _period,
-                _totalBalance,
-                minPayment
+                _nPeriods,
+                0,
+                _periodDuration,
+                nowTime,
+                _couponSize
             )
         );
-        emit LoanCreated(id, msg.sender, _totalBalance, _maturity);
+        emit LoanCreated(
+            id,
+            msg.sender,
+            _couponSize * _nPeriods,
+            nowTime + _periodDuration * _nPeriods
+        );
         return id;
     }
 
@@ -99,7 +116,7 @@ contract LoanManager {
             IERC20(_tokenAddress),
             _count
         );
-        collateralManager.reserveERC20(tok, _id, msg.sender);
+        _collateralManager.reserveERC20(tok, _id, msg.sender);
     }
 
     /**
@@ -117,7 +134,7 @@ contract LoanManager {
             IERC721(_nftAddress),
             _nft
         );
-        collateralManager.reserveERC721(nft, _id, msg.sender);
+        _collateralManager.reserveERC721(nft, _id, msg.sender);
     }
 
     /**
@@ -127,10 +144,9 @@ contract LoanManager {
      * @param _id ID or index of loan you want to service
      * @param _with Amount of eth the loan has been serviced by
      */
-    function _serviceLoan(uint256 _id, uint256 _with) internal {
+    function _serviceLoan(uint256 _id, uint256 _with) internal onlyActive(_id) {
         // get, check loan
         PeriodicLoan storage loan = loans[_id];
-        require(loan.active, "LoanManager: Referenced token is not active");
 
         // check if loan is fully paid
         if (loan.balance <= _with) {
@@ -189,9 +205,9 @@ contract LoanManager {
         PeriodicLoan storage loan = loans[_id];
         loan.active = false;
         if (_successful) {
-            collateralManager.release(_id, loan.borrower);
+            _collateralManager.release(_id, loan.borrower);
         } else {
-            collateralManager.release(_id, loan.beneficiary);
+            _collateralManager.release(_id, loan.beneficiary);
         }
         emit LoanCompleted(_id, loan.borrower, _successful);
     }
