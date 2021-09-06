@@ -20,35 +20,26 @@ contract TestLoanManager is Utility {
     // TESTS
 
     function testCreatingLoan() public {
-        uint256 id = loanManager.createLoan(
-            block.timestamp + 10 days,
-            1 days,
-            100
-        );
+        uint256 id = loanManager.createLoan(10, 1 days, 10);
         Assert.equal(id, 0, "Ids should start at 0");
         // PeriodicLoan[] memory loans = loanManager.getLoans();
         // Assert.equal(loans.length, 1, "There should be one loan");
 
         PeriodicLoan memory l = _getPeriodicLoan(id, loanManager);
-        Assert.isTrue(l.active, "Loan should be active");
+        Assert.isFalse(l.failed, "Loan should not be failed");
         Assert.equal(
-            l.borrower,
+            l.minter,
             address(this),
             "Minter should be marked as contract borrower"
         );
+        Assert.equal(l.periodDuration, 1 days, "Period should be 1 day");
         Assert.equal(
-            l.beneficiary,
-            address(this),
-            "Minter should be marked as contract beneficiary"
+            l.curPeriod,
+            0,
+            "Loan should not have any service payments yet"
         );
-        Assert.equal(l.period, 1 days, "Period should be 1 day");
-        Assert.equal(
-            l.nextServiceTime,
-            block.timestamp + 1 days,
-            "Next service time should be 7 days from now"
-        );
-        Assert.equal(l.balance, 100, "Balance should be 100 initially");
-        Assert.equal(l.minimumPayment, 10, "Payment should be 10 (100/10)");
+        Assert.equal(l.nPeriods, 10, "Should have 10 total periods");
+        Assert.equal(l.couponSize, 10, "Coupon should be set to 10");
     }
 
     function testServiceLoan() public {

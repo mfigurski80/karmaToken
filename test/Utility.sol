@@ -14,13 +14,13 @@ abstract contract Utility {
     {
         PeriodicLoan memory l;
         (
-            l.active,
-            l.beneficiary,
-            l.borrower,
-            l.period,
-            l.nextServiceTime,
-            l.balance,
-            l.minimumPayment
+            l.failed,
+            l.minter,
+            l.nPeriods,
+            l.curPeriod,
+            l.periodDuration,
+            l.startTime,
+            l.couponSize
         ) = loanManager.loans(id);
         return l;
     }
