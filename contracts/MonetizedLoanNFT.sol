@@ -8,7 +8,7 @@ contract MonetizedLoanNFT is LoanToken, Ownable {
     uint256 public mintFee = .001 ether; // .001 ~ $3
     uint256 public serviceFee = 1_000; // percentage, divided by 1,000,000 (so .1% default)
 
-    event FeeChanged(bool isMint, uint256 newFee);
+    event FeeChanged(bool isMintFee, uint256 newFee);
 
     constructor(address manager) LoanToken(manager) {}
 
@@ -38,15 +38,15 @@ contract MonetizedLoanNFT is LoanToken, Ownable {
      * @dev Ensure user pays minting fee when minting
      */
     function mintLoan(
-        uint256 maturity,
-        uint256 period,
-        uint256 totalBalance
+        uint16 nPeriods,
+        uint32 periodDuration,
+        uint128 couponSize
     ) public payable override returns (uint256) {
         require(
             msg.value >= mintFee,
             "MonetizedLoanNFT: ether sent does not cover mint fee"
         );
-        return super.mintLoan(maturity, period, totalBalance);
+        return super.mintLoan(nPeriods, periodDuration, couponSize);
     }
 
     /**
@@ -55,11 +55,10 @@ contract MonetizedLoanNFT is LoanToken, Ownable {
      */
     function serviceLoan(uint256 id) public payable override {
         uint256 fee = (msg.value * serviceFee) / 1_000_000;
-        if (fee == 0) fee = 1;
+        if ((msg.value * serviceFee) % 1_000_000 > 0) fee++; // round up fee
         uint256 trueValue = msg.value - fee;
         require(
-            trueValue >= loans[id].minimumPayment ||
-                trueValue >= loans[id].balance,
+            trueValue >= loans[id].couponSize,
             "MonetizedLoanNFT: ether sent cannot cover service fee and minimum payment"
         );
         super.serviceLoan(id);

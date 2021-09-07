@@ -21,47 +21,28 @@ contract LoanToken is LoanManager, ERC721URIStorage {
     /**
      * @dev Mint a new loan token with given information. Payable to
      *  allow overriding to add mint fees
-     * @param maturity The maturity of the loan
-     * @param period The period of the loan
-     * @param totalBalance The total of service payments to the loan
+     * @param nPeriods The number of periods in the loan
+     * @param periodDuration The duration of each period
+     * @param couponSize How much wei each coupon payment will be
      */
     function mintLoan(
-        uint256 maturity,
-        uint256 period,
-        uint256 totalBalance
+        uint16 nPeriods,
+        uint32 periodDuration,
+        uint128 couponSize
     ) public payable virtual returns (uint256) {
         require(
-            period >= 900,
+            periodDuration >= 900,
             "LoanToken: Period must be at least 900 seconds"
         );
+        require(nPeriods > 0, "LoanToken: Must have at least one period");
         require(
-            maturity - block.timestamp >= period,
-            "LoanToken: Maturity must be at least one period after current block timestamp"
-        );
-        require(
-            totalBalance > 0,
-            "LoanToken: Total balance must be greater than 0"
+            couponSize > 0,
+            "LoanToken: COupon balance must be greater than 0"
         );
 
-        uint256 id = _createLoan(maturity, period, totalBalance);
+        uint256 id = _createLoan(nPeriods, periodDuration, couponSize);
         _mint(msg.sender, id);
         return id;
-    }
-
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override {
-        if (from == address(0) || to == address(0)) return;
-        loans[tokenId].beneficiary = to;
-    }
-
-    function updateLoanBeneficiary(uint256 id, address newBeneficiary)
-        external
-        onlyApprovedOrOwner(id)
-    {
-        _updateBeneficiary(id, newBeneficiary);
     }
 
     function addERC20Collateral(
@@ -81,18 +62,14 @@ contract LoanToken is LoanManager, ERC721URIStorage {
     }
 
     function serviceLoan(uint256 id) public payable virtual onlyCreator(id) {
-        _serviceLoan(id, msg.value);
+        _serviceLoan(id, msg.value, ownerOf(id));
     }
 
     function cancelLoan(uint256 id) public onlyApprovedOrOwner(id) {
         _cancelLoan(id);
     }
 
-    function callLoan(uint256 id)
-        public
-        onlyApprovedOrOwner(id)
-        returns (bool)
-    {
-        return _callLoan(id);
+    function callLoan(uint256 id) public onlyApprovedOrOwner(id) {
+        _callLoan(id);
     }
 }
