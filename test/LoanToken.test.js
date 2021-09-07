@@ -27,7 +27,7 @@ contract('LoanToken', accounts => {
     });
 
     it('should allow minting loans', async () => {
-        let tx = await instance.mintLoan(now() + TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
+        let tx = await instance.mintLoan(7, TIME_UNIT.DAY, 10);
         let ev = await getEvent(tx, 'LoanCreated');
         assert.equal(ev.id, 0);
 
@@ -38,38 +38,15 @@ contract('LoanToken', accounts => {
         assert.equal(balance.toNumber(), 1, 'Balance did not increase when minting token');
 
         const loan = await instance.loans.call(ev.id);
-        assert.isTrue(loan.active, 'Loan was not marked as active by default');
-        assert.equal(loan.balance.toNumber(), 100, 'Loan balance was not set to mint parameter');
+        assert.isFalse(loan.failed, 'Loan should not be marked as failed');
+        assert.equal(loan.couponSize.toNumber(), 10, 'Loan coupon was not set to mint parameter');
     });
 
     it('shouldn\'t allow minting tokens with bad parameters', async () => {
-        let err = await getRevert(instance.mintLoan(now() - TIME_UNIT.WEEK, TIME_UNIT.DAY, 100));
+        let err = await getRevert(instance.mintLoan(0, TIME_UNIT.DAY, 10));
         // assert.include(err.message.toLowerCase(), 'matur', 'Error should be related to maturity time');
-        err = await getRevert(instance.mintLoan(now() + TIME_UNIT.WEEK, 10, 100));
+        err = await getRevert(instance.mintLoan(7, 10, 10));
         assert.include(err.message.toLowerCase(), 'period', 'Error should be related to period');
     });
 
-    it('allows loan beneficiary to be changed', async () => {
-        let tx = await instance.mintLoan(now() + TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
-        let ev = await getEvent(tx, 'LoanCreated');
-        await instance.updateLoanBeneficiary(ev.id, accounts[1]);
-
-        const owner = await instance.ownerOf.call(ev.id);
-        assert.equal(owner, ownerAccount, 'Loan owner changed when beneficiary was changed');
-
-        const l = await instance.loans.call(ev.id);
-        assert.equal(l.beneficiary, accounts[1], 'Loan beneficiary was not changed');
-    });
-
-    it('changes beneficiary with each transfer', async () => {
-        let tx = await instance.mintLoan(now() + TIME_UNIT.WEEK, TIME_UNIT.DAY, 100);
-        let ev = await getEvent(tx, 'LoanCreated');
-        await instance.transferFrom(ownerAccount, accounts[1], ev.id);
-
-        const owner = await instance.ownerOf.call(ev.id);
-        assert.equal(owner, accounts[1], 'Loan owner was not changed');
-
-        const l = await instance.loans.call(ev.id);
-        assert.equal(l.beneficiary, accounts[1], 'Loan beneficiary was not changed with transfer');
-    });
 });
