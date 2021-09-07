@@ -140,7 +140,7 @@ contract LoanManager {
         // figure out periods covered by payment
         uint16 periodsCovered = uint16(_with / loan.couponSize);
         require(
-            _with > loan.couponSize,
+            _with >= loan.couponSize,
             "LoanManager: Payment doesn't meet coupon size"
         );
         // perform state changes
@@ -148,7 +148,9 @@ contract LoanManager {
         // transfer value to beneficiary
         uint256 acceptedPayment = periodsCovered * loan.couponSize;
         assert(acceptedPayment <= _with);
-        payable(_to).transfer(acceptedPayment);
+        // payable(_to).transfer(acceptedPayment);
+        (bool success, ) = _to.call{value: acceptedPayment}("");
+        require(success, "LoanManager: failed to accept payment");
 
         // emit events
         emit LoanServiced(_id, msg.sender, acceptedPayment);
