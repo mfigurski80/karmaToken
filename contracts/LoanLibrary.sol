@@ -13,38 +13,35 @@ contract LoanLibrary {
         returns (uint8 format, bool flag)
     {
         // read format + flag (8 bits)
-        bytes1 packed_format_flag = bytes1(alp);
-        uint8 format = uint8(packed_format_flag >> 1); // get first 7 bits
+        bytes1 packedFormatFlag = bytes1(alp);
+        format = uint8(packedFormatFlag >> 1); // get first 7 bits
         require(format == supportedFormat(), "Library: unsupported format");
-        bool flag = uint8(packed_format_flag & 0x01) == 1; // get last bit
-        return (format, flag);
+        flag = uint8(packedFormatFlag & 0x01) == 1; // get last bit
     }
 
     function readCouponSize(bytes32 alp)
         public
         pure
-        returns (uint256 coupon_size)
+        returns (uint256 couponSize)
     {
         // read mult + coupon size (32 bits)
-        bytes4 coupon_data = bytes4(alp << 8); // skip 8 bits, get 32 bits
-        uint8 coupon_mult = uint8(bytes1(coupon_data)) >> 6; // get first 2 bits
-        uint256 coupon_size = uint32(coupon_data) & 0x3F;
-        if (coupon_mult == 1) coupon_size *= 1 gwei;
-        if (coupon_mult == 2) coupon_size *= 1 ether / 1000;
-        if (coupon_mult == 3) coupon_size *= 1 ether;
-        return coupon_size;
+        bytes4 couponData = bytes4(alp << 8); // skip 8 bits, get 32 bits
+        uint8 couponMult = uint8(bytes1(couponData)) >> 6; // get first 2 bits
+        couponSize = uint32(couponData) & 0x3F;
+        if (couponMult == 1) couponSize *= 1 gwei;
+        if (couponMult == 2) couponSize *= 1 ether / 1000;
+        if (couponMult == 3) couponSize *= 1 ether;
     }
 
     function readPeriodData(bytes32 alp)
         public
         pure
-        returns (uint16 n_periods, uint16 cur_period)
+        returns (uint16 nPeriods, uint16 curPeriod)
     {
-        // read n_periods (16 bits)
-        uint16 n_periods = uint16(bytes2(alp << (8 + 32)));
-        // read cur_period (16 bits)
-        uint16 cur_period = uint16(bytes2(alp << (8 + 32 + 16)));
-        return (n_periods, cur_period);
+        // read nPeriods (16 bits)
+        nPeriods = uint16(bytes2(alp << (8 + 32)));
+        // read curPeriod (16 bits)
+        curPeriod = uint16(bytes2(alp << (8 + 32 + 16)));
     }
 
     function readCurrency(bytes32 alp) public pure returns (uint32 currency) {
