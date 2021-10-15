@@ -8,7 +8,8 @@ contract('LoanLibrary', accounts => {
     });
     
     describe('reading alpha slot', () => {
-        
+        // TODO: ensure we're reading multipliers properly
+
         it('reads format and flag', async() => {
             const r = await instance.readFormatAndFlag(
                 // 8  -- 7 bit format is *0* + 1 bit flag is *true* (0x01)
@@ -16,6 +17,7 @@ contract('LoanLibrary', accounts => {
             );
             assert.isTrue(r.flag);
             assert.equal(r.format, 0);
+            // TODO: test format error
         });
         
         it('reads coupon size', async() => {
@@ -59,6 +61,8 @@ contract('LoanLibrary', accounts => {
     });
 
     describe('reading beta slot', () => {
+        // TODO: ensure we're reading multipliers properly
+
         it('reads face value', async () => {
             const r = await instance.readFaceValue(
                 // 32 bits -- face value is *100* (0x00000064)
@@ -94,7 +98,36 @@ contract('LoanLibrary', accounts => {
                 `0xFFFFFFFFFFFFFFFFFFFFFFFF${address}`
             );
             assert.equal(r, `0x${address}`, `Minter is read as ${address}`);
-        })
+        });
+    });
+
+    describe('writing alpha slot', () => {
+
+        const maxVal = '0x01FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+
+        it('writes flag', async () => {
+            // write true flag
+            let r = await instance.writeFlag(maxVal, true);
+            let check = await instance.readFormatAndFlag(r);
+            assert.isTrue(check.flag);
+            // write false flag
+            r = await instance.writeFlag(maxVal, false);
+            check = await instance.readFormatAndFlag(r);
+            assert.isFalse(check.flag);
+        });
+
+        it('writes curPeriod', async () => {
+            let r = await instance.writeCurPeriod(maxVal, 4);
+            let check = await instance.readPeriodData(r);
+            assert.equal(check.curPeriod, 4);
+        });
+
+        it('writes beneficiary', async () => {
+            let r = await instance.writeBeneficiary(maxVal, accounts[0]);
+            let check = await instance.readBeneficiary(r);
+            assert.equal(check, accounts[0]);
+        });
+        
     });
             
 });

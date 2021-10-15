@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-contract LoanLibrary {
+library LoanLibrary {
     function supportedFormat() public pure returns (uint8) {
         return 0;
     }
 
+    /* ###################
+     *    READING DATA
+     * ################### */
+
     // READING ALPHA SLOT
+
     function readFormatAndFlag(bytes32 alp)
         public
         pure
@@ -97,6 +102,37 @@ contract LoanLibrary {
     function readMinter(bytes32 bet) public pure returns (address minter) {
         return address(bytes20(bet << (32 + 48 + 16)));
     }
+
+    /* ###################
+     *    WRITING DATA
+     * ################### */
+
+    // WRITING ALPHA SLOT
+
+    function writeFlag(bytes32 alp, bool flag) public pure returns (bytes32) {
+        alp &= 0xFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF; // clear flag bit
+        return alp | bytes32(bytes1(flag ? 1 : 0));
+    }
+
+    function writeCurPeriod(bytes32 alp, uint16 curPeriod)
+        public
+        pure
+        returns (bytes32)
+    {
+        alp &= 0xFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+        return alp | (bytes32(bytes2(curPeriod)) >> (8 + 32 + 16));
+    }
+
+    function writeBeneficiary(bytes32 alp, address beneficiary)
+        public
+        pure
+        returns (bytes32)
+    {
+        alp &= 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
+        return alp | (bytes32(bytes20(beneficiary)) >> (8 + 32 + 16 + 16 + 24));
+    }
+
+    // NO DATA-SPECIFIC WRITING NEEDS TO HAPPEN IN BETA SLOT
 
     function readLoan(bytes32 alp, bytes32 bet) public pure {}
 }
