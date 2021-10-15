@@ -58,7 +58,45 @@ contract LoanLibrary {
         return address(bytes20(alp << (8 + 32 + 16 + 16 + 24)));
     }
 
-    // TODO: READING BETA SLOT
+    // READING BETA SLOT
+
+    function readFaceValue(bytes32 bet)
+        public
+        pure
+        returns (uint256 faceValue)
+    {
+        // read face value (32 bits, 4 bytes)
+        bytes4 valueData = bytes4(bet);
+        uint8 valueMult = uint8(bytes1(bet)) >> 6; // get first two bits
+        faceValue = uint32(valueData) & 0x3FFF; // clear first two bits
+        if (valueMult == 1) faceValue *= 1 gwei;
+        if (valueMult == 2) faceValue *= 1 ether / 1000;
+        if (valueMult == 3) faceValue *= 1 ether;
+    }
+
+    function readStartTime(bytes32 bet) public pure returns (uint64 startTime) {
+        // read start time (48 bits, 6 bytes)
+        return uint64(bytes8(bytes6(bet << (32))) >> 16); // skip face value 32 bits
+    }
+
+    function readPeriodDuration(bytes32 bet)
+        public
+        pure
+        returns (uint64 periodDuration)
+    {
+        // read period duration (16 bits, 2 bytes)
+        // 2 bits for multiplier
+        bytes2 durationData = bytes2(bet << (32 + 48)); // skip face value and start time
+        uint8 durationMult = uint8(bytes1(durationData)) >> 6; // get first two bits
+        periodDuration = uint16(durationData) & 0x3F; // clear first two bits
+        if (durationMult == 1) periodDuration *= 60; // in minutes?
+        if (durationMult == 2) periodDuration *= 60 * 60; // in hours?
+        if (durationMult == 3) periodDuration *= 60 * 60 * 24; // in days?
+    }
+
+    function readMinter(bytes32 bet) public pure returns (address minter) {
+        return address(bytes20(bet << (32 + 48 + 16)));
+    }
 
     function readLoan(bytes32 alp, bytes32 bet) public pure {}
 }
