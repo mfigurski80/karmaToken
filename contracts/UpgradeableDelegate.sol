@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract UpgradeableReference is Ownable {
+contract UpgradeableDelegate is Ownable {
     address public ref = address(0);
     bytes32 public refChange = 0;
 

@@ -1,14 +1,14 @@
-const UpgradeableReference = artifacts.require('UpgradeableReference');
+const UpgradeableDelegate = artifacts.require('UpgradeableDelegate');
 
 const { getRevert, increaseTime } = require('./utils');
 
 
-contract('UpgradeableReference', accounts => {
+contract('UpgradeableDelegate', accounts => {
     let instance;
     const owner = accounts[0];
 
     before(async () => {
-        instance = await UpgradeableReference.new();
+        instance = await UpgradeableDelegate.new();
     });
 
     it('has public ref and refChange variables', async () => {
