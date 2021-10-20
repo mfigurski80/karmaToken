@@ -129,5 +129,23 @@ contract('LoanLibrary', accounts => {
         });
         
     });
-            
+    
+    describe('generic read bond', () => {
+
+        it('reads a bond', async () => {
+            const alp = '0x00FFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000';
+            const bet = '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+
+            const r = await instance.readBond(alp, bet);
+
+            let check = await instance.readCouponSize(alp);
+            assert.equal(check, r.couponSize, 'Coupon Size is read as expected');
+            check = await instance.readMinter(bet);
+            assert.equal(check, r.minter, 'Minter is read as expected');
+            check = await instance.readPeriodDuration(bet);
+            assert.equal(check, r.periodDuration, 'Period Duration is read as expected');
+        });
+
+    });
+
 });

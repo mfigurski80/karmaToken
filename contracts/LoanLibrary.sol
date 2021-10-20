@@ -1,6 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+struct Bond {
+    bool flag;
+    uint32 currencyRef;
+    uint16 nPeriods;
+    uint16 curPeriod;
+    uint64 startTime;
+    uint64 periodDuration;
+    uint256 couponSize;
+    uint256 faceValue;
+    address beneficiary;
+    address minter;
+}
+
 library LoanLibrary {
     function supportedFormat() public pure returns (uint8) {
         return 0;
@@ -134,5 +147,41 @@ library LoanLibrary {
 
     // NO DATA-SPECIFIC WRITING NEEDS TO HAPPEN IN BETA SLOT
 
-    function readLoan(bytes32 alp, bytes32 bet) public pure {}
+    /* ###################
+     *    Generic Reads
+     * ################### */
+
+    function fillBondFromAlpha(bytes32 alp, Bond memory b)
+        public
+        pure
+        returns (Bond memory)
+    {
+        (, b.flag) = readFormatAndFlag(alp);
+        b.couponSize = readCouponSize(alp);
+        (b.nPeriods, b.curPeriod) = readPeriodData(alp);
+        b.currencyRef = readCurrency(alp);
+        b.beneficiary = readBeneficiary(alp);
+        return b;
+    }
+
+    function fillBondFromBeta(bytes32 bet, Bond memory b)
+        public
+        pure
+        returns (Bond memory)
+    {
+        b.faceValue = readFaceValue(bet);
+        b.startTime = readStartTime(bet);
+        b.periodDuration = readPeriodDuration(bet);
+        b.minter = readMinter(bet);
+        return b;
+    }
+
+    function readBond(bytes32 alp, bytes32 bet)
+        public
+        pure
+        returns (Bond memory b)
+    {
+        b = fillBondFromAlpha(alp, b);
+        b = fillBondFromBeta(bet, b);
+    }
 }
