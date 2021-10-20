@@ -48,4 +48,10 @@ function increaseTime(duration) {
     });
 }
 
+async function callAndGetReturn(action, ...args) {
+    let val = await action.call(...args);
+    await action(...args);
+    return val;
+}
+
 module.exports = { getEvent, getRevert, increaseTime, now, TIME_UNIT };
