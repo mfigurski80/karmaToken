@@ -1,10 +1,10 @@
-const LoanLibrary = artifacts.require('LoanLibrary');
+const BondDataLibrary = artifacts.require('BondDataLibrary');
 
-contract('LoanLibrary', accounts => {
+contract('BondDataLibrary', accounts => {
     let instance;
 
     before(async () => {
-        instance = await LoanLibrary.new();
+        instance = await BondDataLibrary.new();
     });
     
     describe('reading alpha slot', () => {
