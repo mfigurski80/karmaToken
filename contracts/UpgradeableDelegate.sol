@@ -26,4 +26,8 @@ contract UpgradeableDelegate is Ownable {
     fallback() external payable {
         // do things
     }
+
+    receive() external payable {
+        // do same things?
+    }
 }
