@@ -18,15 +18,15 @@ contract BondData {
         return (bonds[id * 2], bonds[id * 2 + 1]);
     }
 
-    function writeBondAlpha(uint256 id, bytes32 alp) public {
+    function _writeBondAlpha(uint256 id, bytes32 alp) internal {
         bonds[id * 2] = alp;
     }
 
-    function writeBondBeta(uint256 id, bytes32 bet) public {
+    function _writeBondBeta(uint256 id, bytes32 bet) internal {
         bonds[id * 2 + 1] = bet;
     }
 
-    function addBond(bytes32 alp, bytes32 bet) public returns (uint256 id) {
+    function _addBond(bytes32 alp, bytes32 bet) internal returns (uint256 id) {
         id = bonds.length / 2;
         bonds.push(alp);
         bonds.push(bet);

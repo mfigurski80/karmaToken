@@ -1,5 +1,5 @@
 const LBondReader = artifacts.require('LBondReader');
-const BondData = artifacts.require('BondData');
+const BondDataExposed = artifacts.require('BondDataExposed');
 
 contract('BondData', function(accounts) {
     let libraryInstance;
@@ -10,11 +10,11 @@ contract('BondData', function(accounts) {
 
     before(async () => {
         libraryInstance = await LBondReader.new();
-        BondData.link(libraryInstance);
+        BondDataExposed.link(libraryInstance);
     });
 
     beforeEach(async () => {
-        instance = await BondData.new();
+        instance = await BondDataExposed.new();
     });
 
     it('allows storing bond bytes', async () => {
