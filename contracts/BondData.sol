@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./BondDataLibrary.sol";
+import "./LBondReader.sol";
 
 contract BondData {
     bytes32[] public bonds;
@@ -11,7 +11,7 @@ contract BondData {
     }
 
     function getBond(uint256 id) public view returns (Bond memory) {
-        return BondDataLibrary.readBond(bonds[id * 2], bonds[id * 2 + 1]);
+        return LBondReader.readBond(bonds[id * 2], bonds[id * 2 + 1]);
     }
 
     function getBondBytes(uint256 id) public view returns (bytes32, bytes32) {
