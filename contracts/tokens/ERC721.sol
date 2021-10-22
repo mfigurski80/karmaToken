@@ -21,7 +21,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     string public override symbol;
 
     // Token uri
-    string public tokenUri;
+    string public uri;
 
     // Mapping from token ID to owner address
     mapping(uint256 => address) internal _owners;
@@ -59,7 +59,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     ) {
         name = name_;
         symbol = symbol_;
-        tokenUri = uri_;
+        uri = uri_;
     }
 
     /**
@@ -118,7 +118,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         override
         returns (string memory)
     {
-        return tokenUri;
+        return uri;
     }
 
     /**
