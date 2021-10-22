@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
+// import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+// import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 
@@ -118,4 +118,12 @@ interface ICompositeToken is IERC721, IERC721Metadata {
         uint256[] calldata amounts,
         bytes calldata data
     ) external;
+
+    /**
+     * @dev Returns the URI for token type `id`.
+     *
+     * If the `\{id\}` substring is present in the URI, it must be replaced by
+     * clients with the actual token type ID.
+     */
+    function uri(uint256 id) external view returns (string memory);
 }
