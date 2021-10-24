@@ -15,7 +15,9 @@ contract CompositeToken is ICompositeToken, ERC721 {
         string memory name_,
         string memory symbol_,
         string memory uri_
-    ) ERC721(name_, symbol_, uri_) {}
+    )
+        ERC721(name_, symbol_, uri_) //solhint-disable-next-line no-empty-blocks
+    {}
 
     /**
      * @dev See {IERC1155MetadataURI-uri}.
@@ -151,8 +153,8 @@ contract CompositeToken is ICompositeToken, ERC721 {
         address operator,
         address from,
         address to,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
+        uint256[] memory ids,
+        uint256[] memory amounts,
         bytes memory data
     ) internal {
         if (to.isContract()) {
@@ -176,5 +178,29 @@ contract CompositeToken is ICompositeToken, ERC721 {
                 revert("ERC1155: transfer to non ERC1155Receiever implementer");
             }
         }
+    }
+
+    function _mintBatch(address to, uint256[] memory ids) internal virtual {
+        require(to != address(0), "ERC1155: mint to zero address");
+        uint256[] memory amounts;
+        for (uint256 i = 0; i < ids.length; i++) {
+            require(
+                _owners[ids[i]] != address(0),
+                "ERC1155: token already minted"
+            );
+            amounts[i] = 1;
+            _balances[to] += 1;
+            _owners[ids[i]] = to;
+            emit Transfer(address(0), to, ids[i]);
+        }
+        emit TransferBatch(msg.sender, address(0), to, ids, amounts);
+        _checkOnERC1155BatchReceived(
+            msg.sender,
+            address(0),
+            to,
+            ids,
+            amounts,
+            ""
+        );
     }
 }

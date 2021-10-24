@@ -146,7 +146,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         returns (address)
     {
         require(
-            exists(tokenId),
+            _owners[tokenId] != address(0),
             "ERC721: approved query for nonexistent token"
         );
 
@@ -228,37 +228,6 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     }
 
     /**
-     * @dev Returns whether `tokenId` exists.
-     *
-     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
-     *
-     * Tokens start existing when they are minted (`_mint`),
-     * and stop existing when they are burned (`_burn`).
-     */
-    function exists(uint256 tokenId) public view virtual returns (bool) {
-        return _owners[tokenId] != address(0);
-    }
-
-    /**
-     * @dev Safely mints `tokenId` and transfers it to `to`, with additional `data` parameter
-     *
-     * Requirements:
-     *
-     * - `tokenId` must not exist.
-     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
-     *
-     * Emits a {Transfer} event.
-     */
-    function _safeMint(
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal virtual {
-        _mint(to, tokenId);
-        _checkOnERC721Received(address(0), to, tokenId, _data);
-    }
-
-    /**
      * @dev Mints `tokenId` and transfers it to `to`.
      *
      * WARNING: Usage of this method is discouraged, use {_safeMint} whenever possible
@@ -272,12 +241,13 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      */
     function _mint(address to, uint256 tokenId) internal virtual {
         require(to != address(0), "ERC721: mint to the zero address");
-        require(!exists(tokenId), "ERC721: token already minted");
+        require(_owners[tokenId] != address(0), "ERC721: token already minted");
 
         _balances[to] += 1;
         _owners[tokenId] = to;
 
         emit Transfer(address(0), to, tokenId);
+        _checkOnERC721Received(address(0), to, tokenId, "");
     }
 
     /**
