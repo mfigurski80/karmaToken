@@ -200,18 +200,6 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     }
 
     /**
-     * @dev See {IERC721-safeTransferFrom}.
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public virtual override checkValidOperator(tokenId) {
-        _safeTransfer(from, to, tokenId, _data);
-    }
-
-    /**
      * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
      * are aware of the ERC721 protocol to prevent tokens from being forever locked.
      *
@@ -229,17 +217,14 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      *
      * Emits a {Transfer} event.
      */
-    function _safeTransfer(
+    function safeTransferFrom(
         address from,
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) internal virtual {
+    ) public virtual override checkValidOperator(tokenId) {
         _transfer(from, to, tokenId);
-        require(
-            _checkOnERC721Received(from, to, tokenId, _data),
-            "ERC721: transfer to non ERC721Receiver implementer"
-        );
+        _checkOnERC721Received(from, to, tokenId, _data);
     }
 
     /**
@@ -270,10 +255,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         bytes memory _data
     ) internal virtual {
         _mint(to, tokenId);
-        require(
-            _checkOnERC721Received(address(0), to, tokenId, _data),
-            "ERC721: transfer to non ERC721Receiver implementer"
-        );
+        _checkOnERC721Received(address(0), to, tokenId, _data);
     }
 
     /**
@@ -385,14 +367,13 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      * @param to target address that will receive the tokens
      * @param tokenId uint256 ID of the token to be transferred
      * @param _data bytes optional data to send along with the call
-     * @return bool whether the call correctly returned the expected magic value
      */
     function _checkOnERC721Received(
         address from,
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) private returns (bool) {
+    ) private {
         if (to.isContract()) {
             try
                 IERC721Receiver(to).onERC721Received(
@@ -402,21 +383,14 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
                     _data
                 )
             returns (bytes4 retval) {
-                return retval == IERC721Receiver.onERC721Received.selector;
-            } catch (bytes memory reason) {
-                if (reason.length == 0) {
-                    revert(
-                        "ERC721: transfer to non ERC721Receiver implementer"
-                    );
-                } else {
-                    //solhint-disable-next-line no-inline-assembly
-                    assembly {
-                        revert(add(32, reason), mload(reason))
-                    }
+                if (retval != IERC721Receiver.onERC721Received.selector) {
+                    revert("ERC721: ERC721Receiver rejected token");
                 }
+            } catch Error(string memory reason) {
+                revert(reason);
+            } catch {
+                revert("ERC721: transfer to non ERC721Receiver implementer");
             }
-        } else {
-            return true;
         }
     }
 }

@@ -1,10 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+
 import "./ICompositeToken.sol";
 import "./ERC721.sol";
 
+import "../utils/Address.sol";
+
 contract CompositeToken is ICompositeToken, ERC721 {
+    using Address for address;
+
     constructor(
         string memory name_,
         string memory symbol_,
@@ -82,15 +88,93 @@ contract CompositeToken is ICompositeToken, ERC721 {
         uint256 id,
         uint256 amount,
         bytes memory data
-    ) external virtual override checkValidOperator(id) {}
+    ) external virtual override checkValidOperator(id) {
+        require(amount == 1, "ERC1155: cannot transfer more than balance");
+        _transfer(from, to, id);
+        emit TransferSingle(msg.sender, from, to, id, amount);
+        _checkOnERC1155Received(msg.sender, from, to, id, amount, data);
+    }
 
     function safeBatchTransferFrom(
         address from,
         address to,
         uint256[] calldata ids,
         uint256[] calldata amounts,
-        bytes calldata data
+        bytes memory data
     ) external virtual override {
-        // Check valid operator manually
+        require(
+            ids.length == amounts.length,
+            "ERC1155: account and ids length mismatch"
+        );
+        for (uint256 i = 0; i < ids.length; i++) {
+            // Check valid operator manually
+            require(
+                msg.sender == from || _operatorApprovals[from][msg.sender],
+                "ERC1155: transfer caller is not owner or approved"
+            );
+            _transfer(from, to, ids[i]);
+        }
+        emit TransferBatch(msg.sender, from, to, ids, amounts);
+        _checkOnERC1155BatchReceived(msg.sender, from, to, ids, amounts, data);
+    }
+
+    function _checkOnERC1155Received(
+        address operator,
+        address from,
+        address to,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal {
+        if (to.isContract()) {
+            try
+                IERC1155Receiver(to).onERC1155Received(
+                    operator,
+                    from,
+                    id,
+                    amount,
+                    data
+                )
+            returns (bytes4 response) {
+                if (response != IERC1155Receiver.onERC1155Received.selector) {
+                    revert("ERC1155: ERC1155Receiver rejected tokens");
+                }
+            } catch Error(string memory reason) {
+                revert(reason);
+            } catch {
+                revert("ERC1155: transfer to non ERC1155Receiver implementer");
+            }
+        }
+    }
+
+    function _checkOnERC1155BatchReceived(
+        address operator,
+        address from,
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes memory data
+    ) internal {
+        if (to.isContract()) {
+            try
+                IERC1155Receiver(to).onERC1155BatchReceived(
+                    operator,
+                    from,
+                    ids,
+                    amounts,
+                    data
+                )
+            returns (bytes4 response) {
+                if (
+                    response != IERC1155Receiver.onERC1155BatchReceived.selector
+                ) {
+                    revert("ERC1155: ERC1155Receiver rejected batch tokens");
+                }
+            } catch Error(string memory reason) {
+                revert(reason);
+            } catch {
+                revert("ERC1155: transfer to non ERC1155Receiever implementer");
+            }
+        }
     }
 }
