@@ -101,7 +101,7 @@ module.exports = {
     }
   },
 
-  plugins: ["truffle-contract-size"],
+  plugins: ["truffle-contract-size", "solidity-coverage"],
 
   // Truffle DB is currently disabled by default; to enable it, change enabled: false to enabled: true
   //

@@ -10,6 +10,7 @@
     "build": "truffle compile",
     "dev": "truffle dev > /dev/null &",
     "test": "truffle test",
+    "coverage": "truffle run coverage",
     "lint": "solhint contracts/**/*.sol"
   },
   "author": "",
@@ -22,6 +23,7 @@
   "devDependencies": {
     "eth-gas-reporter": "^0.2.22",
     "solhint": "^3.3.6",
+    "solidity-coverage": "^0.7.17",
     "truffle": "^5.4.3"
   }
 }
