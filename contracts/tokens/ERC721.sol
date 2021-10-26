@@ -241,7 +241,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      */
     function _mint(address to, uint256 tokenId) internal virtual {
         require(to != address(0), "ERC721: mint to the zero address");
-        require(_owners[tokenId] != address(0), "ERC721: token already minted");
+        require(_owners[tokenId] == address(0), "ERC721: token already minted");
 
         _balances[to] += 1;
         _owners[tokenId] = to;
@@ -295,7 +295,9 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         require(to != address(0), "ERC721: transfer to the zero address");
 
         // Clear approvals from the previous owner
-        _approve(address(0), tokenId);
+        if (from != address(0)) {
+            _approve(address(0), tokenId);
+        }
 
         _balances[from] -= 1;
         _balances[to] += 1;
