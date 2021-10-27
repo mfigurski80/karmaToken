@@ -154,14 +154,18 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     }
 
     /**
-     * @dev See {IERC721-setApprovalForAll}.
+     * @dev Approve `operator` to operate on all of `owner` tokens
+     *
+     * Emits a {ApprovalForAll} event.
      */
     function setApprovalForAll(address operator, bool approved)
         public
         virtual
         override
     {
-        _setApprovalForAll(msg.sender, operator, approved);
+        // require(msg.sender != operator, "ERC721: approve to caller");
+        _operatorApprovals[msg.sender][operator] = approved;
+        emit ApprovalForAll(msg.sender, operator, approved);
     }
 
     /**
@@ -315,21 +319,6 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     }
 
     /**
-     * @dev Approve `operator` to operate on all of `owner` tokens
-     *
-     * Emits a {ApprovalForAll} event.
-     */
-    function _setApprovalForAll(
-        address owner,
-        address operator,
-        bool approved
-    ) internal virtual {
-        // require(owner != operator, "ERC721: approve to caller");
-        _operatorApprovals[owner][operator] = approved;
-        emit ApprovalForAll(owner, operator, approved);
-    }
-
-    /**
      * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
      * The call is not executed if the target address is not a contract.
      *
@@ -343,7 +332,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) private {
+    ) internal {
         if (to.isContract()) {
             try
                 IERC721Receiver(to).onERC721Received(
