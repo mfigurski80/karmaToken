@@ -21,12 +21,19 @@ contract('LBondReader', accounts => {
         });
         
         it('reads coupon size', async() => {
-            const r = await instance.readCouponSize(
+            let r = await instance.readCouponSize(
                 // 8 bit offset (0xFF)
                 // 32 -- 2 bit mult is *0* + 30 bit coupon_size is *10* (0x0000000A)
                 '0xFF0000000A'
             );
             assert.equal(r, 10);
+
+            r = await instance.readCouponSize(
+                // 32 -- 2 bit mult is *1* + 30 bit coupon_size is *10* (0x4000000A)
+                '0xFF4000000A'
+            );
+            assert.equal(r.toNumber(), 10 * 1_000_000_000);
+
         });
         
         it('reads period data', async() => {
