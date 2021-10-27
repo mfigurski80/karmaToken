@@ -11,7 +11,7 @@ contract('ERC721', (accounts) => {
     const operator = accounts[1];
     const receiver = accounts[2];
     const ID = 0;
-    const args = {name: 'Test Token', symbol: 'TST', uri: 'http://localhost'};
+    const args = { name: 'Test Token', symbol: 'TST', uri: 'http://localhost' };
 
     before(async () => {
         receiverInstance = await ERC721ReceiverExposed.new();

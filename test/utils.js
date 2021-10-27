@@ -14,7 +14,14 @@ function now() {
 function getEvent(tx, event) {
     return new Promise((resolve, reject) => {
         truffleAssert.eventEmitted(tx, event, resolve);
+        reject(`No event ${event} emitted`);
     });
+}
+
+async function getEvents(tx, event) {
+    return tx.logs
+        .filter(l => l.event == event)
+        .map(l => l.args);
 }
 
 function getRevert(prom, m) {
@@ -54,4 +61,4 @@ async function callAndGetReturn(action, ...args) {
     return val;
 }
 
-module.exports = { getEvent, getRevert, increaseTime, now, TIME_UNIT };
+module.exports = { getEvent, getEvents, getRevert, increaseTime, now, TIME_UNIT };

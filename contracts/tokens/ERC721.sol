@@ -295,9 +295,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         require(to != address(0), "ERC721: transfer to the zero address");
 
         // Clear approvals from the previous owner
-        if (from != address(0)) {
-            _approve(address(0), tokenId);
-        }
+        _approve(address(0), tokenId);
 
         _balances[from] -= 1;
         _balances[to] += 1;

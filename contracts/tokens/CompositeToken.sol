@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/extensions/IERC1155MetadataURI.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 
 import "./ICompositeToken.sol";
@@ -19,6 +21,19 @@ contract CompositeToken is ICompositeToken, ERC721 {
         ERC721(name_, symbol_, uri_) //solhint-disable-next-line no-empty-blocks
     {}
 
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721, IERC165)
+        returns (bool)
+    {
+        return
+            interfaceId == type(IERC1155).interfaceId ||
+            interfaceId == type(IERC1155MetadataURI).interfaceId ||
+            super.supportsInterface(interfaceId);
+    }
+
     /**
      * @dev See {IERC1155MetadataURI-uri}.
      *
@@ -31,6 +46,21 @@ contract CompositeToken is ICompositeToken, ERC721 {
      */
     function uri(uint256) public view virtual override returns (string memory) {
         return _uri;
+    }
+
+    /**
+     * Gets batch of owners from give id list
+     */
+    function ownerOfBatch(uint256[] memory ids)
+        public
+        view
+        returns (address[] memory)
+    {
+        address[] memory owners = new address[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            owners[i] = _owners[ids[i]];
+        }
+        return owners;
     }
 
     /**
@@ -75,7 +105,10 @@ contract CompositeToken is ICompositeToken, ERC721 {
         uint256[] memory batchBalances = new uint256[](accounts.length);
 
         for (uint256 i = 0; i < accounts.length; ++i) {
-            batchBalances[i] = balanceOf(accounts[i], ids[i]);
+            if (_owners[ids[i]] == accounts[i]) {
+                batchBalances[i] = 1;
+            }
+            // batchBalances[i] = balanceOf(accounts[i], ids[i]);
         }
 
         return batchBalances;
@@ -113,6 +146,10 @@ contract CompositeToken is ICompositeToken, ERC721 {
             require(
                 msg.sender == from || _operatorApprovals[from][msg.sender],
                 "ERC1155: transfer caller is not owner or approved"
+            );
+            require(
+                amounts[i] == 1,
+                "ERC1155: cannot transfer more than balance"
             );
             _transfer(from, to, ids[i]);
         }
@@ -180,19 +217,24 @@ contract CompositeToken is ICompositeToken, ERC721 {
         }
     }
 
+    function _mint(address to, uint256 id) internal virtual override {
+        super._mint(to, id);
+        emit TransferSingle(msg.sender, address(0), to, id, 1);
+    }
+
     function _mintBatch(address to, uint256[] memory ids) internal virtual {
         require(to != address(0), "ERC1155: mint to zero address");
-        uint256[] memory amounts;
+        uint256[] memory amounts = new uint256[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             require(
-                _owners[ids[i]] != address(0),
+                _owners[ids[i]] == address(0),
                 "ERC1155: token already minted"
             );
             amounts[i] = 1;
-            _balances[to] += 1;
             _owners[ids[i]] = to;
             emit Transfer(address(0), to, ids[i]);
         }
+        _balances[to] += ids.length;
         emit TransferBatch(msg.sender, address(0), to, ids, amounts);
         _checkOnERC1155BatchReceived(
             msg.sender,
