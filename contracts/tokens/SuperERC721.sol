@@ -57,8 +57,10 @@ contract SuperERC721 is ERC721 {
         for (uint256 i = 0; i < ids.length; i++) {
             // check valid operator
             require(
-                msg.sender == from || _operatorApprovals[from][msg.sender],
-                "SuperERC721: transfer caller is not valid operator"
+                msg.sender == from ||
+                    _operatorApprovals[from][msg.sender] ||
+                    msg.sender == _tokenApprovals[ids[i]],
+                "SuperERC721: caller is not valid operator"
             );
             _transfer(from, to, ids[i]);
             _checkOnERC721Received(from, to, ids[i], _data);

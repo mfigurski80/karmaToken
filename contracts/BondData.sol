@@ -6,10 +6,6 @@ import "./LBondReader.sol";
 contract BondData {
     bytes32[] public bonds;
 
-    function test() public view returns (bytes32) {
-        return bonds[0];
-    }
-
     function getBond(uint256 id) public view returns (Bond memory) {
         return LBondReader.readBond(bonds[id * 2], bonds[id * 2 + 1]);
     }

@@ -1,7 +1,7 @@
 const LBondReader = artifacts.require('LBondReader');
 const BondDataExposed = artifacts.require('BondDataExposed');
 
-contract('BondData', function(accounts) {
+contract('BondData', accounts => {
     let libraryInstance;
     let instance;
     

@@ -1,7 +1,7 @@
 const SuperERC721 = artifacts.require('SuperERC721Exposed');
 const ERC721ReceiverExposed = artifacts.require('ERC721ReceiverExposed');
 
-const { getEvent, getEvents, getRevert } = require('./utils');
+const { getEvents, getRevert } = require('./utils');
 
 contract('SuperERC721', accounts => {
     let instance;

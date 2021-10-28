@@ -38,14 +38,19 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     /**
      * @dev Checks is msg sender is listed as a valid operator
      */
-    modifier checkValidOperator(uint256 id) {
+    modifier onlyValidOperator(uint256 id) {
         address owner = _owners[id];
         require(
             msg.sender == owner ||
                 _operatorApprovals[owner][msg.sender] ||
                 msg.sender == _tokenApprovals[id],
-            "ERC721: transfer caller is not owner nor approved"
+            "ERC721: caller is not owner nor approved"
         );
+        _;
+    }
+
+    modifier onlyOwner(uint256 id) {
+        require(msg.sender == _owners[id], "ERC721: called is not owner");
         _;
     }
 
@@ -128,7 +133,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         public
         virtual
         override
-        checkValidOperator(tokenId)
+        onlyOwner(tokenId)
     {
         address owner = _owners[tokenId];
         require(to != owner, "ERC721: approval to current owner");
@@ -188,7 +193,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         address from,
         address to,
         uint256 tokenId
-    ) public virtual override checkValidOperator(tokenId) {
+    ) public virtual override onlyValidOperator(tokenId) {
         _transfer(from, to, tokenId);
     }
 
@@ -226,7 +231,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) public virtual override checkValidOperator(tokenId) {
+    ) public virtual override onlyValidOperator(tokenId) {
         _transfer(from, to, tokenId);
         _checkOnERC721Received(from, to, tokenId, _data);
     }
@@ -265,7 +270,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      * Emits a {Transfer} event.
      */
     function _burn(uint256 tokenId) internal virtual {
-        address owner = ERC721.ownerOf(tokenId);
+        address owner = _owners[tokenId];
 
         // Clear approvals
         _approve(address(0), tokenId);

@@ -123,7 +123,7 @@ contract CompositeToken is ICompositeToken, ERC721 {
         uint256 id,
         uint256 amount,
         bytes memory data
-    ) external virtual override checkValidOperator(id) {
+    ) external virtual override onlyValidOperator(id) {
         require(amount == 1, "ERC1155: cannot transfer more than balance");
         _transfer(from, to, id);
         emit TransferSingle(msg.sender, from, to, id, amount);
