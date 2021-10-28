@@ -1,10 +1,10 @@
-const LBondReader = artifacts.require('LBondReader');
+const LBondManager = artifacts.require('LBondManager');
 
-contract('LBondReader', accounts => {
+contract('LBondManager', accounts => {
     let instance;
 
     before(async () => {
-        instance = await LBondReader.new();
+        instance = await LBondManager.new();
     });
     
     describe('reading alpha slot', () => {

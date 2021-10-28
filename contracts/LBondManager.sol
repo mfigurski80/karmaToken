@@ -14,7 +14,7 @@ struct Bond {
     address minter;
 }
 
-library LBondReader {
+library LBondManager {
     function supportedFormat() public pure returns (uint8) {
         return 0;
     }

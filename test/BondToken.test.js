@@ -1,4 +1,4 @@
-const LBondReader = artifacts.require('LBondReader');
+const LBondManager = artifacts.require('LBondManager');
 const BondToken = artifacts.require('BondToken');
 
 const { getEvent, getEvents, getRevert } = require('./utils');
@@ -14,7 +14,7 @@ contract('BondToken', accounts => {
     ];
 
     before(async () => {
-        libraryInstance = await LBondReader.new();
+        libraryInstance = await LBondManager.new();
         BondToken.link(libraryInstance);
     });
 
