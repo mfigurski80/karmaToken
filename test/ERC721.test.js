@@ -87,8 +87,7 @@ contract('ERC721', (accounts) => {
     });
 
     it('dissallows transfers of invalid tokens', async () => {
-        let err = await getRevert(instance.transferFrom(owner, receiver, ID));
-        assert.include(err.message.toLowerCase(), 'transfer');
+        await getRevert(instance.transferFrom(owner, receiver, ID));
     });
 
     it('allows operator token approvals', async () => {
