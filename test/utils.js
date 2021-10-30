@@ -1,4 +1,4 @@
-
+const BigNumber = require('bignumber.js')
 const truffleAssert = require('truffle-assertions');
 
 const TIME_UNIT = {
@@ -6,6 +6,29 @@ const TIME_UNIT = {
     WEEK: 604800,
     MONTH: 2592000,
 };
+
+
+const getAllSimpleStorage = async (addr, offset=0) => {
+    let slot = offset
+    let zeroCounter = 0
+    const simpleStorage = []
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        const data = await web3.eth.getStorageAt(addr, slot)
+        if (new BigNumber(data).eq(0)) {
+        zeroCounter++
+        }
+
+        simpleStorage.push({ slot, data })
+        slot++
+
+        if (zeroCounter > 10) {
+        break
+        }
+    }
+
+    return simpleStorage.splice(0, simpleStorage.length - 11);
+}
 
 function now() {
     return Math.floor(Date.now() / 1000);
@@ -61,4 +84,4 @@ async function callAndGetReturn(action, ...args) {
     return val;
 }
 
-module.exports = { getEvent, getEvents, getRevert, increaseTime, now, TIME_UNIT };
+module.exports = { getAllSimpleStorage, getEvent, getEvents, getRevert, increaseTime, now, TIME_UNIT };

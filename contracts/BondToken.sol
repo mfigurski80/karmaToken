@@ -28,7 +28,7 @@ contract BondToken is SuperERC721 {
             msg.sender == LBondManager.readMinter(bet),
             "BondToken: minter must be caller"
         );
-        uint256 id = bonds.length;
+        uint256 id = bonds.length / 2;
         bonds.push(alp);
         bonds.push(bet);
         _mint(msg.sender, id);

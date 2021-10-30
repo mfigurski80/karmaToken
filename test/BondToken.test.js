@@ -1,7 +1,9 @@
+const BigNumber = require('bignumber.js')
+
 const LBondManager = artifacts.require('LBondManager');
 const BondToken = artifacts.require('BondToken');
 
-const { getEvent, getEvents, getRevert } = require('./utils');
+const { getAllSimpleStorage, getEvent, getEvents, getRevert } = require('./utils');
 
 contract('BondToken', accounts => {
     let libraryInstance;
@@ -28,6 +30,21 @@ contract('BondToken', accounts => {
         assert.equal(ev.from, 0x0);
         assert.equal(ev.to, owner);
         assert.equal(ev.tokenId, 0);
+    });
+
+    it('disallows minting bonds with bad minter data', async () => {
+        let err = await getRevert(instance.mintBond(bytes[0], bytes[0]));
+        assert.include(err.message, 'minter');
+    });
+
+    it('correctly mints multiple bonds in a row', async () => {
+        for (let i = 0; i < 4; i++) {
+            let tx = await instance.mintBond(bytes[0], bytes[1]);
+            let ev = await getEvent(tx, 'Transfer');
+            assert.equal(ev.from, 0x0);
+            assert.equal(ev.to, owner);
+            assert.equal(ev.tokenId, i);
+        }
     });
 
     it('exposes bond data bytes', async () => {
