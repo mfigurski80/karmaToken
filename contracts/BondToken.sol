@@ -2,14 +2,14 @@
 pragma solidity ^0.8.0;
 
 import "./LBondManager.sol";
+import "./CurrencyManager.sol";
 import "./tokens/SuperERC721.sol";
 
-contract BondToken is SuperERC721 {
+contract BondToken is SuperERC721, CurrencyManager {
     bytes32[] public bonds;
 
     event BeneficiaryChange(uint256 id, address beneficiary);
-
-    event BytesChange(uint256 i, bytes32 newBytes);
+    event BondServiced(uint256 id, address operator, uint64 toPeriod);
 
     constructor(
         string memory name,

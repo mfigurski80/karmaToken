@@ -1,9 +1,7 @@
-const BigNumber = require('bignumber.js')
-
 const LBondManager = artifacts.require('LBondManager');
 const BondToken = artifacts.require('BondToken');
 
-const { getAllSimpleStorage, getEvent, getEvents, getRevert } = require('./utils');
+const { getEvent, getRevert } = require('./utils');
 
 contract('BondToken', accounts => {
     let libraryInstance;
