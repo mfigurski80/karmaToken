@@ -86,7 +86,7 @@ library LBondManager {
         // read face value (32 bits, 4 bytes)
         bytes4 valueData = bytes4(bet);
         uint8 valueMult = uint8(bytes1(bet)) >> 6; // get first two bits
-        faceValue = uint32(valueData) & 0x3FFF; // clear first two bits
+        faceValue = uint32(valueData) & 0x3FFFFFFF; // clear first two bits
         if (valueMult == 1) faceValue *= 1 gwei;
         if (valueMult == 2) faceValue *= 1 ether / 1000;
         if (valueMult == 3) faceValue *= 1 ether;
@@ -106,7 +106,7 @@ library LBondManager {
         // 2 bits for multiplier
         bytes2 durationData = bytes2(bet << (32 + 48)); // skip face value and start time
         uint8 durationMult = uint8(bytes1(durationData)) >> 6; // get first two bits
-        periodDuration = uint16(durationData) & 0x3F; // clear first two bits
+        periodDuration = uint16(durationData) & 0x3FFF; // clear first two bits
         if (durationMult == 1) periodDuration *= 60; // in minutes?
         if (durationMult == 2) periodDuration *= 60 * 60; // in hours?
         if (durationMult == 3) periodDuration *= 60 * 60 * 24; // in days?

@@ -8,6 +8,32 @@ const TIME_UNIT = {
 };
 
 
+function toHex(d, padding=2) {
+    var hex = Number(d).toString(16);
+    while (hex.length < padding) hex = "0" + hex;
+    if (hex.length > padding) hex = hex.substr(hex.length - padding);
+    return hex;
+}
+
+const buildBondBytes = async (flag, currencyRef, nPeriods, curPeriod, startTime, periodDuration, couponSize, faceValue, beneficiary, minter) => {
+    s = {};
+    s.flag = flag ? '01' : '00';
+    s.currencyRef = toHex(currencyRef, 6);
+    s.nPeriods = toHex(nPeriods, 4);
+    s.curPeriod = toHex(curPeriod, 4);
+    s.startTime = toHex(~~startTime, 12);
+    s.periodDuration = toHex(periodDuration, 4); // not how it works in the contract
+    s.couponSize = toHex(~~couponSize, 8); // not how it works in the contract
+    s.faceValue = toHex(~~faceValue, 8);
+    s.beneficiary = beneficiary.substring(2);
+    s.minter = minter.substring(2);
+    const a = `0x${s.flag}${s.couponSize}${s.nPeriods}${s.curPeriod}${s.currencyRef}${s.beneficiary}`.toLowerCase();
+    const b = `0x${s.faceValue}${s.startTime}${s.periodDuration}${s.minter}`.toLowerCase();
+    return [a, b];
+}
+
+
+
 const getAllSimpleStorage = async (addr, offset=0) => {
     let slot = offset
     let zeroCounter = 0
@@ -84,4 +110,4 @@ async function callAndGetReturn(action, ...args) {
     return val;
 }
 
-module.exports = { getAllSimpleStorage, getEvent, getEvents, getRevert, increaseTime, now, TIME_UNIT };
+module.exports = { getAllSimpleStorage, buildBondBytes, getEvent, getEvents, getRevert, increaseTime, now, TIME_UNIT };
