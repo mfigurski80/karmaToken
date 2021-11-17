@@ -1,6 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+enum CurrencyType {
+    Ether,
+    ERC20,
+    ERC721,
+    ERC1155Token,
+    ERC1155NFT
+}
+
 struct Currency {
     uint8 currencyType; // {ERC20, ERC721, ERC1155 tokens, ERC1155 NFTs} = {0,1,2,3}
     uint88 ERC1155SmallId;
