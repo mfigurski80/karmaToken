@@ -1,5 +1,7 @@
 const LifecycleManager = artifacts.require('LifecycleManager');
 const LBondManager = artifacts.require('LBondManager');
+const ERC20 = artifacts.require('ERC20Exposed');
+const ERC1155 = artifacts.require('ERC1155Exposed');
 
 const { buildBondBytes, getEvent, getRevert } = require('./utils');
 
@@ -7,7 +9,6 @@ contract('LifecycleManager', accounts => {
     let instance;
     let libraryInstance;
     let erc20Instance;
-    let erc721Instance;
     let erc1155Instance;
 
     const owner = accounts[0];
@@ -26,7 +27,11 @@ contract('LifecycleManager', accounts => {
     before(async () => {
         libraryInstance = await LBondManager.new();
         LifecycleManager.link(libraryInstance);
-        // TODO: add erc instances, mint some tokens
+        erc20Instance = await ERC20.new();
+        await erc20Instance.mint(owner, 10000);
+        await erc20Instance.approve(libraryInstance.address, 10000);
+        erc1155Instance = await ERC1155.new();
+        // TODO: mint to ERC1155
     });
 
     beforeEach(async () => {
@@ -52,8 +57,9 @@ contract('LifecycleManager', accounts => {
 
     describe('service payments', () => {
 
-        it('exposes serviceBond method', async () => {
-            assert.notEqual(instance.serviceBond, undefined);
+        it('exposes service bond methods', async () => {
+            assert.notEqual(instance.serviceBondWithEther, undefined);
+            assert.notEqual(instance.serviceBondWithERC20, undefined);
         });
 
 
@@ -61,8 +67,7 @@ contract('LifecycleManager', accounts => {
             const bytes = buildBondBytes(DEFAULT_BOND);
             await instance.mintBond(bytes[0], bytes[1]);
             const oldBalance = await web3.eth.getBalance(beneficiary);
-            // BEGIN TEST
-            let tx = await instance.serviceBond(0, { value: 1, from: owner });
+            let tx = await instance.serviceBondWithEther(0, { value: 1, from: owner });
             // event emitted
             let ev = await getEvent(tx, 'BondServiced');
             assert.equal(ev.id, 0);
@@ -78,19 +83,28 @@ contract('LifecycleManager', accounts => {
             // FIXME: ^^ wtf. No idea why this is failing.
         });
 
-        it.skip('allows servicing bond with erc20', async () => {
-            await instance.addERC20Currency(accounts[0]);
+        it('allows servicing bond with erc20', async () => {
+            const allowance = await erc20Instance.allowance(owner, libraryInstance.address);
+            assert.equal(allowance, 10000);
+            await instance.addERC20Currency(erc20Instance.address);
             const bytes = buildBondBytes({
                 ...DEFAULT_BOND,
                 currencyRef: 1
             });
+            const oldBalance = await erc20Instance.balanceOf(beneficiary);
             await instance.mintBond(bytes[0], bytes[1]);
-            let tx = await instance.serviceBond(0, {value: 1, from: owner });
+            let tx = await instance.serviceBondWithERC20(0, 1);
+            // event emitted
             let ev = await getEvent(tx, 'BondServiced');
             assert.equal(ev.id, 0);
             assert.equal(ev.toPeriod, 1);
+            // bond updated
             let b = await instance.getBond(0);
             assert.equal(b.curPeriod, 1);
+            // beneficiary received erc20
+            let balance = await erc20Instance.balanceOf(beneficiary);
+            assert.notEqual(balance, oldBalance, 'no resources sent to beneficiary');
+            assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
         });
 
     });
