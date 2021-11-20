@@ -29,16 +29,13 @@ contract('LifecycleManager', accounts => {
         LifecycleManager.link(libraryInstance);
         erc20Instance = await ERC20.new();
         await erc20Instance.mint(owner, 10000);
-        await erc20Instance.approve(libraryInstance.address, 10000);
         erc1155Instance = await ERC1155.new();
         // TODO: mint to ERC1155
     });
 
     beforeEach(async () => {
         instance = await LifecycleManager.new(ARGS.name, ARGS.symbol, ARGS.uri);
-        // reset beneficiary balance
-        // let bal = await web3.eth.getBalance(beneficiary);
-        // if (bal > 0) await web3.eth.sendTransaction({ from: beneficiary, to: owner, value: bal });
+        await erc20Instance.approve(instance.address, 10000);
     });
     
     it('receives bytes with expected values', async () => {
@@ -84,7 +81,7 @@ contract('LifecycleManager', accounts => {
         });
 
         it('allows servicing bond with erc20', async () => {
-            const allowance = await erc20Instance.allowance(owner, libraryInstance.address);
+            const allowance = await erc20Instance.allowance(owner, instance.address);
             assert.equal(allowance, 10000);
             await instance.addERC20Currency(erc20Instance.address);
             const bytes = buildBondBytes({
