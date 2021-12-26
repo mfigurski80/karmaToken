@@ -21,42 +21,20 @@ contract LifecycleManager is BondToken {
         BondToken(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
     {}
 
-    function serviceBondWithEther(uint256 id) public payable {
+    /**
+     * Internal function containing logic for updating bond
+     * Returns referenced bond, with only alpha elements filled
+     */
+    function _serviceBond(uint256 id, uint256 amount)
+        internal
+        returns (Bond memory)
+    {
         // read bond
         bytes32 alpha = bonds[id * 2];
         Bond memory b = alpha.fillBondFromAlpha(
             Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
         );
-        require(
-            b.currencyRef == 0,
-            "LifecycleManager: wrong servicing currency"
-        );
-        // figure out period change
-        uint16 addedPeriods = uint16(msg.value / b.couponSize);
-        require(
-            addedPeriods > 0,
-            "LifecycleManager: service payment insufficient"
-        );
-        b.curPeriod += addedPeriods;
-        if (b.curPeriod > b.nPeriods) b.curPeriod = b.nPeriods;
-        bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod);
-        // pay beneficiary
-        (bool success, ) = b.beneficiary.call{value: msg.value}("");
-        require(success, "LifecycleManager: transaction failed");
-        emit BondServiced(id, b.curPeriod);
-    }
-
-    function serviceBondWithERC20(uint256 id, uint256 amount) public payable {
-        // read bond
-        bytes32 alpha = bonds[id * 2];
-        Bond memory b = alpha.fillBondFromAlpha(
-            Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
-        );
-        Currency memory c = currencies[b.currencyRef];
-        require(
-            c.currencyType == 0,
-            "LifecycleManager: wrong servicing currency"
-        );
+        // Currency memory c = currencies[b.currencyRef];
         // figure out period change
         uint16 addedPeriods = uint16(amount / b.couponSize);
         require(
@@ -66,36 +44,52 @@ contract LifecycleManager is BondToken {
         b.curPeriod += addedPeriods;
         if (b.curPeriod > b.nPeriods) b.curPeriod = b.nPeriods;
         bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod);
+        // return currency type
+        return b;
+        // presumably:
+        // calling function should check for matching currency
+        // and pay bond holder whatever he is due in that currency
+    }
+
+    function serviceBondWithEther(uint256 id) public payable {
+        // read bond
+        Bond memory b = _serviceBond(id, msg.value);
+        require(
+            b.currencyRef == 0,
+            "LifecycleManager: wrong servicing currency"
+        );
+        // pay beneficiary
+        (bool success, ) = b.beneficiary.call{value: msg.value}("");
+        require(success, "LifecycleManager: ether transaction failed");
+        emit BondServiced(id, b.curPeriod);
+    }
+
+    function serviceBondWithERC20(uint256 id, uint256 amount) public payable {
+        // read bond
+        Bond memory b = _serviceBond(id, amount);
+        Currency memory c = currencies[b.currencyRef];
+        require(
+            c.currencyType == 0,
+            "LifecycleManager: wrong servicing currency"
+        );
         // pay beneficiary
         bool success = IERC20(c.location).transferFrom(
             msg.sender,
             b.beneficiary,
             amount
         );
-        require(success, "LifecycleManager: transaction failed");
+        require(success, "LifecycleManager: erc20 transaction failed");
         emit BondServiced(id, b.curPeriod);
     }
 
     function serviceBondWithERC721(uint256 id, uint256 tokenId) public payable {
         // read bond
-        bytes32 alpha = bonds[id * 2];
-        Bond memory b = alpha.fillBondFromAlpha(
-            Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
-        );
+        Bond memory b = _serviceBond(id, 1);
         Currency memory c = currencies[b.currencyRef];
         require(
             c.currencyType == 1,
             "LifecycleManager: wrong servicing currency"
         );
-        // figure out period change
-        uint16 addedPeriods = uint16(1 / b.couponSize);
-        require(
-            addedPeriods > 0,
-            "LifecycleManager: service payment insufficient"
-        );
-        b.curPeriod += addedPeriods;
-        if (b.curPeriod > b.nPeriods) b.curPeriod = b.nPeriods;
-        bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod);
         // pay beneficiary
         IERC721(c.location).safeTransferFrom(
             msg.sender,
