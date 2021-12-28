@@ -120,6 +120,7 @@ contract LifecycleManager is BondToken {
             amount,
             ""
         );
+        emit BondServiced(id, b.curPeriod);
     }
 
     function serviceBondWithERC1155NFT(uint256 id, uint256 nftId)
@@ -141,5 +142,6 @@ contract LifecycleManager is BondToken {
             1,
             ""
         );
+        emit BondServiced(id, b.curPeriod);
     }
 }

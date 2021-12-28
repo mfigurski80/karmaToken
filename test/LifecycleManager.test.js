@@ -33,14 +33,16 @@ contract('LifecycleManager', accounts => {
         await erc20Instance.mint(owner, 10000);
         erc721Instance = await ERC721.new("Test", "TST", "URI");
         await erc721Instance.mint(owner, 0);
-        // TODO: mint to ERC1155
-        // erc1155Instance = await ERC1155.new();
+        erc1155Instance = await ERC1155.new();
+        await erc1155Instance.mint(owner, 0, 10000);
+        await erc1155Instance.mint(owner, 1, 1);
     });
 
     beforeEach(async () => {
         instance = await LifecycleManager.new(ARGS.name, ARGS.symbol, ARGS.uri);
         await erc20Instance.approve(instance.address, 10000);
         await erc721Instance.setApprovalForAll(instance.address, true);
+        await erc1155Instance.setApprovalForAll(instance.address, true);
     });
     
     it('receives bytes with expected values', async () => {
@@ -127,6 +129,51 @@ contract('LifecycleManager', accounts => {
             let owner = await erc721Instance.ownerOf(0);
             assert.notEqual(owner, oldOwner, 'resource stayed with servicer');
             assert.equal(owner, beneficiary, 'beneficiary not received resource');
+        });
+
+        it('allows servicing bond with erc1155 tokens', async () => {
+            
+            await instance.addERC1155TokenCurrency(erc1155Instance.address, 0);
+            const bytes = buildBondBytes({
+                ...DEFAULT_BOND,
+                currencyRef: 1
+            });
+            const oldBalance = await erc1155Instance.balanceOf(beneficiary, 0);
+            await instance.mintBond(bytes[0], bytes[1]);
+            let tx = await instance.serviceBondWithERC1155Token(0, 1);
+            // event emitted
+            let ev = await getEvent(tx, 'BondServiced');
+            assert.equal(ev.id, 0);
+            assert.equal(ev.toPeriod, 1);
+            // bond updated
+            let b = await instance.getBond(0);
+            assert.equal(b.curPeriod, 1);
+            // beneficiary received erc1155-0
+            let balance = await erc1155Instance.balanceOf(beneficiary, 0);
+            assert.notEqual(balance, oldBalance, 'no resources sent to beneficiary');
+            assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
+        });
+
+        it('allows servicing bond with erc1155 nfts', async () => {
+            await instance.addERC1155Currency(erc1155Instance.address);
+            const bytes = buildBondBytes({
+                ...DEFAULT_BOND,
+                currencyRef: 1
+            });
+            const oldBalance = await erc1155Instance.balanceOf(beneficiary, 1);
+            await instance.mintBond(bytes[0], bytes[1]);
+            let tx = await instance.serviceBondWithERC1155NFT(0,1);
+            // event emitted
+            let ev = await getEvent(tx, 'BondServiced');
+            assert.equal(ev.id, 0);
+            assert.equal(ev.toPeriod, 1);
+            // bond updated
+            let b = await instance.getBond(0);
+            assert.equal(b.curPeriod, 1);
+            // beneficiary received erc1155-1
+            let balance = await erc1155Instance.balanceOf(beneficiary, 1);
+            assert.notEqual(balance, oldBalance, 'no resources sent to beneficiary');
+            assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
         });
 
     });
