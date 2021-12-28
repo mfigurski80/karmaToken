@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 import "./BondToken.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 /**
  * 🦓 Lifecycle Manager
@@ -97,5 +98,48 @@ contract LifecycleManager is BondToken {
             tokenId
         );
         emit BondServiced(id, b.curPeriod);
+    }
+
+    function serviceBondWithERC1155Token(uint256 id, uint256 amount)
+        public
+        payable
+    {
+        // read bond
+        Bond memory b = _serviceBond(id, amount);
+        Currency memory c = currencies[b.currencyRef];
+        require(
+            c.currencyType == 2,
+            "LifecycleManager: wrong servicing currency"
+        );
+        // pay beneficiary
+        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+        IERC1155(c.location).safeTransferFrom(
+            msg.sender,
+            b.beneficiary,
+            c.ERC1155Id,
+            amount,
+            ""
+        );
+    }
+
+    function serviceBondWithERC1155NFT(uint256 id, uint256 nftId)
+        public
+        payable
+    {
+        // read bond
+        Bond memory b = _serviceBond(id, 1);
+        Currency memory c = currencies[b.currencyRef];
+        require(
+            c.currencyType == 3,
+            "LifecycleManager: wrong servicing currency"
+        );
+        // pay beneficiary
+        IERC1155(c.location).safeTransferFrom(
+            msg.sender,
+            b.beneficiary,
+            nftId,
+            1,
+            ""
+        );
     }
 }
