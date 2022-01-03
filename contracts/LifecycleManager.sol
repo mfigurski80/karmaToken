@@ -83,23 +83,6 @@ contract LifecycleManager is BondToken {
         emit BondServiced(id, b.curPeriod);
     }
 
-    function serviceBondWithERC721(uint256 id, uint256 tokenId) public payable {
-        // read bond
-        Bond memory b = _serviceBond(id, 1);
-        Currency memory c = currencies[b.currencyRef];
-        require(
-            c.currencyType == 1,
-            "LifecycleManager: wrong servicing currency"
-        );
-        // pay beneficiary
-        IERC721(c.location).safeTransferFrom(
-            msg.sender,
-            b.beneficiary,
-            tokenId
-        );
-        emit BondServiced(id, b.curPeriod);
-    }
-
     function serviceBondWithERC1155Token(uint256 id, uint256 amount)
         public
         payable
@@ -118,28 +101,6 @@ contract LifecycleManager is BondToken {
             b.beneficiary,
             c.ERC1155Id,
             amount,
-            ""
-        );
-        emit BondServiced(id, b.curPeriod);
-    }
-
-    function serviceBondWithERC1155NFT(uint256 id, uint256 nftId)
-        public
-        payable
-    {
-        // read bond
-        Bond memory b = _serviceBond(id, 1);
-        Currency memory c = currencies[b.currencyRef];
-        require(
-            c.currencyType == 3,
-            "LifecycleManager: wrong servicing currency"
-        );
-        // pay beneficiary
-        IERC1155(c.location).safeTransferFrom(
-            msg.sender,
-            b.beneficiary,
-            nftId,
-            1,
             ""
         );
         emit BondServiced(id, b.curPeriod);

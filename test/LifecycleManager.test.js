@@ -109,7 +109,7 @@ contract('LifecycleManager', accounts => {
             assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
         });
 
-        it('allows servicing bond with erc721', async () => {
+        it.skip('allows servicing bond with erc721', async () => {
             await instance.addERC721Currency(erc721Instance.address);
             const bytes = buildBondBytes({
                 ...DEFAULT_BOND,
@@ -154,7 +154,7 @@ contract('LifecycleManager', accounts => {
             assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
         });
 
-        it('allows servicing bond with erc1155 nfts', async () => {
+        it.skip('allows servicing bond with erc1155 nfts', async () => {
             await instance.addERC1155Currency(erc1155Instance.address);
             const bytes = buildBondBytes({
                 ...DEFAULT_BOND,
