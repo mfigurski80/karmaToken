@@ -22,6 +22,8 @@ contract LifecycleManager is BondToken {
         BondToken(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
     {}
 
+    // SERVICE PAYMENT METHODS
+
     /**
      * Internal function containing logic for updating bond
      * Returns referenced bond, with only alpha elements filled
@@ -43,7 +45,12 @@ contract LifecycleManager is BondToken {
             "LifecycleManager: service payment insufficient"
         );
         b.curPeriod += addedPeriods;
-        if (b.curPeriod > b.nPeriods) b.curPeriod = b.nPeriods;
+        if (b.curPeriod > b.nPeriods) {
+            // might be complete... read beta to find out
+            if (bonds[id * 2 + 1].readFaceValue() == 0) {
+                b.curPeriod = b.nPeriods + 1;
+            } else b.curPeriod = b.nPeriods;
+        }
         bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod);
         // return currency type
         return b;
@@ -104,5 +111,31 @@ contract LifecycleManager is BondToken {
             ""
         );
         emit BondServiced(id, b.curPeriod);
+    }
+
+    // OTHER BOND MANAGEMENT
+
+    function callBond(uint256 id) public onlyValidOperator(id) {
+        // check if bond is overdue
+        bytes32 alpha = bonds[id * 2];
+        Bond memory b = alpha.fillBondFromAlpha(
+            Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
+        );
+        require( // check if done done
+            b.curPeriod < b.nPeriods + 1, // check for
+            "LifecycleManager: bond completed"
+        );
+        require(
+            b.curPeriod * b.periodDuration < b.startTime - block.timestamp,
+            "LifecycleManager: bond not overdue"
+        );
+        // mark defaulted
+        bonds[id * 2] = alpha.writeFlag(true);
+    }
+
+    function forgiveBond(uint256 id) public onlyValidOperator(id) {
+        bytes32 alpha = bonds[id * 2];
+        (uint16 per, ) = alpha.readPeriodData();
+        bonds[id * 2] = alpha.writeCurPeriod(per + 1);
     }
 }
