@@ -204,13 +204,13 @@ contract('LifecycleManager', accounts => {
         await instance.mintBond(bytes[0], bytes[1]);
         const oldFlag = await instance.getBond(0).then(b => b.defaulted);
         // call bond
-        // let tx = await instance.callBond(0);
-        // let ev = await getEvent(tx, 'BondDefaulted');
-        // assert.equal(ev.id, 0);
-        // // bond updated
-        // let newFlag = await instance.getBond(0).then(b => b.defaulted);
-        // assert.notEqual(newFlag, oldFlag, 'bond flag not changed');
-        // assert.isTrue(newFlag, 'bond not marked defaulted');
+        let tx = await instance.callBond(0);
+        let ev = await getEvent(tx, 'BondDefaulted');
+        assert.equal(ev.id, 0);
+        // bond updated
+        let newFlag = await instance.getBond(0).then(b => b.flag);
+        assert.notEqual(newFlag, oldFlag, 'bond flag not changed');
+        assert.isTrue(newFlag, 'bond not marked defaulted');
     });
 
     it('allows forgiving a bond', async () => {

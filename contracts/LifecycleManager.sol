@@ -127,12 +127,12 @@ contract LifecycleManager is BondToken {
         Bond memory b = alpha.fillBondFromAlpha(
             Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
         );
-        require( // check if done done
+        require( // check if bond is done
             b.curPeriod < b.nPeriods + 1, // check for
             "LifecycleManager: bond completed"
         );
         require(
-            b.curPeriod * b.periodDuration < b.startTime - block.timestamp,
+            b.curPeriod * b.periodDuration < block.timestamp - b.startTime,
             "LifecycleManager: bond not overdue"
         );
         // mark defaulted
