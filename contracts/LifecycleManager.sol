@@ -48,9 +48,13 @@ contract LifecycleManager is BondToken {
         );
         b.curPeriod += addedPeriods;
         if (b.curPeriod > b.nPeriods) {
-            // might be complete... read beta to find out
-            if (bonds[id * 2 + 1].readFaceValue() == 0) {
+            // might be complete... read beta to find face value
+            if (
+                (b.curPeriod - b.nPeriods) * b.couponSize >=
+                bonds[id * 2 + 1].readFaceValue()
+            ) {
                 b.curPeriod = b.nPeriods + 1;
+                emit BondCompleted(id);
             } else b.curPeriod = b.nPeriods;
         }
         bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod);
