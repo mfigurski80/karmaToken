@@ -142,4 +142,13 @@ contract LifecycleManager is BondToken {
         bonds[id * 2] = alpha.writeCurPeriod(per + 1);
         emit BondCompleted(id);
     }
+
+    function destroyBond(uint256 id) public onlyValidOperator(id) {
+        delete bonds[id * 2];
+        delete bonds[id * 2 + 1];
+        address owner = _owners[id];
+        delete _owners[id];
+        delete _tokenApprovals[id];
+        _balances[owner] -= 1;
+    }
 }

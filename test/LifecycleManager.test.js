@@ -206,4 +206,17 @@ contract('LifecycleManager', accounts => {
         assert.equal(+b.curPeriod, +b.nPeriods + 1, 'bond curPeriod not incremented to completion');
     });
 
+    it('allows destroying a bond', async () => {
+        const bytes = buildBondBytes(DEFAULT_BOND);
+        await instance.mintBond(bytes[0], bytes[1]);
+        const oldBalance = await instance.balanceOf(owner);
+        // destroy bond
+        await instance.destroyBond(0);
+        // bond destroyed
+        let b = await instance.getBond(0);
+        assert.equal(b.startTime, 0, 'bond not reset');
+        const newBalance = await instance.balanceOf(owner);
+        assert.equal(oldBalance - newBalance, 1, 'balance not updated properly');
+    });
+
 });
