@@ -16,7 +16,7 @@ contract('LifecycleManager', accounts => {
     const owner = accounts[0];
     const beneficiary = accounts[1];
     const DEFAULT_BOND = {
-        flag: true,
+        flag: false,
         currencyRef: 0,
         nPeriods: 10, curPeriod: 0,
         startTime: Date.now(), periodDuration: 60*60*24,
@@ -176,6 +176,34 @@ contract('LifecycleManager', accounts => {
             assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
         });
 
+    });
+
+    it('allows calling defaulted bond', async () => {
+        const bytes = buildBondBytes({...DEFAULT_BOND, startTime: Date.now() - 60*60*24*100});
+        await instance.mintBond(bytes[0], bytes[1]);
+        const oldFlag = await instance.getBond(0).then(b => b.defaulted);
+        // call bond
+        // let tx = await instance.callBond(0);
+        // let ev = await getEvent(tx, 'BondDefaulted');
+        // assert.equal(ev.id, 0);
+        // // bond updated
+        // let newFlag = await instance.getBond(0).then(b => b.defaulted);
+        // assert.notEqual(newFlag, oldFlag, 'bond flag not changed');
+        // assert.isTrue(newFlag, 'bond not marked defaulted');
+    });
+
+    it('allows forgiving a bond', async () => {
+        const bytes = buildBondBytes(DEFAULT_BOND);
+        await instance.mintBond(bytes[0], bytes[1]);
+        const oldCurPeriod = await instance.getBond(0).then(b => b.curPeriod);
+        // forgive bond
+        let tx = await instance.forgiveBond(0);
+        let ev = await getEvent(tx, 'BondCompleted');
+        assert.equal(ev.id, 0);
+        // bond updated
+        let b = await instance.getBond(0);
+        assert.notEqual(b.curPeriod, oldCurPeriod, 'bond curPeriod not changed');
+        assert.equal(+b.curPeriod, +b.nPeriods + 1, 'bond curPeriod not incremented to completion');
     });
 
 });

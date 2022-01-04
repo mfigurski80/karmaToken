@@ -13,6 +13,8 @@ contract LifecycleManager is BondToken {
     using LBondManager for bytes32;
 
     event BondServiced(uint256 id, uint64 toPeriod);
+    event BondCompleted(uint256 id);
+    event BondDefaulted(uint256 id);
 
     constructor(
         string memory name,
@@ -131,11 +133,13 @@ contract LifecycleManager is BondToken {
         );
         // mark defaulted
         bonds[id * 2] = alpha.writeFlag(true);
+        emit BondDefaulted(id);
     }
 
     function forgiveBond(uint256 id) public onlyValidOperator(id) {
         bytes32 alpha = bonds[id * 2];
         (uint16 per, ) = alpha.readPeriodData();
         bonds[id * 2] = alpha.writeCurPeriod(per + 1);
+        emit BondCompleted(id);
     }
 }
