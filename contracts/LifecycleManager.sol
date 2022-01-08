@@ -30,7 +30,7 @@ contract LifecycleManager is BondToken {
      * Internal function containing logic for updating bond
      * Returns referenced bond, with only alpha elements filled
      */
-    function _serviceBond(uint256 id, uint256 amount)
+    function _serviceBond(uint256 id, uint256 value)
         internal
         returns (Bond memory)
     {
@@ -41,7 +41,7 @@ contract LifecycleManager is BondToken {
         );
         // Currency memory c = currencies[b.currencyRef];
         // figure out period change
-        uint16 addedPeriods = uint16(amount / b.couponSize);
+        uint16 addedPeriods = uint16(value / b.couponSize);
         require(
             addedPeriods > 0,
             "LifecycleManager: service payment insufficient"
@@ -78,9 +78,9 @@ contract LifecycleManager is BondToken {
         emit BondServiced(id, b.curPeriod);
     }
 
-    function serviceBondWithERC20(uint256 id, uint256 amount) public payable {
+    function serviceBondWithERC20(uint256 id, uint256 value) public payable {
         // read bond
-        Bond memory b = _serviceBond(id, amount);
+        Bond memory b = _serviceBond(id, value);
         Currency memory c = currencies[b.currencyRef];
         require(
             c.currencyType == 0,
@@ -90,18 +90,18 @@ contract LifecycleManager is BondToken {
         bool success = IERC20(c.location).transferFrom(
             msg.sender,
             b.beneficiary,
-            amount
+            value
         );
         require(success, "LifecycleManager: erc20 transaction failed");
         emit BondServiced(id, b.curPeriod);
     }
 
-    function serviceBondWithERC1155Token(uint256 id, uint256 amount)
+    function serviceBondWithERC1155Token(uint256 id, uint256 value)
         public
         payable
     {
         // read bond
-        Bond memory b = _serviceBond(id, amount);
+        Bond memory b = _serviceBond(id, value);
         Currency memory c = currencies[b.currencyRef];
         require(
             c.currencyType == 2,
@@ -113,10 +113,55 @@ contract LifecycleManager is BondToken {
             msg.sender,
             b.beneficiary,
             c.ERC1155Id,
-            amount,
+            value,
             ""
         );
         emit BondServiced(id, b.curPeriod);
+    }
+
+    // PAYMENT RECEIVER FUNCTIONS
+
+    function tokensReceived(
+        address operator,
+        address from,
+        address to,
+        uint256 value,
+        bytes memory userData,
+        bytes memory operatorData
+    ) external {
+        // for ERC777
+        // TODO: do we even need this? Doesn't seem to be what I want...
+        // TODO: contract might need to be registered in ERC1820 registry
+    }
+
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external returns (bytes4) {
+        // for ERC1155
+        // TODO: register interface
+
+        uint256 bondId = uint256(bytes32(data)); // read bondId from data
+        Bond memory b = _serviceBond(bondId, value);
+        Currency memory c = currencies[b.currencyRef];
+        require(
+            c.currencyType == 2,
+            "LifecycleManager: wrong servicing currency"
+        );
+        // pay beneficiary
+        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+        IERC1155(c.location).safeTransferFrom(
+            address(this),
+            b.beneficiary,
+            c.ERC1155Id,
+            value,
+            data
+        );
+        emit BondServiced(id, b.curPeriod);
+        return 0xf23a6e61; // ERC1155 transfer accepted
     }
 
     // OTHER BOND MANAGEMENT
