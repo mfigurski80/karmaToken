@@ -58,8 +58,8 @@ contract('LBondManager', accounts => {
             assert.equal(r.toNumber(), 16, 'Currency is read as 16');
         });
         
-        it('reads beneficiary address', async() => {
-            address = '0000000000000000000000000000000000000000';
+        it.skip('reads beneficiary address', async () => {
+            const address = '0000000000000000000000000000000000000000';
             const r = await instance.readBeneficiary(
                 // 8+32+16+16+24 bit offset (0xFFFFFFFFFFFFFFFFFFFFFFFF)
                 // 160 -- beneficiary is *0x0000000000000000000000000000000000000000*
@@ -67,6 +67,15 @@ contract('LBondManager', accounts => {
             );
             assert.equal(r, `0x${address}`, `Beneficiary is read as ${address}`);
         });
+
+        it('reads claimed periods', async () => {
+            const r = await instance.readClaimedPeriods(
+                // 8+32+16+16+24 bit offset (0xFFFFFFFFFFFFFFFFFFFFFFFF)
+                // 16 bits -- claimed periods is *9* (0x09)
+                `0xFFFFFFFFFFFFFFFFFFFFFFFF09`
+            );
+            assert.equal(r.toNumber(), 9, 'ClaimedPeriods is read as 9');
+        })
     });
 
     describe('reading beta slot', () => {
@@ -131,10 +140,16 @@ contract('LBondManager', accounts => {
             assert.equal(check.curPeriod, 4);
         });
 
-        it('writes beneficiary', async () => {
+        it.skip('writes beneficiary', async () => {
             let r = await instance.writeBeneficiary(maxVal, accounts[0]);
             let check = await instance.readBeneficiary(r);
             assert.equal(check, accounts[0]);
+        });
+
+        it('writes claimedPeriods', async () => {
+            let r = await instance.writeClaimedPeriods(maxVal, 17);
+            let check = await instance.readClaimedPeriods(r);
+            assert.equal(check, 17);
         });
         
     });
@@ -160,10 +175,10 @@ contract('LBondManager', accounts => {
             const [alp, bet] = buildBondBytes({
                 flag: false,
                 currencyRef: 0, 
-                nPeriods: 10, curPeriod: 0,
+                nPeriods: 10, curPeriod: 0, claimedPeriods: 0,
                 startTime: now, periodDuration: 60 * 60,
                 couponSize: 10, faceValue: 10,
-                beneficiary: accounts[0], minter: accounts[0]
+                minter: accounts[0]
             });
             // console.log('         [][  Co  ][nP][cP][ cr ][      beneficiary');
             // console.log(`Alpha: ${alp}`);
@@ -176,6 +191,7 @@ contract('LBondManager', accounts => {
             assert.equal(r.flag, false);
             assert.equal(r.periodDuration, 60 * 60);
             assert.equal(r.startTime, now);
+            assert.equal(r.claimedPeriods, 0);
         })
 
     });

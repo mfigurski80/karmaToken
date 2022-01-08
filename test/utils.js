@@ -15,20 +15,21 @@ function toHex(d, padding=2) {
     return hex;
 }
 
-const buildBondBytes = ({flag, currencyRef, nPeriods, curPeriod, startTime, periodDuration, couponSize, faceValue, beneficiary, minter}) => {
+const buildBondBytes = ({flag, currencyRef, nPeriods, curPeriod, claimedPeriods, startTime, periodDuration, couponSize, faceValue, minter}) => {
     s = {};
     s.flag = flag ? '01' : '00';
     s.currencyRef = toHex(currencyRef || 0, 6);
     s.nPeriods = toHex(nPeriods || 0, 4);
     s.curPeriod = toHex(curPeriod || 0, 4);
+    s.claimedPeriods = toHex(claimedPeriods || 0, 4);
     s.startTime = toHex(startTime || 0, 12);
     s.periodDuration = toHex(periodDuration || 0, 4); // not how it works in the contract
     s.couponSize = toHex(~~couponSize || 0, 8); // not how it works in the contract
     s.faceValue = toHex(~~faceValue || 0, 8);
     s.beneficiary = beneficiary.substring(2);
     s.minter = minter.substring(2);
-    const a = `0x${s.flag}${s.couponSize}${s.nPeriods}${s.curPeriod}${s.currencyRef}${s.beneficiary}`.toLowerCase();
-    const b = `0x${s.faceValue}${s.startTime}${s.periodDuration}${s.minter}`.toLowerCase();
+    const a = `0x${s.flag}${s.couponSize}${s.nPeriods}${s.curPeriod}${s.currencyRef}${s.claimedPeriods}`.padEnd(64, '0').toLowerCase();
+    const b = `0x${s.faceValue}${s.startTime}${s.periodDuration}${s.minter}`.padEnd(64, '0').toLowerCase();
     return [a, b];
 }
 
