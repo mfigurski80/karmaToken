@@ -3,9 +3,10 @@ pragma solidity ^0.8.0;
 
 struct Bond {
     bool flag;
-    uint32 currencyRef;
     uint16 nPeriods;
     uint16 curPeriod;
+    uint16 claimedPeriods;
+    uint32 currencyRef;
     uint64 startTime;
     uint64 periodDuration;
     uint256 couponSize;
@@ -17,7 +18,7 @@ struct Bond {
 library LBondManager {
     function supportedFormat() public pure returns (uint8) {
         // FORMAT IMPLIED:
-        // A (32 bytes): [1 byte format + flag][4 bytes coupon size][2 bytes nPeriods][2 bytes curPeriod][3 bytes currencyRef][20 bytes beneficiary]
+        // A (14 bytes): [1 byte format + flag][4 bytes coupon size][2 bytes nPeriods][2 bytes curPeriod][3 bytes currencyRef][2 bytes withdrawnPeriods]
         // B (32 bytes): [4 bytes face value][6 bytes start time][2 bytes period duration][20 bytes minter]
         return 0;
     }
@@ -70,13 +71,22 @@ library LBondManager {
         return uint32(bytes4(bytes3(alp << (8 + 32 + 16 + 16))) >> 8);
     }
 
-    function readBeneficiary(bytes32 alp)
+    // function readBeneficiary(bytes32 alp)
+    //     public
+    //     pure
+    //     returns (address beneficiary)
+    // {
+    //     // read beneficiary (160 bits, 20 bytes)
+    //     return address(bytes20(alp << (8 + 32 + 16 + 16 + 24)));
+    // }
+
+    function readClaimedPeriods(bytes32 alp)
         public
         pure
-        returns (address beneficiary)
+        returns (uint16 claimedPeriods)
     {
-        // read beneficiary (160 bits, 20 bytes)
-        return address(bytes20(alp << (8 + 32 + 16 + 16 + 24)));
+        // read number of periods withdrawn by owner
+        claimedPeriods = uint16(bytes2(alp << (8 + 32 + 16 + 16 + 24)));
     }
 
     // READING BETA SLOT
@@ -139,13 +149,23 @@ library LBondManager {
         return alp | (bytes32(bytes2(curPeriod)) >> (8 + 32 + 16));
     }
 
-    function writeBeneficiary(bytes32 alp, address beneficiary)
+    // function writeBeneficiary(bytes32 alp, address beneficiary)
+    //     public
+    //     pure
+    //     returns (bytes32)
+    // {
+    //     alp &= 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
+    //     return alp | (bytes32(bytes20(beneficiary)) >> (8 + 32 + 16 + 16 + 24));
+    // }
+
+    function writeClaimedPeriods(bytes32 alp, uint16 claimedPeriods)
         public
         pure
         returns (bytes32)
     {
-        alp &= 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
-        return alp | (bytes32(bytes20(beneficiary)) >> (8 + 32 + 16 + 16 + 24));
+        alp &= 0xFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+        return
+            alp | (bytes32(bytes2(claimedPeriods) >> (8 + 32 + 16 + 16 + 24)));
     }
 
     // NO DATA-SPECIFIC WRITING NEEDS TO HAPPEN IN BETA SLOT
@@ -162,8 +182,9 @@ library LBondManager {
         (, b.flag) = readFormatAndFlag(alp);
         b.couponSize = readCouponSize(alp);
         (b.nPeriods, b.curPeriod) = readPeriodData(alp);
+        b.claimedPeriods = readClaimedPeriods(alp);
         b.currencyRef = readCurrency(alp);
-        b.beneficiary = readBeneficiary(alp);
+        // b.beneficiary = readBeneficiary(alp);
         return b;
     }
 
