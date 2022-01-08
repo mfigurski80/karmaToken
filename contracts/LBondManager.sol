@@ -16,6 +16,9 @@ struct Bond {
 
 library LBondManager {
     function supportedFormat() public pure returns (uint8) {
+        // FORMAT IMPLIED:
+        // A (32 bytes): [1 byte format + flag][4 bytes coupon size][2 bytes nPeriods][2 bytes curPeriod][3 bytes currencyRef][20 bytes beneficiary]
+        // B (32 bytes): [4 bytes face value][6 bytes start time][2 bytes period duration][20 bytes minter]
         return 0;
     }
 
