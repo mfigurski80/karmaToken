@@ -151,8 +151,13 @@ contract LifecycleManager is BondToken {
             c.currencyType == 2,
             "LifecycleManager: wrong servicing currency"
         );
+        require(
+            c.location == msg.sender,
+            "LifecycleManager: wrong servicing currency contract"
+        );
         // pay beneficiary
         if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+        require(c.ERC1155Id == id, "LifecycleManager: wrong erc1155 id");
         IERC1155(c.location).safeTransferFrom(
             address(this),
             b.beneficiary,
