@@ -37,7 +37,7 @@ contract LifecycleManager is BondToken {
         // read bond
         bytes32 alpha = bonds[id * 2];
         Bond memory b = alpha.fillBondFromAlpha(
-            Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
+            Bond(false, 0, 0, 0, 0, 0, 0, 0, 0, address(0))
         );
         // Currency memory c = currencies[b.currencyRef];
         // figure out period change
@@ -73,7 +73,7 @@ contract LifecycleManager is BondToken {
             "LifecycleManager: wrong servicing currency"
         );
         // pay beneficiary
-        (bool success, ) = b.beneficiary.call{value: msg.value}("");
+        (bool success, ) = _owners[id].call{value: msg.value}("");
         require(success, "LifecycleManager: ether transaction failed");
         emit BondServiced(id, b.curPeriod);
     }
@@ -89,7 +89,7 @@ contract LifecycleManager is BondToken {
         // pay beneficiary
         bool success = IERC20(c.location).transferFrom(
             msg.sender,
-            b.beneficiary,
+            _owners[id],
             value
         );
         require(success, "LifecycleManager: erc20 transaction failed");
@@ -111,7 +111,7 @@ contract LifecycleManager is BondToken {
         if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
         IERC1155(c.location).safeTransferFrom(
             msg.sender,
-            b.beneficiary,
+            _owners[id],
             c.ERC1155Id,
             value,
             ""
@@ -160,7 +160,7 @@ contract LifecycleManager is BondToken {
         require(c.ERC1155Id == id, "LifecycleManager: wrong erc1155 id");
         IERC1155(c.location).safeTransferFrom(
             address(this),
-            b.beneficiary,
+            _owners[bondId],
             c.ERC1155Id,
             value,
             data
@@ -175,7 +175,7 @@ contract LifecycleManager is BondToken {
         // check if bond is overdue
         bytes32 alpha = bonds[id * 2];
         Bond memory b = alpha.fillBondFromAlpha(
-            Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
+            Bond(false, 0, 0, 0, 0, 0, 0, 0, 0, address(0))
         );
         require( // check if bond is done
             b.curPeriod < b.nPeriods + 1, // check for

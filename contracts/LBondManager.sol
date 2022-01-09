@@ -11,7 +11,7 @@ struct Bond {
     uint64 periodDuration;
     uint256 couponSize;
     uint256 faceValue;
-    address beneficiary;
+    // address beneficiary;
     address minter;
 }
 

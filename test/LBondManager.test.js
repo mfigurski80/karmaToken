@@ -192,7 +192,7 @@ contract('LBondManager', accounts => {
             assert.equal(r.periodDuration, 60 * 60);
             assert.equal(r.startTime, now);
             assert.equal(r.claimedPeriods, 0);
-        })
+        });
 
     });
 

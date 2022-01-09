@@ -34,14 +34,14 @@ contract BondToken is SuperERC721, CurrencyManager {
         _mint(msg.sender, id);
     }
 
-    function updateBeneficiary(uint256 id, address newBeneficiary)
-        public
-        onlyValidOperator(id)
-    {
-        uint256 i = id * 2;
-        bonds[i] = LBondManager.writeBeneficiary(bonds[i], newBeneficiary);
-        emit BeneficiaryChange(id, newBeneficiary);
-    }
+    // function updateBeneficiary(uint256 id, address newBeneficiary)
+    //     public
+    //     onlyValidOperator(id)
+    // {
+    //     uint256 i = id * 2;
+    //     bonds[i] = LBondManager.writeBeneficiary(bonds[i], newBeneficiary);
+    //     emit BeneficiaryChange(id, newBeneficiary);
+    // }
 
     // function serviceBond(uint256 bondId, uint256 value) public payable virtual {
     //     bytes32 alpha = bonds[bondId * 2];
