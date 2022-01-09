@@ -163,9 +163,9 @@ library LBondManager {
         pure
         returns (bytes32)
     {
-        alp &= 0xFFFFFFFFFFFFFFFFFFFFFFFF00FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+        alp &= 0xFFFFFFFFFFFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
         return
-            alp | (bytes32(bytes2(claimedPeriods) >> (8 + 32 + 16 + 16 + 24)));
+            (bytes32(bytes2(claimedPeriods)) >> (8 + 32 + 16 + 16 + 24)) | alp;
     }
 
     // NO DATA-SPECIFIC WRITING NEEDS TO HAPPEN IN BETA SLOT

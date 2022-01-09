@@ -61,7 +61,7 @@ contract('LBondManager', accounts => {
         it.skip('reads beneficiary address', async () => {
             const address = '0000000000000000000000000000000000000000';
             const r = await instance.readBeneficiary(
-                // 8+32+16+16+24 bit offset (0xFFFFFFFFFFFFFFFFFFFFFFFF)
+                // 8+32+16+16+24 bit offset (0xFFFFFFFFFFFFFFFFFFFFFFFF) 0xFFFFFFFFFFFFFFFFFFFFFFFF
                 // 160 -- beneficiary is *0x0000000000000000000000000000000000000000*
                 `0xFFFFFFFFFFFFFFFFFFFFFFFF${address}`
             );
@@ -72,7 +72,7 @@ contract('LBondManager', accounts => {
             const r = await instance.readClaimedPeriods(
                 // 8+32+16+16+24 bit offset (0xFFFFFFFFFFFFFFFFFFFFFFFF)
                 // 16 bits -- claimed periods is *9* (0x09)
-                `0xFFFFFFFFFFFFFFFFFFFFFFFF09`
+                `0xFFFFFFFFFFFFFFFFFFFFFFFF0009`
             );
             assert.equal(r.toNumber(), 9, 'ClaimedPeriods is read as 9');
         })
@@ -149,7 +149,7 @@ contract('LBondManager', accounts => {
         it('writes claimedPeriods', async () => {
             let r = await instance.writeClaimedPeriods(maxVal, 17);
             let check = await instance.readClaimedPeriods(r);
-            assert.equal(check, 17);
+            assert.equal(check.toNumber(), 17);
         });
         
     });
@@ -185,10 +185,10 @@ contract('LBondManager', accounts => {
             // console.log('         [  fv  ][    st    ][Pd][        minter');
             // console.log(`Beta:  ${bet}`);
             const r = await instance.readBond(alp, bet);
+            assert.equal(r.flag, false);
             assert.equal(r.couponSize, 10);
             assert.equal(r.faceValue, 10);
             assert.equal(r.minter, accounts[0]);
-            assert.equal(r.flag, false);
             assert.equal(r.periodDuration, 60 * 60);
             assert.equal(r.startTime, now);
             assert.equal(r.claimedPeriods, 0);
