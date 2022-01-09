@@ -72,9 +72,9 @@ contract LifecycleManager is BondToken {
             b.currencyRef == 0,
             "LifecycleManager: wrong servicing currency"
         );
-        // pay beneficiary
-        (bool success, ) = _owners[id].call{value: msg.value}("");
-        require(success, "LifecycleManager: ether transaction failed");
+        // skip! pay beneficiary
+        // (bool success, ) = _owners[id].call{value: msg.value}("");
+        // require(success, "LifecycleManager: ether transaction failed");
         emit BondServiced(id, b.curPeriod);
     }
 
@@ -86,13 +86,13 @@ contract LifecycleManager is BondToken {
             c.currencyType == 0,
             "LifecycleManager: wrong servicing currency"
         );
-        // pay beneficiary
-        bool success = IERC20(c.location).transferFrom(
-            msg.sender,
-            _owners[id],
-            value
-        );
-        require(success, "LifecycleManager: erc20 transaction failed");
+        // skip! pay beneficiary
+        // bool success = IERC20(c.location).transferFrom(
+        //     msg.sender,
+        //     _owners[id],
+        //     value
+        // );
+        // require(success, "LifecycleManager: erc20 transaction failed");
         emit BondServiced(id, b.curPeriod);
     }
 
@@ -107,15 +107,15 @@ contract LifecycleManager is BondToken {
             c.currencyType == 2,
             "LifecycleManager: wrong servicing currency"
         );
-        // pay beneficiary
-        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
-        IERC1155(c.location).safeTransferFrom(
-            msg.sender,
-            _owners[id],
-            c.ERC1155Id,
-            value,
-            ""
-        );
+        // skip! pay beneficiary
+        // if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+        // IERC1155(c.location).safeTransferFrom(
+        //     msg.sender,
+        //     _owners[id],
+        //     c.ERC1155Id,
+        //     value,
+        //     ""
+        // );
         emit BondServiced(id, b.curPeriod);
     }
 
@@ -169,6 +169,65 @@ contract LifecycleManager is BondToken {
         return 0xf23a6e61; // ERC1155 transfer accepted
     }
 
+    // BOND OWNER CLAIM PAYMENTS
+
+    function _claimBondPayment(uint256 id)
+        internal
+        onlyValidOperator(id)
+        returns (uint256 payment, Bond memory b)
+    {
+        // read bond
+        bytes32 alpha = bonds[id * 2];
+        b = alpha.fillBondFromAlpha(
+            Bond(false, 0, 0, 0, 0, 0, 0, 0, 0, address(0))
+        );
+        // figure out payment amount due
+        uint16 periods = b.curPeriod - b.claimedPeriods;
+        require(periods > 0, "LifecycleManager: no payment due");
+        if (b.curPeriod > b.nPeriods) {
+            // bond complete. Add face value...
+            payment = bonds[id * 2 + 1].readFaceValue();
+            periods -= 1;
+        }
+        payment += periods * b.couponSize;
+        // update claimed periods
+        bonds[id * 2] = alpha.writeClaimedPeriods(b.curPeriod);
+    }
+
+    function claimPaymentWithEther(uint256 id, address to) public {
+        // read bond + payment due
+        (uint256 payment, Bond memory b) = _claimBondPayment(id);
+        require(b.currencyRef == 0, "LifecycleManager: wrong currency");
+        (bool success, ) = to.call{value: payment}("");
+        require(success, "LifecycleManager: ether transaction failed");
+    }
+
+    function claimPaymentWithERC20(uint256 id, address to) public {
+        // read bond + payment due
+        (uint256 payment, Bond memory b) = _claimBondPayment(id);
+        Currency memory c = currencies[b.currencyRef];
+        require(c.currencyType == 0, "LifecycleManager: wrong currency");
+        // pay beneficiary
+        bool success = IERC20(c.location).transferFrom(msg.sender, to, payment);
+        require(success, "LifecycleManager: erc20 transaction failed");
+    }
+
+    function claimPaymentWithERC1155Token(uint256 id, address to) public {
+        // read bond + payment due
+        (uint256 payment, Bond memory b) = _claimBondPayment(id);
+        Currency memory c = currencies[b.currencyRef];
+        require(c.currencyType == 2, "LifecycleManager: wrong currency");
+        // pay beneficiary
+        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+        IERC1155(c.location).safeTransferFrom(
+            address(this),
+            to,
+            c.ERC1155Id,
+            payment,
+            ""
+        );
+    }
+
     // OTHER BOND MANAGEMENT
 
     function callBond(uint256 id) public onlyValidOperator(id) {
@@ -193,7 +252,10 @@ contract LifecycleManager is BondToken {
     function forgiveBond(uint256 id) public onlyValidOperator(id) {
         bytes32 alpha = bonds[id * 2];
         (uint16 per, ) = alpha.readPeriodData();
-        bonds[id * 2] = alpha.writeCurPeriod(per + 1);
+        bonds[id * 2] = alpha
+            .writeCurPeriod(per + 1)
+            .writeFlag(false)
+            .writeClaimedPeriods(per + 1);
         emit BondCompleted(id);
     }
 

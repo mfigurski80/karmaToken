@@ -59,7 +59,7 @@ contract('BondToken', accounts => {
         assert.equal(b.minter, owner);
     });
 
-    it('allows updating the bond beneficiary', async () => {
+    it.skip('allows updating the bond beneficiary', async () => {
         await instance.mintBond(bytes[0], bytes[1]);
         let b = await instance.getBond(0);
         assert.notEqual(b.beneficiary, owner);
