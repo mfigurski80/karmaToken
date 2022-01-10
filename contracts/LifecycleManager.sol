@@ -171,7 +171,7 @@ contract LifecycleManager is BondToken {
 
     // BOND OWNER CLAIM PAYMENTS
 
-    function _claimBondPayment(uint256 id)
+    function _claimPayment(uint256 id)
         internal
         onlyValidOperator(id)
         returns (uint256 payment, Bond memory b)
@@ -196,7 +196,7 @@ contract LifecycleManager is BondToken {
 
     function claimPaymentWithEther(uint256 id, address to) public {
         // read bond + payment due
-        (uint256 payment, Bond memory b) = _claimBondPayment(id);
+        (uint256 payment, Bond memory b) = _claimPayment(id);
         require(b.currencyRef == 0, "LifecycleManager: wrong currency");
         (bool success, ) = to.call{value: payment}("");
         require(success, "LifecycleManager: ether transaction failed");
@@ -204,7 +204,7 @@ contract LifecycleManager is BondToken {
 
     function claimPaymentWithERC20(uint256 id, address to) public {
         // read bond + payment due
-        (uint256 payment, Bond memory b) = _claimBondPayment(id);
+        (uint256 payment, Bond memory b) = _claimPayment(id);
         Currency memory c = currencies[b.currencyRef];
         require(c.currencyType == 0, "LifecycleManager: wrong currency");
         // pay beneficiary
@@ -214,7 +214,7 @@ contract LifecycleManager is BondToken {
 
     function claimPaymentWithERC1155Token(uint256 id, address to) public {
         // read bond + payment due
-        (uint256 payment, Bond memory b) = _claimBondPayment(id);
+        (uint256 payment, Bond memory b) = _claimPayment(id);
         Currency memory c = currencies[b.currencyRef];
         require(c.currencyType == 2, "LifecycleManager: wrong currency");
         // pay beneficiary

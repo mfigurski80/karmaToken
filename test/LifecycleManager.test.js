@@ -18,10 +18,10 @@ contract('LifecycleManager', accounts => {
     const DEFAULT_BOND = {
         flag: false,
         currencyRef: 0,
-        nPeriods: 10, curPeriod: 0,
+        nPeriods: 10, curPeriod: 0, claimedPeriods: 0,
         startTime: Date.now(), periodDuration: 60*60*24,
         couponSize: 1, faceValue: 2,
-        beneficiary, minter: owner
+        minter: owner
     }
     const ARGS = { name: 'Test Token', symbol: 'TST', uri: 'http://localhost' };
 
@@ -52,11 +52,11 @@ contract('LifecycleManager', accounts => {
         let b = await instance.getBond(0);
         assert.equal(b.nPeriods, 10);
         assert.equal(b.curPeriod, 0);
+        assert.equal(b.claimedPeriods, 0);
         assert.equal(b.currencyRef, 0);
         assert.equal(b.faceValue, 2);
         assert.equal(b.couponSize, 1);
         assert.equal(b.minter, owner);
-        assert.equal(b.beneficiary, beneficiary);
     });
 
     describe('service payments', () => {
@@ -78,12 +78,10 @@ contract('LifecycleManager', accounts => {
             // bond updated
             let b = await instance.getBond(0);
             assert.equal(b.curPeriod, 1);
-            // beneficiary received ether
+            assert.equal(b.claimedPeriods, 0);
+            // beneficiary did notreceived ether
             let newBalance = await web3.eth.getBalance(beneficiary);
-            assert.notEqual(newBalance, oldBalance, 'no resources sent to beneficiary');
-            // console.log(`${newBalance} - ${oldBalance} = ${newBalance - oldBalance}`);
-            // assert.equal(newBalance - oldBalance, 1, 'wrong amount sent to beneficiary');
-            // FIXME: ^^ wtf. No idea why this is failing.
+            assert.equal(newBalance, oldBalance, 'resources sent to beneficiary?');
         });
 
         it('allows servicing bond with erc20', async () => {
@@ -102,10 +100,7 @@ contract('LifecycleManager', accounts => {
             // bond updated
             let b = await instance.getBond(0);
             assert.equal(b.curPeriod, 1);
-            // beneficiary received erc20
-            let balance = await erc20Instance.balanceOf(beneficiary);
-            assert.notEqual(balance, oldBalance, 'no resources sent to beneficiary');
-            assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
+            assert.equal(b.claimedPeriods, 0);
         });
 
         it.skip('allows servicing bond with erc721', async () => {
@@ -124,10 +119,7 @@ contract('LifecycleManager', accounts => {
             // bond updated
             let b = await instance.getBond(0);
             assert.equal(b.curPeriod, 1);
-            // beneficiary received erc721
-            let owner = await erc721Instance.ownerOf(0);
-            assert.notEqual(owner, oldOwner, 'resource stayed with servicer');
-            assert.equal(owner, beneficiary, 'beneficiary not received resource');
+            assert.equal(b.claimedPeriods, 0);
         });
 
         it('allows servicing bond with erc1155 tokens', async () => {
@@ -147,10 +139,7 @@ contract('LifecycleManager', accounts => {
             // bond updated
             let b = await instance.getBond(0);
             assert.equal(b.curPeriod, 1);
-            // beneficiary received erc1155-0
-            let balance = await erc1155Instance.balanceOf(beneficiary, 0);
-            assert.notEqual(balance, oldBalance, 'no resources sent to beneficiary');
-            assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
+            assert.equal(b.claimedPeriods, 0);
         });
 
         it.skip('allows servicing bond with erc1155 nfts', async () => {
@@ -169,10 +158,6 @@ contract('LifecycleManager', accounts => {
             // bond updated
             let b = await instance.getBond(0);
             assert.equal(b.curPeriod, 1);
-            // beneficiary received erc1155-1
-            let balance = await erc1155Instance.balanceOf(beneficiary, 1);
-            assert.notEqual(balance, oldBalance, 'no resources sent to beneficiary');
-            assert.equal(balance - oldBalance, 1, 'wrong amount sent to beneficiary');
         });
 
         it('allows completing bonds', async () => {
@@ -196,6 +181,32 @@ contract('LifecycleManager', accounts => {
             b = await instance.getBond(0);
             assert.equal(b.curPeriod, 11);
         });
+
+    });
+
+    describe('claiming payments', () => {
+
+        it('allows claiming ether payments', async () => {
+            const bytes = buildBondBytes(DEFAULT_BOND);
+            await instance.mintBond(bytes[0], bytes[1]);
+            await instance.serviceBondWithEther(0, { value: 1, from: owner});
+            const oldBalance = await web3.eth.getBalance(beneficiary);
+            await instance.claimPaymentWithEther(0, beneficiary, { from: owner });
+            // bond updated
+            let b = await instance.getBond(0);
+            assert.equal(b.curPeriod, 1);
+            assert.equal(b.claimedPeriods, 1);
+            // balance changed
+            let newBalance = await web3.eth.getBalance(beneficiary);
+            assert.notEqual(newBalance, oldBalance);
+            assert.equal(+newBalance, +oldBalance + 1);
+        });
+
+        it('allows claiming erc20 payments');
+
+        it('allows claiming erc1155 token payments');
+
+        it('allows claiming face value once paid');
 
     });
 
