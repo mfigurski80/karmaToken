@@ -87,12 +87,12 @@ contract LifecycleManager is BondToken {
             "LifecycleManager: wrong servicing currency"
         );
         // skip! pay beneficiary
-        // bool success = IERC20(c.location).transferFrom(
-        //     msg.sender,
-        //     _owners[id],
-        //     value
-        // );
-        // require(success, "LifecycleManager: erc20 transaction failed");
+        bool success = IERC20(c.location).transferFrom(
+            msg.sender,
+            address(this),
+            value
+        );
+        require(success, "LifecycleManager: erc20 transaction failed");
         emit BondServiced(id, b.curPeriod);
     }
 
@@ -107,15 +107,15 @@ contract LifecycleManager is BondToken {
             c.currencyType == 2,
             "LifecycleManager: wrong servicing currency"
         );
-        // skip! pay beneficiary
-        // if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
-        // IERC1155(c.location).safeTransferFrom(
-        //     msg.sender,
-        //     _owners[id],
-        //     c.ERC1155Id,
-        //     value,
-        //     ""
-        // );
+        // pull funds
+        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+        IERC1155(c.location).safeTransferFrom(
+            msg.sender,
+            address(this),
+            c.ERC1155Id,
+            value,
+            ""
+        );
         emit BondServiced(id, b.curPeriod);
     }
 
