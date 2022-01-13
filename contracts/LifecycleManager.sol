@@ -143,6 +143,7 @@ contract LifecycleManager is BondToken {
     ) external returns (bytes4) {
         // for ERC1155
         // TODO: register interface
+        if (operator == address(this)) return 0xf23a6e61; // erc1155 received
 
         uint256 bondId = uint256(bytes32(data)); // read bondId from data
         Bond memory b = _serviceBond(bondId, value);
