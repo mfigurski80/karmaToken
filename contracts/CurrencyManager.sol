@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 enum CurrencyType {
-    Ether,
     ERC20,
     ERC721,
     ERC1155Token,

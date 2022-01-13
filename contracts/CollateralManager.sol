@@ -1,67 +1,87 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
-import "./ICollateralManager.sol";
+import "./LifecycleManager.sol";
 
-contract CollateralManager is ICollateralManager {
-    mapping(uint256 => ERC20Collateral[]) public tokenCollateral;
-    mapping(uint256 => ERC721Collateral[]) public nftCollateral;
+struct Collateral {
+    uint256 amountOrId;
+    uint256 currencyRef;
+}
 
-    function reserveERC20(
-        ERC20Collateral memory token,
+contract CollateralManager is LifecycleManager {
+    mapping(uint256 => Collateral[]) public collateral;
+
+    constructor(
+        string memory name,
+        string memory symbol,
+        string memory uri
+    )
+        LifecycleManager(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
+    {}
+
+    function addEtherCollateral(uint256 id) public payable {
+        collateral[id].push(Collateral(msg.value, 0));
+    }
+
+    function addERC20Collateral(
         uint256 id,
-        address owner
-    ) external override {
-        token.contractAddress.transferFrom(owner, address(this), token.count);
-        tokenCollateral[id].push(token);
+        uint256 currencyRef,
+        uint256 amount
+    ) public payable {
+        Currency storage c = currencies[currencyRef];
+        require(c.currencyType == 0);
+        bool success = IERC20(c.location).transferFrom(
+            msg.sender,
+            address(this),
+            amount
+        );
+        require(success, "CollateralManager: erc20 transfer failed");
+        collateral[id].push(Collateral(amount, currencyRef));
     }
 
-    function reserveERC721(
-        ERC721Collateral memory nft,
+    function addERC721Collateral(
         uint256 id,
-        address owner
-    ) external override {
-        nft.contractAddress.transferFrom(owner, address(this), nft.id);
-        nftCollateral[id].push(nft);
+        uint256 currencyRef,
+        uint256 nftId
+    ) public {
+        Currency storage c = currencies[currencyRef];
+        require(c.currencyType == 1);
+        IERC721(c.location).transferFrom(msg.sender, address(this), nftId);
+        collateral[id].push(Collateral(nftId, currencyRef));
     }
 
-    function release(uint256 id, address to) external override {
-        for (uint256 i = 0; i < tokenCollateral[id].length; i++) {
-            ERC20Collateral storage token = tokenCollateral[id][i];
-            token.contractAddress.transfer(to, token.count);
-        }
-        delete tokenCollateral[id];
-        for (uint256 i = 0; i < nftCollateral[id].length; i++) {
-            ERC721Collateral storage nft = nftCollateral[id][i];
-            nft.contractAddress.transferFrom(address(this), to, nft.id);
-        }
-        delete nftCollateral[id];
+    function addERC1155TokenCollateral(
+        uint256 id,
+        uint256 currencyRef,
+        uint256 amount
+    ) public {
+        Currency storage c = currencies[currencyRef];
+        require(c.currencyType == 2);
+        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+        IERC1155(c.location).safeTransferFrom(
+            msg.sender,
+            address(this),
+            c.ERC1155Id,
+            amount,
+            ""
+        );
+        collateral[id].push(Collateral(amount, currencyRef));
     }
 
-    function listERC20(uint256 id)
-        external
-        view
-        override
-        returns (ERC20Collateral[] memory)
-    {
-        return tokenCollateral[id];
-    }
-
-    function listERC721(uint256 id)
-        external
-        view
-        override
-        returns (ERC721Collateral[] memory)
-    {
-        return nftCollateral[id];
-    }
-
-    function listAll(uint256 id)
-        external
-        view
-        override
-        returns (ERC20Collateral[] memory, ERC721Collateral[] memory)
-    {
-        return (tokenCollateral[id], nftCollateral[id]);
+    function addERC1155NFTCollateral(
+        uint256 id,
+        uint256 currencyRef,
+        uint256 nftId
+    ) public {
+        Currency storage c = currencies[currencyRef];
+        require(c.currencyType == 3);
+        IERC1155(c.location).safeTransferFrom(
+            msg.sender,
+            address(this),
+            nftId,
+            1,
+            ""
+        );
+        collateral[id].push(Collateral(nftId, currencyRef));
     }
 }
