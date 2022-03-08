@@ -28,14 +28,17 @@ contract CollateralManager is LifecycleManager {
         uint256 currencyRef,
         uint256 amount
     ) public payable {
+        // find currency being referenced
         Currency storage c = currencies[currencyRef];
         require(c.currencyType == 0);
+        // pull collateral
         bool success = IERC20(c.location).transferFrom(
             msg.sender,
             address(this),
             amount
         );
         require(success, "CollateralManager: erc20 transfer failed");
+        // add collateral entry
         collateral[id].push(Collateral(amount, currencyRef));
     }
 

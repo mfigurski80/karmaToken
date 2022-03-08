@@ -6,13 +6,13 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
-import "../utils/Address.sol";
+import "../utils/AltAddress.sol";
 
 // NOTE: this contract is based on openzeppelin ERC721 found here
 // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
 
 contract ERC721 is IERC721, IERC721Metadata, ERC165 {
-    using Address for address;
+    using AltAddress for address;
 
     // Token name
     string public override name;

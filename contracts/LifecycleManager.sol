@@ -136,7 +136,7 @@ contract LifecycleManager is BondToken {
 
     function onERC1155Received(
         address operator,
-        address from,
+        address,
         uint256 id,
         uint256 value,
         bytes calldata data
