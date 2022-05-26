@@ -83,7 +83,7 @@ contract LifecycleManager is BondToken {
         Bond memory b = _serviceBond(id, value);
         Currency memory c = currencies[b.currencyRef];
         require(
-            c.currencyType == 0,
+            c.currencyType == CurrencyType.ERC20,
             "LifecycleManager: wrong servicing currency"
         );
         // pay beneficiary
@@ -104,7 +104,7 @@ contract LifecycleManager is BondToken {
         Bond memory b = _serviceBond(id, value);
         Currency memory c = currencies[b.currencyRef];
         require(
-            c.currencyType == 2,
+            c.currencyType == CurrencyType.ERC1155Token,
             "LifecycleManager: wrong servicing currency"
         );
         // pay beneficiary
@@ -149,7 +149,7 @@ contract LifecycleManager is BondToken {
         Bond memory b = _serviceBond(bondId, value);
         Currency memory c = currencies[b.currencyRef];
         require(
-            c.currencyType == 2,
+            c.currencyType == CurrencyType.ERC1155Token,
             "LifecycleManager: wrong servicing currency"
         );
         require(

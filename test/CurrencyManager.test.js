@@ -2,6 +2,13 @@ const CurrencyManager = artifacts.require("CurrencyManager");
 const BigNumber = require('bignumber.js');
 const { getEvent, getRevert } = require('./utils');
 
+const CURRENCY_TYPE = {
+    ETHER: 0,
+    ERC20: 1,
+    ERC721: 2,
+    ERC1155Token: 3,
+    ERC1155NFT: 4,
+}
 
 contract("CurrencyManager", accounts => {
     let instance;
@@ -14,14 +21,14 @@ contract("CurrencyManager", accounts => {
         let tx = await instance.addERC20Currency(accounts[0]);
         let ev = await getEvent(tx, 'CurrencyAdded');
         assert.equal(ev.id, 1, 'Id starts at 1 since 0 refers to ether');
-        assert.equal(ev.currencyType, 0);
+        assert.equal(ev.currencyType, CURRENCY_TYPE.ERC20);
         assert.equal(ev.location, accounts[0]);
         assert.equal(ev.ERC1155Id, 0);
 
         tx = await instance.addERC721Currency(accounts[0]);
         ev = await getEvent(tx, 'CurrencyAdded');
         assert.equal(ev.id, 2);
-        assert.equal(ev.currencyType, 1);
+        assert.equal(ev.currencyType, CURRENCY_TYPE.ERC721);
         assert.equal(ev.location, accounts[0]);
         assert.equal(ev.ERC1155Id, 0);
     });
@@ -30,14 +37,14 @@ contract("CurrencyManager", accounts => {
         tx = await instance.addERC1155TokenCurrency(accounts[0], 1);
         let ev = await getEvent(tx, 'CurrencyAdded');
         assert.equal(ev.id, 1);
-        assert.equal(ev.currencyType, 2);
+        assert.equal(ev.currencyType, CURRENCY_TYPE.ERC1155Token);
         assert.equal(ev.location, accounts[0]);
         assert.equal(ev.ERC1155Id, 1);
 
         tx = await instance.addERC1155Currency(accounts[0]);
         ev = await getEvent(tx, 'CurrencyAdded');
         assert.equal(ev.id, 2);
-        assert.equal(ev.currencyType, 3);
+        assert.equal(ev.currencyType, CURRENCY_TYPE.ERC1155NFT);
         assert.equal(ev.location, accounts[0]);
         assert.equal(ev.ERC1155Id, 0);
     });
@@ -52,7 +59,12 @@ contract("CurrencyManager", accounts => {
     it('exposes existing currencies', async () => {
         await instance.addERC20Currency(accounts[0]);
         let c = await instance.currencies(1);
-        assert.equal(c.currencyType.toNumber(), 0);
+        assert.equal(c.currencyType, CURRENCY_TYPE.ERC20);
         assert.equal(c.location, accounts[0]);
+    });
+
+    it('has Ether currency at index 0', async () => {
+        let c = await instance.currencies(0);
+        assert.equal(c.currencyType, CURRENCY_TYPE.ETHER);
     });
 });
