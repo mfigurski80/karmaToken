@@ -7,6 +7,16 @@ const TIME_UNIT = {
     MONTH: 2592000,
 };
 
+// Corresponds to CURRENCY_TYPE enum in the
+// CurrencyManager.sol contract
+const CURRENCY_TYPE = {
+    ETHER: 0,
+    ERC20: 1,
+    ERC721: 2,
+    ERC1155Token: 3,
+    ERC1155NFT: 4,
+};
+
 
 function toHex(d, padding=2) {
     var hex = Number(d).toString(16);
@@ -110,4 +120,14 @@ async function callAndGetReturn(action, ...args) {
     return val;
 }
 
-module.exports = { getAllSimpleStorage, buildBondBytes, getEvent, getEvents, getRevert, increaseTime, now, TIME_UNIT };
+module.exports = { 
+    callAndGetReturn,
+    getAllSimpleStorage,
+    buildBondBytes,
+    getEvent,
+    getEvents,
+    getRevert,
+    increaseTime,
+    now,
+    TIME_UNIT, CURRENCY_TYPE
+};

@@ -1,14 +1,7 @@
 const CurrencyManager = artifacts.require("CurrencyManager");
 const BigNumber = require('bignumber.js');
-const { getEvent, getRevert } = require('./utils');
+const { getEvent, getRevert, CURRENCY_TYPE } = require('./utils');
 
-const CURRENCY_TYPE = {
-    ETHER: 0,
-    ERC20: 1,
-    ERC721: 2,
-    ERC1155Token: 3,
-    ERC1155NFT: 4,
-}
 
 contract("CurrencyManager", accounts => {
     let instance;

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./LifecycleManager.sol";
+import "./CurrencyManager.sol";
 
 struct Collateral {
     uint256 amountOrId;
@@ -10,6 +11,8 @@ struct Collateral {
 
 contract CollateralManager is LifecycleManager {
     mapping(uint256 => Collateral[]) public collateral;
+
+    event CollateralAdded(uint256 id, CurrencyType collateralType);
 
     constructor(
         string memory name,
@@ -30,7 +33,7 @@ contract CollateralManager is LifecycleManager {
     ) public payable {
         // find currency being referenced
         Currency storage c = currencies[currencyRef];
-        require(c.currencyType == 0);
+        require(c.currencyType == CurrencyType.ERC20);
         // pull collateral
         bool success = IERC20(c.location).transferFrom(
             msg.sender,
@@ -40,6 +43,7 @@ contract CollateralManager is LifecycleManager {
         require(success, "CollateralManager: erc20 transfer failed");
         // add collateral entry
         collateral[id].push(Collateral(amount, currencyRef));
+        emit CollateralAdded(id, CurrencyType.ERC20);
     }
 
     function addERC721Collateral(
@@ -48,9 +52,10 @@ contract CollateralManager is LifecycleManager {
         uint256 nftId
     ) public {
         Currency storage c = currencies[currencyRef];
-        require(c.currencyType == 1);
+        require(c.currencyType == CurrencyType.ERC721);
         IERC721(c.location).transferFrom(msg.sender, address(this), nftId);
         collateral[id].push(Collateral(nftId, currencyRef));
+        emit CollateralAdded(id, CurrencyType.ERC721);
     }
 
     function addERC1155TokenCollateral(
@@ -59,7 +64,7 @@ contract CollateralManager is LifecycleManager {
         uint256 amount
     ) public {
         Currency storage c = currencies[currencyRef];
-        require(c.currencyType == 2);
+        require(c.currencyType == CurrencyType.ERC1155Token);
         if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
         IERC1155(c.location).safeTransferFrom(
             msg.sender,
@@ -69,6 +74,7 @@ contract CollateralManager is LifecycleManager {
             ""
         );
         collateral[id].push(Collateral(amount, currencyRef));
+        emit CollateralAdded(id, CurrencyType.ERC1155Token);
     }
 
     function addERC1155NFTCollateral(
@@ -77,7 +83,7 @@ contract CollateralManager is LifecycleManager {
         uint256 nftId
     ) public {
         Currency storage c = currencies[currencyRef];
-        require(c.currencyType == 3);
+        require(c.currencyType == CurrencyType.ERC1155NFT);
         IERC1155(c.location).safeTransferFrom(
             msg.sender,
             address(this),
@@ -86,5 +92,6 @@ contract CollateralManager is LifecycleManager {
             ""
         );
         collateral[id].push(Collateral(nftId, currencyRef));
+        emit CollateralAdded(id, CurrencyType.ERC1155NFT);
     }
 }
