@@ -2,7 +2,7 @@ const MonetizedLoanNFT = artifacts.require('MonetizedLoanNFT');
 
 const { getEvent, getRevert, TIME_UNIT } = require('./utils');
 
-contract('MonetizedLoanNFT', accounts => {
+contract.skip('MonetizedLoanNFT', accounts => {
     let instance;
     const ownerAccount = accounts[0];
     const foreignAccount = accounts[1];
