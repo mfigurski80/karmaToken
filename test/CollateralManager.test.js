@@ -79,7 +79,7 @@ contract('CollateralManager', accounts => {
         const NFT_ID = 2;
         await erc1155Instance.mint(accounts[0], NFT_ID, 1);
         await erc1155Instance.setApprovalForAll(instance.address, true);
-        let currencyEvent = await instance.addERC1155Currency(erc1155Instance.address).then(tx => getEvent(tx, 'CurrencyAdded'));
+        let currencyEvent = await instance.addERC1155NFTCurrency(erc1155Instance.address).then(tx => getEvent(tx, 'CurrencyAdded'));
         let bondEvent = await instance.mintBond(bondBytes[0], bondBytes[1]).then(tx => getEvent(tx, 'Transfer'));
         // test subject: associate some erc1155 collateral
         let ev = await instance.addERC1155NFTCollateral(bondEvent.tokenId, currencyEvent.id, NFT_ID).then(tx => getEvent(tx, 'CollateralAdded'));
@@ -88,4 +88,27 @@ contract('CollateralManager', accounts => {
     });
 
 
+    it('allows releasing collateral to bond owner', async () => {
+        const TOKEN_ID = 3;
+        const OPERATOR = accounts[0];
+        await erc1155Instance.mint(OPERATOR, TOKEN_ID, 100);
+        await erc1155Instance.setApprovalForAll(instance.address, true);
+        let currencyEvent = await instance.addERC1155TokenCurrency(erc1155Instance.address, TOKEN_ID).then(tx => getEvent(tx, 'CurrencyAdded'));
+        let bondEvent = await instance.mintBond(bondBytes[0], bondBytes[1]).then(tx => getEvent(tx, 'Transfer'));
+        let collateralEvent = await instance.addERC1155TokenCollateral(bondEvent.tokenId, currencyEvent.id, 100).then(tx => getEvent(tx, 'CollateralAdded'));
+        // test subject: release collateral fails when bond ISN'T complete
+        let err = await getRevert(instance.releaseCollaterals([bondEvent.tokenId], [collateralEvent.id], OPERATOR));
+        assert.include(err.reason.toLowerCase(), 'collateral');
+        assert.include(err.reason.toLowerCase(), 'authorized');
+        // test subject: release collateral succeeds when bond IS complete
+        await instance.forgiveBond(bondEvent.tokenId);
+        // let ev = await instance._isAuthorizedToReleaseCollateral(bondEvent.tokenId, accounts[0]);
+        let ev = await instance.releaseCollaterals([bondEvent.tokenId], [collateralEvent.id], OPERATOR).then(tx => getEvent(tx, 'CollateralReleased'));
+        assert.equal(ev.bondId.toNumber(), bondEvent.tokenId.toNumber());
+        assert.equal(ev.collateralId.toNumber(), collateralEvent.id);
+        assert.equal(ev.to, OPERATOR);
+        // test subject: release collateral has proper side effects
+        let numOwned = await erc1155Instance.balanceOf(OPERATOR, TOKEN_ID);
+        assert.equal(numOwned.toNumber(), 100);
+    });
 })

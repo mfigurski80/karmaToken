@@ -47,6 +47,11 @@ module.exports = {
      network_id: "*",       // Any network (default: none)
     //  gasPrice: 1,
     },
+	test: {
+	 host: "10.7.8.120",
+	 port: 9545,
+	 network_id: "*",
+	}
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port

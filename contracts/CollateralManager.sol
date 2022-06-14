@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "./LifecycleManager.sol";
 import "./CurrencyManager.sol";
+import "./LBondManager.sol";
 
 struct Collateral {
     uint256 amountOrId;
@@ -10,9 +11,12 @@ struct Collateral {
 }
 
 contract CollateralManager is LifecycleManager {
+    using LBondManager for bytes32;
+
     mapping(uint256 => Collateral[]) public collateral;
 
     event CollateralAdded(uint256 id, CurrencyType collateralType);
+    event CollateralReleased(uint256 bondId, uint256 collateralId, address to);
 
     constructor(
         string memory name,
@@ -93,5 +97,90 @@ contract CollateralManager is LifecycleManager {
         );
         collateral[id].push(Collateral(nftId, currencyRef));
         emit CollateralAdded(id, CurrencyType.ERC1155NFT);
+    }
+
+    function _test(uint256 bondId, address operator)
+        public
+        view
+        returns (address)
+    {
+        Bond memory b;
+        b = bonds[bondId * 2].fillBondFromAlpha(b);
+        b = bonds[bondId * 2 + 1].fillBondFromBeta(b);
+        return b.minter;
+    }
+
+    function _isAuthorizedToReleaseCollateral(uint256 bondId, address operator)
+        public
+        view
+        returns (bool)
+    {
+        Bond memory b;
+        // Check for default + bond ownership
+        b = bonds[bondId * 2].fillBondFromAlpha(b);
+        if (b.flag && _ownerOrOperatorOf(bondId, _owners[bondId], operator)) {
+            return true;
+        }
+
+        // Check for completed + bond minter
+        b = bonds[bondId * 2 + 1].fillBondFromBeta(b);
+        // return _minterOrOperatorOf(b.minter, operator);
+
+        if (
+            b.curPeriod > b.nPeriods && _minterOrOperatorOf(b.minter, operator)
+        ) {
+            return true;
+        }
+        return false;
+    }
+
+    function releaseCollaterals(
+        uint256[] memory bondIds,
+        uint256[] memory collateralIds,
+        address to
+    ) public {
+        // TODO: de-duplicate reads of bonds, reads of currency
+        // Potentially, this could be easier by assuming similar bonds are
+        // positioned next to each other -- we can just check the previous
+        // one to know if it's been already done
+        // uint256[] memory bondIdsAuthorized = new uint256[](bondIds.length);
+        for (uint256 i = 0; i < bondIds.length; i++) {
+            uint256 bondId = bondIds[i];
+            uint256 collateralId = collateralIds[i];
+            require(
+                _isAuthorizedToReleaseCollateral(bondId, msg.sender),
+                "CollateralManager: unauthorized to release collateral"
+            );
+            Collateral storage c = collateral[bondId][collateralId];
+            Currency storage cur = currencies[c.currencyRef];
+            if (cur.currencyType == CurrencyType.ERC20) {
+                IERC20(cur.location).transfer(address(to), c.amountOrId);
+            } else if (cur.currencyType == CurrencyType.ERC721) {
+                IERC721(cur.location).transferFrom(
+                    address(this),
+                    address(to),
+                    c.amountOrId
+                );
+            } else if (cur.currencyType == CurrencyType.ERC1155Token) {
+                if (cur.ERC1155Id == 0)
+                    cur.ERC1155Id = uint256(cur.ERC1155SmallId);
+                IERC1155(cur.location).safeTransferFrom(
+                    address(this),
+                    address(to),
+                    cur.ERC1155Id,
+                    c.amountOrId,
+                    ""
+                );
+            } else if (cur.currencyType == CurrencyType.ERC1155NFT) {
+                IERC1155(cur.location).safeTransferFrom(
+                    address(this),
+                    address(to),
+                    c.amountOrId,
+                    1,
+                    ""
+                );
+            }
+            emit CollateralReleased(bondId, collateralId, to);
+        }
     }
 }

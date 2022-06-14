@@ -17,6 +17,9 @@ const CURRENCY_TYPE = {
     ERC1155NFT: 4,
 };
 
+// ***************
+// Utils for setting up env
+// ***************
 
 function toHex(d, padding=2) {
     var hex = Number(d).toString(16);
@@ -41,8 +44,6 @@ const buildBondBytes = ({flag, currencyRef, nPeriods, curPeriod, startTime, peri
     const b = `0x${s.faceValue}${s.startTime}${s.periodDuration}${s.minter}`.toLowerCase();
     return [a, b];
 }
-
-
 
 const getAllSimpleStorage = async (addr, offset=0) => {
     let slot = offset
@@ -70,28 +71,6 @@ function now() {
     return Math.floor(Date.now() / 1000);
 }
 
-function getEvent(tx, event) {
-    return new Promise((resolve, reject) => {
-        truffleAssert.eventEmitted(tx, event, resolve);
-        reject(`No event ${event} emitted`);
-    });
-}
-
-async function getEvents(tx, event) {
-    return tx.logs
-        .filter(l => l.event == event)
-        .map(l => l.args);
-}
-
-function getRevert(prom, m) {
-    return new Promise((resolve, reject) => {
-        prom
-            .catch(resolve)
-            .then(() => assert.exists(null, m || "Expected revert but no error thrown"))
-            .catch(reject);
-    });
-}
-
 function increaseTime(duration) {
     const id = Date.now();
     return new Promise((resolve, reject) => {
@@ -111,6 +90,32 @@ function increaseTime(duration) {
                 return err2 ? reject(err2) : resolve(res)
             });
         })
+    });
+}
+
+// ***************
+// Utils for introspection of transactions
+// ***************
+
+function getEvent(tx, event) {
+    return new Promise((resolve, reject) => {
+        truffleAssert.eventEmitted(tx, event, resolve);
+        reject(`No event ${event} emitted`);
+    });
+}
+
+async function getEvents(tx, event) {
+    return tx.logs
+        .filter(l => l.event == event)
+        .map(l => l.args);
+}
+
+function getRevert(prom, m) {
+    return new Promise((resolve, reject) => {
+        prom
+            .catch(resolve)
+            .then(() => assert.exists(null, m || "Expected revert but no error thrown"))
+            .catch(reject);
     });
 }
 

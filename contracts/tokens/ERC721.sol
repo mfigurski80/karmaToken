@@ -54,6 +54,25 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         _;
     }
 
+    function _ownerOrOperatorOf(
+        uint256 id,
+        address owner,
+        address operator
+    ) internal view returns (bool) {
+        return
+            operator == owner ||
+            _operatorApprovals[owner][operator] ||
+            operator == _tokenApprovals[id];
+    }
+
+    function _minterOrOperatorOf(address minter, address operator)
+        internal
+        view
+        returns (bool)
+    {
+        return operator == minter || _operatorApprovals[minter][operator];
+    }
+
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */

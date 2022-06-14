@@ -55,7 +55,7 @@ contract CurrencyManager {
         _addCurrency(c);
     }
 
-    function addERC1155Currency(address location) public payable virtual {
+    function addERC1155NFTCurrency(address location) public payable virtual {
         _addCurrency(Currency(CurrencyType.ERC1155NFT, 0, location, 0));
     }
 
