@@ -34,7 +34,7 @@ contract("CurrencyManager", accounts => {
         assert.equal(ev.location, accounts[0]);
         assert.equal(ev.ERC1155Id, 1);
 
-        tx = await instance.addERC1155Currency(accounts[0]);
+        tx = await instance.addERC1155NFTCurrency(accounts[0]);
         ev = await getEvent(tx, 'CurrencyAdded');
         assert.equal(ev.id, 2);
         assert.equal(ev.currencyType, CURRENCY_TYPE.ERC1155NFT);
