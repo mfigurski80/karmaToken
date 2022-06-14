@@ -28,7 +28,7 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v2.3.0
         with:
-          node-version: 15.x
+          node-version: 16.x
           cache: npm
 
       - name: Install project dependencies
@@ -47,7 +47,7 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v2.3.0
         with:
-          node-version: 15.x
+          node-version: 16.x
           cache: npm
         
       - name: Install project dependencies
@@ -62,7 +62,7 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v2.3.0
         with:
-          node-version: 15.x
+          node-version: 16.x
           cache: npm
       - name: Install project dependencies
         run: npm install
