@@ -99,19 +99,8 @@ contract CollateralManager is LifecycleManager {
         emit CollateralAdded(id, CurrencyType.ERC1155NFT);
     }
 
-    function _test(uint256 bondId, address operator)
-        public
-        view
-        returns (address)
-    {
-        Bond memory b;
-        b = bonds[bondId * 2].fillBondFromAlpha(b);
-        b = bonds[bondId * 2 + 1].fillBondFromBeta(b);
-        return b.minter;
-    }
-
     function _isAuthorizedToReleaseCollateral(uint256 bondId, address operator)
-        public
+        internal
         view
         returns (bool)
     {
