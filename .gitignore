@@ -4,3 +4,5 @@ build
 .env
 coverage.json
 coverage/
+.env
+.do
