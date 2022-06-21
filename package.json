@@ -20,6 +20,7 @@
     "truffle-hdwallet-provider": "^1.0.17"
   },
   "devDependencies": {
+    "dotenv": "^16.0.1",
     "eth-gas-reporter": "^0.2.22",
     "solhint": "^3.3.6",
     "solidity-coverage": "^0.7.17",

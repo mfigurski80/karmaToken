@@ -23,6 +23,8 @@
 // const fs = require('fs');
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
+require('dotenv').config();
+
 module.exports = {
   /**
    * Networks define how you connect to your ethereum client and let you set the
@@ -87,7 +89,7 @@ module.exports = {
       excludeContracts: ['Migrations'],
       coinmarketcap: process.env.COINMARKETCAP_API_KEY,
       currency: 'USD',
-      gasPrice: 70, // gwei
+      gasPrice: 30, // gwei
     }
   },
 

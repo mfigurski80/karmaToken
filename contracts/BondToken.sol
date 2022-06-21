@@ -23,7 +23,7 @@ contract BondToken is SuperERC721, CurrencyManager {
         return LBondManager.readBond(bonds[id * 2], bonds[id * 2 + 1]);
     }
 
-    function mintBond(bytes32 alp, bytes32 bet) public {
+    function mintBond(bytes32 alp, bytes32 bet) public payable virtual {
         require(
             msg.sender == LBondManager.readMinter(bet),
             "BondToken: minter must be caller"

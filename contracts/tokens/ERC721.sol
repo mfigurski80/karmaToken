@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
+import "@openzeppelin/contracts/access/Ownable.sol";
+
 import "../utils/AltAddress.sol";
 
 // NOTE: this contract is based on openzeppelin ERC721 found here
@@ -49,7 +51,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         _;
     }
 
-    modifier onlyOwner(uint256 id) {
+    modifier onlyTokenOwner(uint256 id) {
         require(msg.sender == _owners[id], "ERC721: called is not owner");
         _;
     }
@@ -152,7 +154,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         public
         virtual
         override
-        onlyOwner(tokenId)
+        onlyTokenOwner(tokenId)
     {
         address owner = _owners[tokenId];
         require(to != owner, "ERC721: approval to current owner");
