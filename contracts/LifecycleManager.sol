@@ -7,13 +7,18 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 /**
- * 🦓 Lifecycle Manager
+ * @dev 🦓 LifecycleManager contract exposing methods related to bringing
+ * a bond through it's full lifecycle of servicing, repayment, and
+ * default.
  */
 contract LifecycleManager is BondToken {
     using LBondManager for bytes32;
 
-    event BondServiced(uint256 id, uint64 toPeriod);
+    /// @notice new bond payment has been posted
+    event BondServiced(uint256 id, address operator, uint64 toPeriod);
+    /// @notice bond has been entirely repayed
     event BondCompleted(uint256 id);
+    /// @notice bond payments have been failed
     event BondDefaulted(uint256 id);
 
     constructor(
@@ -27,19 +32,19 @@ contract LifecycleManager is BondToken {
     // SERVICE PAYMENT METHODS
 
     /**
-     * Internal function containing logic for updating bond
-     * Returns referenced bond, with only alpha elements filled
+     * @dev Internal method contains logic for updating bond periods
+     * @param id Id of bond to apply service payments to
+     * @param value Amount of service payments to apply
+     * @return Bond structure, but with only alpha elements filled
      */
     function _serviceBond(uint256 id, uint256 value)
         internal
         returns (Bond memory)
     {
         // read bond
+        Bond memory b;
         bytes32 alpha = bonds[id * 2];
-        Bond memory b = alpha.fillBondFromAlpha(
-            Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
-        );
-        // Currency memory c = currencies[b.currencyRef];
+        b = alpha.fillBondFromAlpha(b);
         // figure out period change
         uint16 addedPeriods = uint16(value / b.couponSize);
         require(
@@ -58,13 +63,17 @@ contract LifecycleManager is BondToken {
             } else b.curPeriod = b.nPeriods;
         }
         bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod);
-        // return currency type
         return b;
-        // presumably:
+        // presumably, after return:
         // calling function should check for matching currency
         // and pay bond holder whatever he is due in that currency
     }
 
+    /**
+     * @dev services a referenced bond with ether sent along
+     * with transaction.
+     * @param id Id of bond to apply service payments to
+     */
     function serviceBondWithEther(uint256 id) public payable {
         // read bond
         Bond memory b = _serviceBond(id, msg.value);
@@ -75,9 +84,16 @@ contract LifecycleManager is BondToken {
         // pay beneficiary
         (bool success, ) = b.beneficiary.call{value: msg.value}("");
         require(success, "LifecycleManager: ether transaction failed");
-        emit BondServiced(id, b.curPeriod);
+        emit BondServiced(id, msg.sender, b.curPeriod);
     }
 
+    /**
+     * @dev services a referenced bond with ERC20 tokens authorized
+     * for withdrawal.
+     * @param id Id of bond to apply service payments to
+     * @param value Among of ERC20 to withdraw from caller's account
+     * to apply as a service payment
+     */
     function serviceBondWithERC20(uint256 id, uint256 value) public payable {
         // read bond
         Bond memory b = _serviceBond(id, value);
@@ -93,9 +109,16 @@ contract LifecycleManager is BondToken {
             value
         );
         require(success, "LifecycleManager: erc20 transaction failed");
-        emit BondServiced(id, b.curPeriod);
+        emit BondServiced(id, msg.sender, b.curPeriod);
     }
 
+    /**
+     * @dev services a referenced bond with ERC1155 tokens authorized
+     * for withdrawal.
+     * @param id Id of bond to apply service payments to
+     * @param value Among of ERC1155 to withdraw from caller's account
+     * to apply as a service payment
+     */
     function serviceBondWithERC1155Token(uint256 id, uint256 value)
         public
         payable
@@ -116,11 +139,14 @@ contract LifecycleManager is BondToken {
             value,
             ""
         );
-        emit BondServiced(id, b.curPeriod);
+        emit BondServiced(id, msg.sender, b.curPeriod);
     }
 
     // PAYMENT RECEIVER FUNCTIONS
 
+    /**
+     * TODO: write documentation
+     */
     function tokensReceived(
         address operator,
         address from,
@@ -134,6 +160,9 @@ contract LifecycleManager is BondToken {
         // TODO: contract might need to be registered in ERC1820 registry
     }
 
+    /**
+     * TODO: write documentation
+     */
     function onERC1155Received(
         address operator,
         address,
@@ -166,12 +195,17 @@ contract LifecycleManager is BondToken {
             value,
             data
         );
-        emit BondServiced(id, b.curPeriod);
+        emit BondServiced(id, msg.sender, b.curPeriod);
         return 0xf23a6e61; // ERC1155 transfer accepted
     }
 
     // OTHER BOND MANAGEMENT
 
+    /**
+     * @dev call bond to mark it as in default. Can only be performed
+     * by token owner or authorized operator.
+     * @param id Id of bond to check for default
+     */
     function callBond(uint256 id) public onlyValidOperator(id) {
         // check if bond is overdue
         bytes32 alpha = bonds[id * 2];
@@ -191,6 +225,11 @@ contract LifecycleManager is BondToken {
         emit BondDefaulted(id);
     }
 
+    /**
+     * @dev set bond as complete and forfeight future payments. Can only
+     * be performed by token owner or authorized operator.
+     * @param id Id of bond to forgive
+     */
     function forgiveBond(uint256 id) public onlyValidOperator(id) {
         bytes32 alpha = bonds[id * 2];
         (uint16 per, ) = alpha.readPeriodData();
@@ -198,6 +237,11 @@ contract LifecycleManager is BondToken {
         emit BondCompleted(id);
     }
 
+    /**
+     * TODO: write documentation
+     * TODO: prevent abuse a la "owner destroys after getting all money,
+     * preventing minter from retrieving their collateral"
+     */
     function destroyBond(uint256 id) public onlyValidOperator(id) {
         delete bonds[id * 2];
         delete bonds[id * 2 + 1];

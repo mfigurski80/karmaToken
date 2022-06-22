@@ -5,11 +5,22 @@ import "./LBondManager.sol";
 import "./CurrencyManager.sol";
 import "./tokens/SuperERC721.sol";
 
+/**
+ * @dev BondToken contract holds a basic interface on top of ERC721
+ * to manage the creation and reading of bonds. It's dependent on
+ * the LBondManager library to interpret the condensed 64 byte
+ * representation.
+ */
 contract BondToken is SuperERC721, CurrencyManager {
+    /**
+     * @dev bond data array, as interpreted by LBondManager library
+     * contract. Each bond takes two slots, so bond of id i starts at
+     * position 2i.
+     */
     bytes32[] public bonds;
 
+    /// @notice recipient of bond payments has been updated
     event BeneficiaryChange(uint256 id, address beneficiary);
-    event BondServiced(uint256 id, address operator, uint64 toPeriod);
 
     constructor(
         string memory name,
@@ -19,10 +30,20 @@ contract BondToken is SuperERC721, CurrencyManager {
         SuperERC721(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
     {}
 
+    /**
+     * @dev interprets bond at given id into readable version
+     * @param id is the target bond id
+     * @return Bond as the expanded bond datastructure at given id
+     */
     function getBond(uint256 id) public view returns (Bond memory) {
         return LBondManager.readBond(bonds[id * 2], bonds[id * 2 + 1]);
     }
 
+    /**
+     * @dev appends a new bond to the list
+     * @param alp Alpha bytes to append, as interpreted by library
+     * @param bet Beta bytes to append, as interpreted by library
+     */
     function mintBond(bytes32 alp, bytes32 bet) public payable virtual {
         require(
             msg.sender == LBondManager.readMinter(bet),
@@ -34,6 +55,11 @@ contract BondToken is SuperERC721, CurrencyManager {
         _mint(msg.sender, id);
     }
 
+    /**
+     * @dev updates the beneficiary associated with a bond
+     * @param id Bond id
+     * @param newBeneficiary address of new beneficiary
+     */
     function updateBeneficiary(uint256 id, address newBeneficiary)
         public
         onlyValidOperator(id)
@@ -54,7 +80,7 @@ contract BondToken is SuperERC721, CurrencyManager {
     //         Currency memory c = currencies[currencyRef];
     //     }
 
-    // accept any currency
+    // TODO: accept any currency as service payment
     // ether or ERC20 or ERC1155 tokens
     // or even ERC721 or ERC1155 nfts?
     // step1: look up bond and figure out which currency it uses
