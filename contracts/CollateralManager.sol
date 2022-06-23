@@ -133,6 +133,7 @@ contract CollateralManager is LifecycleManager {
         // positioned next to each other -- we can just check the previous
         // one to know if it's been already done
         // uint256[] memory bondIdsAuthorized = new uint256[](bondIds.length);
+        // TODO: free storage after releasing
         for (uint256 i = 0; i < bondIds.length; i++) {
             uint256 bondId = bondIds[i];
             uint256 collateralId = collateralIds[i];
@@ -142,33 +143,7 @@ contract CollateralManager is LifecycleManager {
             );
             Collateral storage c = collateral[bondId][collateralId];
             Currency storage cur = currencies[c.currencyRef];
-            if (cur.currencyType == CurrencyType.ERC20) {
-                IERC20(cur.location).transfer(address(to), c.amountOrId);
-            } else if (cur.currencyType == CurrencyType.ERC721) {
-                IERC721(cur.location).transferFrom(
-                    address(this),
-                    address(to),
-                    c.amountOrId
-                );
-            } else if (cur.currencyType == CurrencyType.ERC1155Token) {
-                if (cur.ERC1155Id == 0)
-                    cur.ERC1155Id = uint256(cur.ERC1155SmallId);
-                IERC1155(cur.location).safeTransferFrom(
-                    address(this),
-                    address(to),
-                    cur.ERC1155Id,
-                    c.amountOrId,
-                    ""
-                );
-            } else if (cur.currencyType == CurrencyType.ERC1155NFT) {
-                IERC1155(cur.location).safeTransferFrom(
-                    address(this),
-                    address(to),
-                    c.amountOrId,
-                    1,
-                    ""
-                );
-            }
+            _transferGenericCurrency(cur, address(this), to, c.amountOrId, "");
             emit CollateralReleased(bondId, collateralId, to);
         }
     }

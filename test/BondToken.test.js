@@ -71,4 +71,12 @@ contract('BondToken', accounts => {
         b = await instance.getBond(0);
         assert.equal(b.beneficiary, owner);
     });
+
+    it.skip('disallows reading/updating bonds past end of array', async () => {
+        await instance.mintBond(bytes[0], bytes[1]);
+        await instance.bonds(10**3);
+        // await instance.getBond(10**3);
+        // let err = await getRevert(instance.getBond(0));
+        // assert.include(err.message, "Index out of bounds");
+    });
 });

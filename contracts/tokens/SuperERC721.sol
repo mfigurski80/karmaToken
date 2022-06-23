@@ -2,11 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "./ERC721.sol";
-import "../utils/AltAddress.sol";
 
 contract SuperERC721 is ERC721 {
-    using AltAddress for address;
-
     constructor(
         string memory name_,
         string memory symbol_,

@@ -12,6 +12,8 @@ import "./tokens/SuperERC721.sol";
  * representation.
  */
 contract BondToken is SuperERC721, CurrencyManager {
+    using LBondManager for bytes32;
+
     /**
      * @dev bond data array, as interpreted by LBondManager library
      * contract. Each bond takes two slots, so bond of id i starts at

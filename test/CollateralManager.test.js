@@ -162,5 +162,12 @@ contract('CollateralManager', accounts => {
 
 		it.skip('has proper side effects for erc1155 nfts');
 
+		it('disallows releasing collaterals out of bounds', async () => {
+			await instance.forgiveBond(bondEvent.tokenId);
+			let err = await getRevert(instance.releaseCollaterals([bondEvent.tokenId], [10**6], OPERATOR));
+			assert.include(err.message, "Index out of bounds");
+		});
+
 	});
+
 });

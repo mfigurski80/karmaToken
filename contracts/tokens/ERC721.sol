@@ -8,14 +8,10 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-import "../utils/AltAddress.sol";
-
 // NOTE: this contract is based on openzeppelin ERC721 found here
 // https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
 
 contract ERC721 is IERC721, IERC721Metadata, ERC165 {
-    using AltAddress for address;
-
     // Token name
     string public override name;
 
@@ -359,7 +355,7 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         uint256 tokenId,
         bytes memory _data
     ) internal {
-        if (to.isContract()) {
+        if (to.code.length > 0) {
             try
                 IERC721Receiver(to).onERC721Received(
                     msg.sender,
