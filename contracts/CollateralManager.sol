@@ -15,7 +15,7 @@ contract CollateralManager is LifecycleManager {
 
     mapping(uint256 => Collateral[]) public collateral;
 
-    event CollateralAdded(uint256 id, CurrencyType collateralType);
+    event CollateralAdded(uint256 bondId, uint256 collateralId, CurrencyType collateralType);
     event CollateralReleased(uint256 bondId, uint256 collateralId, address to);
 
     constructor(
@@ -47,7 +47,7 @@ contract CollateralManager is LifecycleManager {
         require(success, "CollateralManager: erc20 transfer failed");
         // add collateral entry
         collateral[id].push(Collateral(amount, currencyRef));
-        emit CollateralAdded(id, CurrencyType.ERC20);
+        emit CollateralAdded(id, collateral[id].length - 1, CurrencyType.ERC20);
     }
 
     function addERC721Collateral(
@@ -59,7 +59,7 @@ contract CollateralManager is LifecycleManager {
         require(c.currencyType == CurrencyType.ERC721);
         IERC721(c.location).transferFrom(msg.sender, address(this), nftId);
         collateral[id].push(Collateral(nftId, currencyRef));
-        emit CollateralAdded(id, CurrencyType.ERC721);
+        emit CollateralAdded(id, collateral[id].length - 1, CurrencyType.ERC721);
     }
 
     function addERC1155TokenCollateral(
@@ -78,7 +78,7 @@ contract CollateralManager is LifecycleManager {
             ""
         );
         collateral[id].push(Collateral(amount, currencyRef));
-        emit CollateralAdded(id, CurrencyType.ERC1155Token);
+        emit CollateralAdded(id, collateral[id].length - 1, CurrencyType.ERC1155Token);
     }
 
     function addERC1155NFTCollateral(
@@ -96,7 +96,7 @@ contract CollateralManager is LifecycleManager {
             ""
         );
         collateral[id].push(Collateral(nftId, currencyRef));
-        emit CollateralAdded(id, CurrencyType.ERC1155NFT);
+        emit CollateralAdded(id, collateral[id].length - 1, CurrencyType.ERC1155NFT);
     }
 
     function _isAuthorizedToReleaseCollateral(uint256 bondId, address operator)
@@ -107,43 +107,45 @@ contract CollateralManager is LifecycleManager {
         Bond memory b;
         // Check for default + bond ownership
         b = bonds[bondId * 2].fillBondFromAlpha(b);
-        if (b.flag && _ownerOrOperatorOf(bondId, _owners[bondId], operator)) {
+		bool isOwner = _ownerOrOperatorOf(bondId, _owners[bondId], operator);
+        if (b.flag && isOwner)
             return true;
-        }
-
-        // Check for completed + bond minter
+		// TODO: Check for minter, owner agreement
         b = bonds[bondId * 2 + 1].fillBondFromBeta(b);
-        // return _minterOrOperatorOf(b.minter, operator);
-
-        if (
-            b.curPeriod > b.nPeriods && _minterOrOperatorOf(b.minter, operator)
-        ) {
-            return true;
-        }
-        return false;
+		bool isMinter = _minterOrOperatorOf(b.minter, operator);
+		// if (isOwner && isMinter)
+			// return true;
+        // Check for completed + bond minter
+        return (b.curPeriod > b.nPeriods && isMinter);
     }
 
-    function releaseCollaterals(
+    function safeBatchReleaseCollaterals(
         uint256[] memory bondIds,
         uint256[] memory collateralIds,
         address to
     ) public {
-        // TODO: de-duplicate reads of bonds, reads of currency
-        // Potentially, this could be easier by assuming similar bonds are
-        // positioned next to each other -- we can just check the previous
-        // one to know if it's been already done
-        // uint256[] memory bondIdsAuthorized = new uint256[](bondIds.length);
-        // TODO: free storage after releasing
+		uint256 lastAuthorizedBond = 2**256-1;
+		uint256 lastCurrencyRef = 2**256-1;
+		Currency storage currency = currencies[0]; // TODO: figure out storage pointer
         for (uint256 i = 0; i < bondIds.length; i++) {
             uint256 bondId = bondIds[i];
+			if (lastAuthorizedBond != bondId || lastAuthorizedBond == 2**256-1) {
+				require(
+					_isAuthorizedToReleaseCollateral(bondId, msg.sender),
+					"CollateralManager: unauthorized to release collateral"
+				);
+				lastAuthorizedBond = bondId;
+			}
             uint256 collateralId = collateralIds[i];
-            require(
-                _isAuthorizedToReleaseCollateral(bondId, msg.sender),
-                "CollateralManager: unauthorized to release collateral"
-            );
-            Collateral storage c = collateral[bondId][collateralId];
-            Currency storage cur = currencies[c.currencyRef];
-            _transferGenericCurrency(cur, address(this), to, c.amountOrId, "");
+            Collateral memory c = collateral[bondId][collateralId];
+			require(c.amountOrId > 0, "CollateralManager: this collateral has already been released");
+			if (lastCurrencyRef != c.currencyRef || lastCurrencyRef == 2**256-1) {
+				currency = currencies[c.currencyRef];
+				lastCurrencyRef = c.currencyRef;
+			}
+			delete collateral[bondId][collateralId];
+			// TODO: release entire array if empty?
+            _transferGenericCurrency(currency, address(this), to, c.amountOrId, "");
             emit CollateralReleased(bondId, collateralId, to);
         }
     }

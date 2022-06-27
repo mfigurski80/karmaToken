@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 /**
  * @dev 🦓 LifecycleManager contract exposing methods related to bringing
  * a bond through it's full lifecycle of servicing, repayment, and
- * default.
+ * potentially default.
  */
 contract LifecycleManager is BondToken {
     using LBondManager for bytes32;
