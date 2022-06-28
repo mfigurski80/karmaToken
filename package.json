@@ -11,7 +11,7 @@
     "dev": "truffle dev > /dev/null &",
     "test": "truffle test",
     "coverage": "truffle run coverage",
-    "lint": "solhint contracts/**/*.sol"
+    "lint": "solhint contracts/*.sol contracts/**/*.sol"
   },
   "author": "",
   "license": "ISC",
