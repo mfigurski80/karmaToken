@@ -70,134 +70,111 @@ contract LifecycleManager is BondToken {
     }
 
     /**
-     * @dev services a referenced bond with ether sent along
-     * with transaction.
-     * @param id Id of bond to apply service payments to
-     */
-    function serviceBondWithEther(uint256 id) public payable {
-        // read bond
-        Bond memory b = _serviceBond(id, msg.value);
-        require(
-            b.currencyRef == 0,
-            "LifecycleManager: wrong servicing currency"
-        );
-        // pay beneficiary
-        (bool success, ) = b.beneficiary.call{value: msg.value}("");
-        require(success, "LifecycleManager: ether transaction failed");
-        emit BondServiced(id, msg.sender, b.curPeriod);
-    }
-
-    /**
-     * @dev services a referenced bond with ERC20 tokens authorized
-     * for withdrawal.
-     * @param id Id of bond to apply service payments to
-     * @param value Among of ERC20 to withdraw from caller's account
-     * to apply as a service payment
-     */
-    function serviceBondWithERC20(uint256 id, uint256 value) public payable {
-        // read bond
-        Bond memory b = _serviceBond(id, value);
-        Currency memory c = currencies[b.currencyRef];
-        require(
-            c.currencyType == CurrencyType.ERC20,
-            "LifecycleManager: wrong servicing currency"
-        );
-        // pay beneficiary
-        bool success = IERC20(c.location).transferFrom(
-            msg.sender,
-            b.beneficiary,
-            value
-        );
-        require(success, "LifecycleManager: erc20 transaction failed");
-        emit BondServiced(id, msg.sender, b.curPeriod);
-    }
-
-    /**
-     * @dev services a referenced bond with ERC1155 tokens authorized
-     * for withdrawal.
-     * @param id Id of bond to apply service payments to
-     * @param value Among of ERC1155 to withdraw from caller's account
-     * to apply as a service payment
-     */
-    function serviceBondWithERC1155Token(uint256 id, uint256 value)
-        public
-        payable
-    {
-        // read bond
-        Bond memory b = _serviceBond(id, value);
-        Currency memory c = currencies[b.currencyRef];
-        require(
-            c.currencyType == CurrencyType.ERC1155Token,
-            "LifecycleManager: wrong servicing currency"
-        );
-        // pay beneficiary
-        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
-        IERC1155(c.location).safeTransferFrom(
-            msg.sender,
-            b.beneficiary,
-            c.ERC1155Id,
-            value,
-            ""
-        );
-        emit BondServiced(id, msg.sender, b.curPeriod);
-    }
-
-    // PAYMENT RECEIVER FUNCTIONS
-
-    /**
      * TODO: write documentation
      */
-    function tokensReceived(
-        address operator,
-        address from,
-        address to,
-        uint256 value,
-        bytes memory userData,
-        bytes memory operatorData
-    ) external {
-        // for ERC777
-        // TODO: do we even need this? Doesn't seem to be what I want...
-        // TODO: contract might need to be registered in ERC1820 registry
-    }
-
-    /**
-     * TODO: write documentation
-     */
-    function onERC1155Received(
-        address operator,
-        address,
+    function serviceBond(
         uint256 id,
+        address operator,
         uint256 value,
         bytes calldata data
-    ) external returns (bytes4) {
-        // for ERC1155
-        // TODO: register interface
-        if (operator == address(this)) return 0xf23a6e61; // erc1155 received
-
-        uint256 bondId = uint256(bytes32(data)); // read bondId from data
-        Bond memory b = _serviceBond(bondId, value);
-        Currency memory c = currencies[b.currencyRef];
-        require(
-            c.currencyType == CurrencyType.ERC1155Token,
-            "LifecycleManager: wrong servicing currency"
-        );
-        require(
-            c.location == msg.sender,
-            "LifecycleManager: wrong servicing currency contract"
-        );
-        // pay beneficiary
-        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
-        require(c.ERC1155Id == id, "LifecycleManager: wrong erc1155 id");
-        IERC1155(c.location).safeTransferFrom(
-            address(this),
-            b.beneficiary,
-            c.ERC1155Id,
-            value,
-            data
-        );
-        emit BondServiced(id, msg.sender, b.curPeriod);
-        return 0xf23a6e61; // ERC1155 transfer accepted
+    ) public payable {
+        // read bond
+        Bond memory b = _serviceBond(id, value);
+        if (b.currencyRef == 0) { // special case for ether
+            assert(msg.value == value); 
+            assert(msg.sender == operator);
+            (bool success, ) = b.beneficiary.call{value: value}(data);
+            require(success, "LifecycleManager: ether transaction failed");
+        } else {
+            Currency storage c = currencies[b.currencyRef];
+            CurrencyType typ = c.currencyType;
+            require(typ != CurrencyType.ERC721, "LifecycleManager: cannot use erc721");
+            require(typ != CurrencyType.ERC1155NFT, "LifecycleManager: cannot use erc1155 NFT");
+            _transferGenericCurrency(c, operator, b.beneficiary, value, data);
+        }
+        emit BondServiced(id, operator, b.curPeriod);
     }
+
+
+    // PAYMENT RECEIVER FUNCTIONS
+    // discontinued due to discussion
+
+    // function tokensReceived(
+    // address operator,
+    // address from,
+    // address to,
+    // uint256 value,
+    // bytes memory userData,
+    // bytes memory operatorData
+    // ) external {
+    // // for ERC777
+    // // do we even need this? Doesn't seem to be what I want...
+    // // contract might need to be registered in ERC1820 registry
+    // }
+    // function onERC1155Received(
+    //     address operator,
+    //     address from,
+    //     uint256 id,
+    //     uint256 value,
+    //     bytes calldata data
+    // ) public returns (bytes4) {
+    //     // for ERC1155 single transfers
+    //     // Probably don't need to register interface?
+    //     if (operator == address(this)) return 0xf23a6e61; // erc1155 received
+    //     uint256 bondId = uint256(bytes32(data)); // read bondId from data
+    //     Bond memory b = _serviceBond(bondId, value); // TODO: check for re-entrancy
+    //     Currency memory c = currencies[b.currencyRef];
+    //     require(
+    //         c.currencyType == CurrencyType.ERC1155Token,
+    //         "LifecycleManager: wrong servicing currency"
+    //     );
+    //     require(
+    //         c.location == msg.sender,
+    //         "LifecycleManager: wrong servicing currency contract"
+    //     );
+    //     // pay beneficiary
+    //     if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
+    //     require(c.ERC1155Id == id, "LifecycleManager: wrong erc1155 id");
+    //     IERC1155(msg.sender).safeTransferFrom(
+    //         address(this),
+    //         b.beneficiary,
+    //         c.ERC1155Id,
+    //         value,
+    //         data
+    //     );
+    //     emit BondServiced(id, msg.sender, b.curPeriod);
+    //     return 0xf23a6e61; // ERC1155 transfer accepted
+    // }
+    // function onERC1155BatchReceived(
+    //     address operator,
+    //     address from,
+    //     uint256[] memory ids,
+    //     uint256[] memory values,
+    //     bytes memory data
+    // ) public returns (bytes4) {
+    //     // for ERC1155 batch transfers
+    //     if (operator == address(this)) return 0xbc197c81;
+    //     bytes memory d = data;
+
+    //     for (uint16 i = 0; i < ids.length; i++) {
+    //         (bytes32 curId, bytes memory newData) = abi.decode(
+    //             d,
+    //             (bytes32, bytes)
+    //         );
+    //         data = newData;
+    //         assert(
+    //             this.onERC1155Received(
+    //                 operator,
+    //                 from,
+    //                 ids[i],
+    //                 values[i],
+    //                 abi.encodePacked(curId)
+    //             ) == 0xf23a6e61
+    //         );
+    //     }
+
+    //     return 0xbc197c81; // ERC1155 batch transfer accepted
+    // }
 
     // OTHER BOND MANAGEMENT
 
