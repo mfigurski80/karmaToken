@@ -33,18 +33,17 @@ contract LifecycleManager is BondToken {
 
     /**
      * @dev Internal method contains logic for updating bond periods
+     * @param b Bond structure with alpha elements filled
+     * @param alpha bytes32 of first bond slot data
      * @param id Id of bond to apply service payments to
      * @param value Amount of service payments to apply
-     * @return Bond structure, but with only alpha elements filled
      */
-    function _serviceBond(uint256 id, uint256 value)
-        internal
-        returns (Bond memory)
-    {
-        // read bond
-        Bond memory b;
-        bytes32 alpha = bonds[id * 2];
-        b = alpha.fillBondFromAlpha(b);
+    function _updateBondPeriod(
+        Bond memory b,
+        bytes32 alpha,
+        uint256 id,
+        uint256 value
+    ) internal {
         // figure out period change
         uint16 addedPeriods = uint16(value / b.couponSize);
         require(
@@ -63,118 +62,65 @@ contract LifecycleManager is BondToken {
             } else b.curPeriod = b.nPeriods;
         }
         bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod);
-        return b;
         // presumably, after return:
         // calling function should check for matching currency
         // and pay bond holder whatever he is due in that currency
     }
 
     /**
-     * TODO: write documentation
+     * @notice Services a specific bond with generic currency
+     * @param id uint256 index of bond to service
+     * @param from address account to take value from
+     * @param value amount to apply to the bond, or the NFT id
+     * to transfer
+     * @param data bytes to send with the transaction
+     * 
+     * @dev For ether transactions, from and value still have
+     * to match or exceed the ether sent and the message sender
+     * @dev Note that call data will not get forwarded in all
+     * cases
      */
     function serviceBond(
         uint256 id,
-        address operator,
+        address from,
         uint256 value,
         bytes calldata data
     ) public payable {
         // read bond
-        Bond memory b = _serviceBond(id, value);
+        Bond memory b;
+        bytes32 alpha = bonds[id*2]; // READ A
+        b = alpha.fillBondFromAlpha(b);
         if (b.currencyRef == 0) { // special case for ether
-            assert(msg.value == value); 
-            assert(msg.sender == operator);
+            assert(msg.value >= value); 
+            assert(msg.sender == from);
+            _updateBondPeriod(b, alpha, id, value);
             (bool success, ) = b.beneficiary.call{value: value}(data);
             require(success, "LifecycleManager: ether transaction failed");
         } else {
             Currency storage c = currencies[b.currencyRef];
             CurrencyType typ = c.currencyType;
-            require(typ != CurrencyType.ERC721, "LifecycleManager: cannot use erc721");
-            require(typ != CurrencyType.ERC1155NFT, "LifecycleManager: cannot use erc1155 NFT");
-            _transferGenericCurrency(c, operator, b.beneficiary, value, data);
+            if (typ == CurrencyType.ERC721 || typ == CurrencyType.ERC1155NFT)
+                _updateBondPeriod(b, alpha, id, 1);
+            else
+                _updateBondPeriod(b, alpha, id, value);
+            _transferGenericCurrency(c, from, b.beneficiary, value, data);
         }
-        emit BondServiced(id, operator, b.curPeriod);
+        emit BondServiced(id, from, b.curPeriod);
     }
 
-
     // PAYMENT RECEIVER FUNCTIONS
-    // discontinued due to discussion
+    // discontinued due to discussion, refer commit a3cc493
 
-    // function tokensReceived(
-    // address operator,
-    // address from,
-    // address to,
-    // uint256 value,
-    // bytes memory userData,
-    // bytes memory operatorData
-    // ) external {
-    // // for ERC777
-    // // do we even need this? Doesn't seem to be what I want...
-    // // contract might need to be registered in ERC1820 registry
-    // }
-    // function onERC1155Received(
-    //     address operator,
-    //     address from,
-    //     uint256 id,
-    //     uint256 value,
-    //     bytes calldata data
-    // ) public returns (bytes4) {
-    //     // for ERC1155 single transfers
-    //     // Probably don't need to register interface?
-    //     if (operator == address(this)) return 0xf23a6e61; // erc1155 received
-    //     uint256 bondId = uint256(bytes32(data)); // read bondId from data
-    //     Bond memory b = _serviceBond(bondId, value); // TODO: check for re-entrancy
-    //     Currency memory c = currencies[b.currencyRef];
-    //     require(
-    //         c.currencyType == CurrencyType.ERC1155Token,
-    //         "LifecycleManager: wrong servicing currency"
-    //     );
-    //     require(
-    //         c.location == msg.sender,
-    //         "LifecycleManager: wrong servicing currency contract"
-    //     );
-    //     // pay beneficiary
-    //     if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
-    //     require(c.ERC1155Id == id, "LifecycleManager: wrong erc1155 id");
-    //     IERC1155(msg.sender).safeTransferFrom(
-    //         address(this),
-    //         b.beneficiary,
-    //         c.ERC1155Id,
-    //         value,
-    //         data
-    //     );
-    //     emit BondServiced(id, msg.sender, b.curPeriod);
-    //     return 0xf23a6e61; // ERC1155 transfer accepted
-    // }
-    // function onERC1155BatchReceived(
-    //     address operator,
-    //     address from,
-    //     uint256[] memory ids,
-    //     uint256[] memory values,
-    //     bytes memory data
-    // ) public returns (bytes4) {
-    //     // for ERC1155 batch transfers
-    //     if (operator == address(this)) return 0xbc197c81;
-    //     bytes memory d = data;
-
-    //     for (uint16 i = 0; i < ids.length; i++) {
-    //         (bytes32 curId, bytes memory newData) = abi.decode(
-    //             d,
-    //             (bytes32, bytes)
-    //         );
-    //         data = newData;
-    //         assert(
-    //             this.onERC1155Received(
-    //                 operator,
-    //                 from,
-    //                 ids[i],
-    //                 values[i],
-    //                 abi.encodePacked(curId)
-    //             ) == 0xf23a6e61
-    //         );
-    //     }
-
-    //     return 0xbc197c81; // ERC1155 batch transfer accepted
-    // }
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) public returns (bytes4) {
+        // for ERC1155 single transfers
+        return 0xf23a6e61;
+    }
 
     // OTHER BOND MANAGEMENT
 
@@ -203,9 +149,9 @@ contract LifecycleManager is BondToken {
     }
 
     /**
-     * @dev set bond as complete and forfeight future payments. Can only
+     * @notice set bond as complete and forfeight future payments. Can only
      * be performed by token owner or authorized operator.
-     * @param id Id of bond to forgive
+     * @param id uint256 bond index
      */
     function forgiveBond(uint256 id) public onlyValidOperator(id) {
         bytes32 alpha = bonds[id * 2];
@@ -215,7 +161,9 @@ contract LifecycleManager is BondToken {
     }
 
     /**
-     * TODO: write documentation
+     * @notice destroy bond and all related resource, refunding gas
+     * @param id uin256 bond index
+     * @dev Needs to be overriden to remove collateral as well
      * TODO: prevent abuse a la "owner destroys after getting all money,
      * preventing minter from retrieving their collateral"
      */
