@@ -67,18 +67,16 @@ contract CollateralManager is LifecycleManager {
     }
 
     /**
-     * @notice Release collateral by specified bond and collateral ids.
+     * @notice Release last collateral attached to specified bonds ids
      * @dev Method is optimized to memoize the 'previous' bond and
      * currency used. If possible, sort incoming lists by bondIds and
      * by related currencyIds.
      * @param bondIds Integer array of bondIds to release collateral for
-     * @param collateralIds Integer array of collateral ids related to
-     * the bonds specified
      * @param to address to direct all collaterals to
+     * @param data bytes to forward with each transfer
      */
     function safeBatchReleaseCollaterals(
         uint256[] memory bondIds,
-        uint256[] memory collateralIds,
         address to,
         bytes calldata data
     ) public {
@@ -87,27 +85,30 @@ contract CollateralManager is LifecycleManager {
         Currency storage currency = currencies[0]; // TODO: figure out storage pointer
         for (uint256 i = 0; i < bondIds.length; i++) {
             uint256 bondId = bondIds[i];
+            // Check if this is an un-cached bond?
             if (lastAuthorizedBond != bondId || lastAuthorizedBond == 2**256-1) {
-                // if new bond, authorize release
+                // It is! Authorize new release
                 require(
                     _isAuthorizedToReleaseCollateral(bondId, msg.sender),
                     "CollateralManager: unauthorized to release collateral"
                 );
                 lastAuthorizedBond = bondId;
             }
-            uint256 collateralId = collateralIds[i];
+            // Get bond collateral (last in array), remove from storage 
+            uint256 collateralId = collateral[bondId].length - 1; 
             Collateral memory c = collateral[bondId][collateralId];
+            collateral[bondId].pop();
             require(
                 c.amountOrId > 0,
                 "CollateralManager: this collateral has already been released"
             );
+            // Check if Collateral refers to a un-cached currency
             if (lastCurrencyRef != c.currencyRef || lastCurrencyRef == 2**256-1) {
-                // if new currency type, re-load currency
+                // It does! Re-load cached currency
                 currency = currencies[c.currencyRef];
                 lastCurrencyRef = c.currencyRef;
             }
-            delete collateral[bondId][collateralId];
-            // TODO: release entire array if empty?
+            // Transfer collateral
             _transferGenericCurrency(
                 currency,
                 address(this),

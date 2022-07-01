@@ -157,14 +157,14 @@ contract('CollateralManager', accounts => {
 
         it('fails when bond minter and bond isn\'t complete', async () => {
             let err = await getRevert(
-                instance.safeBatchReleaseCollaterals([bondEvent.tokenId], [collateralEvent.collateralId], OPERATOR, 0x0));
+                instance.safeBatchReleaseCollaterals([bondEvent.tokenId], OPERATOR, 0x0));
             assert.include(err.reason.toLowerCase(), 'collateral');
             assert.include(err.reason.toLowerCase(), 'authorized');
         });
 
         it('succeeds when bond minter and bond is complete', async () => {
             await instance.forgiveBond(bondEvent.tokenId);
-            let ev = await instance.safeBatchReleaseCollaterals([bondEvent.tokenId], [collateralEvent.collateralId], OPERATOR, 0x0)
+            let ev = await instance.safeBatchReleaseCollaterals([bondEvent.tokenId], OPERATOR, 0x0)
                 .then(tx => getEvent(tx, 'CollateralReleased'));
             assert.equal(ev.bondId.toNumber(), bondEvent.tokenId.toNumber());
             assert.equal(ev.collateralId.toNumber(), collateralEvent.collateralId);
@@ -175,7 +175,7 @@ contract('CollateralManager', accounts => {
         });
 
         it('fails when bond owner and bond is active', async () => {
-            let err = await getRevert(instance.safeBatchReleaseCollaterals([bondEvent.tokenId], [collateralEvent.collateralId], OPERATOR, 0x0));
+            let err = await getRevert(instance.safeBatchReleaseCollaterals([bondEvent.tokenId], OPERATOR, 0x0));
             assert.include(err.reason.toLowerCase(), 'collateral');
             assert.include(err.reason.toLowerCase(), 'authorized');
         });
@@ -185,7 +185,7 @@ contract('CollateralManager', accounts => {
             let defaultEvent = await instance.callBond(bondEvent.tokenId)
                 .then(tx => getEvent(tx, 'BondDefaulted'));
             assert.equal(defaultEvent.id.toNumber(), bondEvent.tokenId.toNumber());
-            let ev = await instance.safeBatchReleaseCollaterals([bondEvent.tokenId], [collateralEvent.collateralId], OPERATOR, 0x0)
+            let ev = await instance.safeBatchReleaseCollaterals([bondEvent.tokenId], OPERATOR, 0x0)
                 .then(tx => getEvent(tx, 'CollateralReleased'));
             assert.equal(ev.bondId.toNumber(), bondEvent.tokenId.toNumber());
             assert.equal(ev.collateralId.toNumber(), collateralEvent.collateralId);
@@ -203,17 +203,17 @@ contract('CollateralManager', accounts => {
 
         it.skip('has proper side effects for erc1155 nfts');
 
-        it('disallows releasing collaterals out of bounds', async () => {
+        it.skip('disallows releasing collaterals out of bounds', async () => {
             await instance.forgiveBond(bondEvent.tokenId);
-            let err = await getRevert(instance.safeBatchReleaseCollaterals([bondEvent.tokenId], [10**6], OPERATOR, 0x0));
+            let err = await getRevert(instance.safeBatchReleaseCollaterals([bondEvent.tokenId], OPERATOR, 0x0));
             assert.include(err.message, "Index out of bounds");
         });
 
         it('disallows releasing collaterals twice', async () => {
             await instance.forgiveBond(bondEvent.tokenId);
-            await instance.safeBatchReleaseCollaterals([bondEvent.tokenId], [collateralEvent.collateralId], OPERATOR, 0x0);
-            let err = await getRevert(instance.safeBatchReleaseCollaterals([bondEvent.tokenId], [collateralEvent.collateralId], OPERATOR, 0x0));
-            assert.include(err.message, "collateral");
+            await instance.safeBatchReleaseCollaterals([bondEvent.tokenId], OPERATOR, 0x0);
+            let err = await getRevert(instance.safeBatchReleaseCollaterals([bondEvent.tokenId], OPERATOR, 0x0));
+            assert.include(err.message, "overflow");
         });
         
     });
@@ -261,7 +261,7 @@ contract('CollateralManager', accounts => {
             await instance.forgiveBond(bondId);
             collateralIds = collateralIds.map(ev => ev.collateralId);
             let ev = await instance.safeBatchReleaseCollaterals(
-                [bondId, bondId, bondId, bondId], collateralIds, OPERATOR, 0x0)
+                [bondId, bondId, bondId, bondId], OPERATOR, 0x0)
                 .then(tx => getEvents(tx, 'CollateralReleased'));
             assert.equal(ev.length, collateralIds.length);
             ev.forEach((e, i) => {
@@ -298,7 +298,7 @@ contract('CollateralManager', accounts => {
             // Test: inefficient mixing of bond references
             await Promise.all(bondIds.map(i => instance.forgiveBond(i)));
             let tx = await instance.safeBatchReleaseCollaterals(
-                [...bondIds, ...bondIds], collateralIds, OPERATOR, 0x0);
+                [...bondIds, ...bondIds], OPERATOR, 0x0);
             const gasUsed = tx.receipt.gasUsed;
 
             // re-register collaterals -- 2 erc1155Tokens to each bond
@@ -313,7 +313,6 @@ contract('CollateralManager', accounts => {
             // note bonds already forgiven
             tx = await instance.safeBatchReleaseCollaterals(
                 [bondIds[0], bondIds[0], bondIds[1], bondIds[1]],
-                [collateralIds[0], collateralIds[2], collateralIds[1], collateralIds[3]],
                 OPERATOR, 0x0);
             const gasDiffPer = 100 * (gasUsed - tx.receipt.gasUsed)/gasUsed;
             console.log(`${gasUsed} -> ${tx.receipt.gasUsed} : ${gasDiffPer}% change`);
@@ -336,7 +335,7 @@ contract('CollateralManager', accounts => {
 
         });
          
-        it.skip('allows bond destruction if all collateral released', async () => {
+        it('allows bond destruction if all collateral released', async () => {
             const bondId = await instance.mintBond(bondBytes[0], bondBytes[1])
                 .then(tx => getEvent(tx, 'Transfer'))
                 .then(ev => ev.tokenId.toNumber());
@@ -345,8 +344,7 @@ contract('CollateralManager', accounts => {
                 .then(tx => getEvent(tx, 'CollateralAdded'))
                 .then(ev => ev.collateralId);
             await instance.forgiveBond(bondId);
-            await instance.safeBatchReleaseCollaterals(
-                [bondId], [collateralId], accounts[0], 0x0)
+            await instance.safeBatchReleaseCollaterals([bondId], accounts[0], 0x0)
                 .then(tx => getEvent(tx, 'CollateralReleased'));
             // destroy bond
             await instance.destroyBond(bondId);
