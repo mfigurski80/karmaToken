@@ -90,6 +90,7 @@ contract LifecycleManager is BondToken {
         Bond memory b;
         bytes32 alpha = bonds[id*2]; // READ A
         b = alpha.fillBondFromAlpha(b);
+        require(b.flag, false, "LifecycleManager: cannot service defaulted bond");
         if (b.currencyRef == 0) { // special case for ether
             assert(msg.value >= value); 
             assert(msg.sender == from);
@@ -147,8 +148,8 @@ contract LifecycleManager is BondToken {
             Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
         );
         require( // check if bond is done
-            b.curPeriod < b.nPeriods + 1, // check for
-            "LifecycleManager: bond completed"
+            b.curPeriod <= b.nPeriods,
+            "LifecycleManager: cannot call completed bond"
         );
         require(
             b.curPeriod * b.periodDuration < block.timestamp - b.startTime,
@@ -175,10 +176,9 @@ contract LifecycleManager is BondToken {
      * @notice destroy bond and all related resource, refunding gas
      * @param id uin256 bond index
      * @dev Needs to be overriden to remove collateral as well
-     * TODO: prevent abuse a la "owner destroys after getting all money,
-     * preventing minter from retrieving their collateral"
      */
     function destroyBond(uint256 id) public virtual onlyValidOperator(id) {
+        // Note: raw version implies owner can destroy at any time
         // frees 4 slots, writes to one
         delete bonds[id * 2]; 
         delete bonds[id * 2 + 1];
@@ -186,6 +186,5 @@ contract LifecycleManager is BondToken {
         delete _owners[id];
         delete _tokenApprovals[id];
         _balances[owner] -= 1;
-        
     }
 }
