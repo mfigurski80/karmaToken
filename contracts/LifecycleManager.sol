@@ -90,7 +90,7 @@ contract LifecycleManager is BondToken {
         Bond memory b;
         bytes32 alpha = bonds[id*2]; // READ A
         b = alpha.fillBondFromAlpha(b);
-        require(b.flag, false, "LifecycleManager: cannot service defaulted bond");
+        require(b.flag == false, "LifecycleManager: cannot service defaulted bond");
         if (b.currencyRef == 0) { // special case for ether
             assert(msg.value >= value); 
             assert(msg.sender == from);

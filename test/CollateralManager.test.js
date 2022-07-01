@@ -265,8 +265,8 @@ contract('CollateralManager', accounts => {
                 .then(tx => getEvents(tx, 'CollateralReleased'));
             assert.equal(ev.length, collateralIds.length);
             ev.forEach((e, i) => {
-                assert.equal(e.bondId.toNumber(), bondId.toNumber());
-                assert.equal(e.collateralId.toNumber(), collateralIds[i].toNumber());
+                assert.equal(+e.bondId, +bondId);
+                assert.equal(+e.collateralId, +collateralIds[collateralIds.length - 1 - i]);
                 assert.equal(e.to, OPERATOR);
             });
         });
