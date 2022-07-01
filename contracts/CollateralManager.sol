@@ -57,12 +57,9 @@ contract CollateralManager is LifecycleManager {
         b = bonds[bondId * 2].fillBondFromAlpha(b);
         bool isOwner = _ownerOrOperatorOf(bondId, _owners[bondId], operator);
         if (b.flag && isOwner) return true;
-        // TODO: Check for minter, owner agreement
+        // Check for completed + bond minter
         b = bonds[bondId * 2 + 1].fillBondFromBeta(b);
         bool isMinter = _minterOrOperatorOf(b.minter, operator);
-        // if (isOwner && isMinter)
-        // return true;
-        // Check for completed + bond minter
         return (b.curPeriod > b.nPeriods && isMinter);
     }
 

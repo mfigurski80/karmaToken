@@ -52,7 +52,7 @@ contract MonetizedBondNFT is CollateralManager, Ownable {
      * @dev Retrieves fees to an alternative account, callable by owner.
      * Assumes that contract holds only ether related to fees -- no bond
      * or collateral has any references to ethereum stored in this
-     * contract. TODO: this assumption is FALSE due to collateral storage
+     * contract. This assumption is FALSE due to collateral storage
      * @param n Count of wei to transfer. Must be below total paid
      * @param to Address to transfer ether to
      * @param data Additional calldata to attach
