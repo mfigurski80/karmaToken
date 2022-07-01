@@ -113,13 +113,24 @@ contract LifecycleManager is BondToken {
 
     function onERC1155Received(
         address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
-    ) public returns (bytes4) {
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external view returns (bytes4) {
         // for ERC1155 single transfers
-        return 0xf23a6e61;
+        if (operator == address(this)) return 0xf23a6e61;
+        return 0x0;
+    }
+
+    function onERC721Received(
+        address operator,
+        address,
+        uint256,
+        bytes calldata
+    ) external view returns (bytes4) {
+        if (operator == address(this)) return this.onERC721Received.selector;
+        return 0x0;
     }
 
     // OTHER BOND MANAGEMENT
@@ -167,12 +178,14 @@ contract LifecycleManager is BondToken {
      * TODO: prevent abuse a la "owner destroys after getting all money,
      * preventing minter from retrieving their collateral"
      */
-    function destroyBond(uint256 id) public onlyValidOperator(id) {
-        delete bonds[id * 2];
+    function destroyBond(uint256 id) public virtual onlyValidOperator(id) {
+        // frees 4 slots, writes to one
+        delete bonds[id * 2]; 
         delete bonds[id * 2 + 1];
         address owner = _owners[id];
         delete _owners[id];
         delete _tokenApprovals[id];
         _balances[owner] -= 1;
+        
     }
 }

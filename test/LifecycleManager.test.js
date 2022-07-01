@@ -83,6 +83,7 @@ contract('LifecycleManager', accounts => {
             // console.log(`${newBalance} - ${oldBalance} = ${newBalance - oldBalance}`);
             // assert.equal(newBalance - oldBalance, 1, 'wrong amount sent to beneficiary');
             // FIXME: ^^ lol. No idea why this is failing.
+            // Probably because beneficiary is executing and so burning gas. Check recipient instead
         });
 
         it('allows servicing bond with erc20', async () => {

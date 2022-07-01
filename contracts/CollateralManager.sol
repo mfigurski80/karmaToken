@@ -30,89 +30,21 @@ contract CollateralManager is LifecycleManager {
         LifecycleManager(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
     {}
 
-    function addEtherCollateral(uint256 id) public payable {
-        collateral[id].push(Collateral(msg.value, 0));
-    }
-
-    function addERC20Collateral(
+    function addCollateral(
         uint256 id,
         uint256 currencyRef,
-        uint256 amount
-    ) public payable {
-        // find currency being referenced
-        Currency storage c = currencies[currencyRef];
-        require(c.currencyType == CurrencyType.ERC20);
-        // pull collateral
-        bool success = IERC20(c.location).transferFrom(
-            msg.sender,
-            address(this),
-            amount
-        );
-        require(success, "CollateralManager: erc20 transfer failed");
-        // add collateral entry
-        collateral[id].push(Collateral(amount, currencyRef));
-        emit CollateralAdded(id, collateral[id].length - 1, CurrencyType.ERC20);
-    }
-
-    function addERC721Collateral(
-        uint256 id,
-        uint256 currencyRef,
-        uint256 nftId
-    ) public {
-        Currency storage c = currencies[currencyRef];
-        require(c.currencyType == CurrencyType.ERC721);
-        IERC721(c.location).transferFrom(msg.sender, address(this), nftId);
-        collateral[id].push(Collateral(nftId, currencyRef));
-        emit CollateralAdded(
-            id,
-            collateral[id].length - 1,
-            CurrencyType.ERC721
-        );
-    }
-
-    function addERC1155TokenCollateral(
-        uint256 id,
-        uint256 currencyRef,
-        uint256 amount
-    ) public {
-        Currency storage c = currencies[currencyRef];
-        require(c.currencyType == CurrencyType.ERC1155Token);
-        if (c.ERC1155Id == 0) c.ERC1155Id = uint256(c.ERC1155SmallId);
-        IERC1155(c.location).safeTransferFrom(
-            msg.sender,
-            address(this),
-            c.ERC1155Id,
-            amount,
-            ""
-        );
-        collateral[id].push(Collateral(amount, currencyRef));
-        emit CollateralAdded(
-            id,
-            collateral[id].length - 1,
-            CurrencyType.ERC1155Token
-        );
-    }
-
-    function addERC1155NFTCollateral(
-        uint256 id,
-        uint256 currencyRef,
-        uint256 nftId
-    ) public {
-        Currency storage c = currencies[currencyRef];
-        require(c.currencyType == CurrencyType.ERC1155NFT);
-        IERC1155(c.location).safeTransferFrom(
-            msg.sender,
-            address(this),
-            nftId,
-            1,
-            ""
-        );
-        collateral[id].push(Collateral(nftId, currencyRef));
-        emit CollateralAdded(
-            id,
-            collateral[id].length - 1,
-            CurrencyType.ERC1155NFT
-        );
+        uint256 valueOrId
+    ) external payable {
+        collateral[id].push(Collateral(valueOrId, currencyRef));
+        CurrencyType typ = CurrencyType.Ether;
+        if (currencyRef == 0) { // ether special case
+            assert(msg.value == valueOrId);
+        } else {
+            Currency storage c = currencies[currencyRef];
+            typ = c.currencyType;
+            _transferGenericCurrency(c, msg.sender, address(this), valueOrId, "");
+        }
+        emit CollateralAdded(id, collateral[id].length - 1, typ);
     }
 
     function _isAuthorizedToReleaseCollateral(uint256 bondId, address operator)
@@ -142,20 +74,21 @@ contract CollateralManager is LifecycleManager {
      * @param bondIds Integer array of bondIds to release collateral for
      * @param collateralIds Integer array of collateral ids related to
      * the bonds specified
+     * @param to address to direct all collaterals to
      */
     function safeBatchReleaseCollaterals(
         uint256[] memory bondIds,
         uint256[] memory collateralIds,
-        address to
+        address to,
+        bytes calldata data
     ) public {
         uint256 lastAuthorizedBond = 2**256 - 1;
         uint256 lastCurrencyRef = 2**256 - 1;
         Currency storage currency = currencies[0]; // TODO: figure out storage pointer
         for (uint256 i = 0; i < bondIds.length; i++) {
             uint256 bondId = bondIds[i];
-            if (
-                lastAuthorizedBond != bondId || lastAuthorizedBond == 2**256 - 1
-            ) {
+            if (lastAuthorizedBond != bondId || lastAuthorizedBond == 2**256-1) {
+                // if new bond, authorize release
                 require(
                     _isAuthorizedToReleaseCollateral(bondId, msg.sender),
                     "CollateralManager: unauthorized to release collateral"
@@ -168,10 +101,8 @@ contract CollateralManager is LifecycleManager {
                 c.amountOrId > 0,
                 "CollateralManager: this collateral has already been released"
             );
-            if (
-                lastCurrencyRef != c.currencyRef ||
-                lastCurrencyRef == 2**256 - 1
-            ) {
+            if (lastCurrencyRef != c.currencyRef || lastCurrencyRef == 2**256-1) {
+                // if new currency type, re-load currency
                 currency = currencies[c.currencyRef];
                 lastCurrencyRef = c.currencyRef;
             }
@@ -182,9 +113,19 @@ contract CollateralManager is LifecycleManager {
                 address(this),
                 to,
                 c.amountOrId,
-                ""
+                data 
             );
             emit CollateralReleased(bondId, collateralId, to);
         }
     }
+
+    /**
+     * @inheritdoc LifecycleManager
+     * @notice Collateral must be entirely released to allow bond destruction
+     */
+    function destroyBond(uint256 id) public override onlyValidOperator(id) {
+        assert(collateral[id].length == 0);
+        delete collateral[id];
+        super.destroyBond(id);
+    } 
 }
