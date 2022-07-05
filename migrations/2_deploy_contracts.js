@@ -7,5 +7,5 @@ module.exports = async function(deployer, network, accounts) {
   bondLibrary = await LBondManager.deployed();
   // console.log(`Deploying CollateralManager contract...${network}`);
   deployer.link(LBondManager, CollateralManager);
-  await deployer.deploy(CollateralManager, "About", "Bichin", "Time").catch(() => {});
+  await deployer.deploy(CollateralManager, "BOND On-Network Datastructure", "BOND", "http://google.com").catch(() => {});
 }
