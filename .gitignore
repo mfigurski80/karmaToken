@@ -1,5 +1,6 @@
 node_modules
 build
+publicBuild
 .vscode
 .env
 coverage.json
