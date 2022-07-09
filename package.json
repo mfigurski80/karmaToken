@@ -7,13 +7,13 @@
     "test": "test"
   },
   "scripts": {
+    "start": "snowpack dev",
+    "buildSite": "snowpack build",
     "build": "truffle compile --all",
     "dev": "truffle dev > /dev/null &",
     "test": "truffle test",
     "coverage": "truffle run coverage",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
-    "appdev": "snowpack dev",
-    "appbuild": "snowpack build",
     "report-addresses": "truffle network --clean && truffle network > testnet_addresses.txt",
     "deploy-testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test; npm run report-addresses"
   },
@@ -21,9 +21,13 @@
   "license": "ISC",
   "dependencies": {
     "@openzeppelin/contracts": "^4.2.0",
-    "truffle-hdwallet-provider": "^1.0.17"
+    "snowpack": "^3.8.8",
+    "truffle-hdwallet-provider": "^1.0.17",
+    "vue": "^3.2.37",
+    "vue-web3": "^2.1.0"
   },
   "devDependencies": {
+    "@snowpack/plugin-vue": "^2.6.2",
     "dotenv": "^16.0.1",
     "eth-gas-reporter": "^0.2.22",
     "solhint": "^3.3.6",
