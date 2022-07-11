@@ -7,6 +7,7 @@ module.exports = {
     'public': '/',
     'build/contracts': '/contracts',
     'coverage': '/coverage',
+    'testnet_addresses.txt': '/testnet_addresses.txt',
     /* ... */
   },
   plugins: [

@@ -7,15 +7,16 @@
     "test": "test"
   },
   "scripts": {
-    "start": "snowpack dev",
-    "buildSite": "snowpack build",
     "build": "truffle compile --all",
     "dev": "truffle dev > /dev/null &",
     "test": "truffle test",
     "coverage": "truffle run coverage",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
-    "report-addresses": "truffle network --clean && truffle network > testnet_addresses.txt",
-    "deploy-testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test; npm run report-addresses"
+    "report-addresses": "truffle network && truffle network > testnet_addresses.txt",
+    "deploy": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate; npm run report-addresses",
+    "deploy-testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test; npm run report-addresses",
+    "start": "npm run dev; snowpack dev",
+    "buildSite": "npm run build; snowpack build"
   },
   "author": "",
   "license": "ISC",
