@@ -5,10 +5,11 @@
   </h2>
   <button @click="toggleHidden">{{hidden ? 'Show' : 'Hide'}} Methods</button>
   <h6>Status: {{connected ? 'Connected' : 'Disconnected'}}</h6>
-  <form v-if="!hidden" v-for="f in fields" :key="f.id" 
+  <form v-if="!hidden"
+    v-for="f in fields" :key="f.id" 
     @submit.prevent="handleDoMethod(f.id)"
   >
-    <hr />
+    <hr :style="{ borderStyle: 'dotted' }" />
     <h4>Function: <code>{{f.name}}</code></h4>
     <p>{{f.notice}}</p>
     <p>{{f.details}}</p>
@@ -17,7 +18,7 @@
     /></label>
     <div v-for="i in f.inputs">
 
-      <label>Parameter <b>{{i.name}}</b> ({{i.type}}) -- {{i.description}}<input
+      <label>Parameter <b>{{i.name}}</b> ({{i.type}}) -- {{i.description}} <input
         v-model='i.value'
         :placeholder="placeholders[i.type]"
       /></label> 

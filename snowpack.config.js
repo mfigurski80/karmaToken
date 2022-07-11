@@ -3,16 +3,15 @@
 
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
+  root: 'public',
+  workspaceRoot: '.',
   mount: {
     'public': '/',
-    'build/contracts': '/contracts',
-    'coverage': '/coverage',
-    'testnet_addresses.txt': '/testnet_addresses.txt',
-    /* ... */
+    'build/contracts': { url: '/contracts', static: true },
+    'coverage': { url: '/coverage', static: true },
   },
   plugins: [
     '@snowpack/plugin-vue',
-    /* ... */
   ],
   packageOptions: {
     /* ... */

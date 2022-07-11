@@ -12,7 +12,7 @@
     "test": "truffle test",
     "coverage": "truffle run coverage",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
-    "report-addresses": "truffle network && truffle network > testnet_addresses.txt",
+    "report-addresses": "truffle network && truffle network > public/addresses.txt",
     "deploy": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate; npm run report-addresses",
     "deploy-testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test; npm run report-addresses",
     "start": "npm run dev; snowpack dev",

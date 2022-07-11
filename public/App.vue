@@ -9,6 +9,9 @@
       :accounts="accounts"
     />
   </div>
+  <p v-if="connected & contractData.length === 0">
+    This network does not have supported contracts.
+  </p>
 </template>
 
 <script>
@@ -23,29 +26,41 @@ export default {
     connected: false,
     web3: null,
     accounts: [],
-    contractData: [{
-      name: 'CollateralManager',
-      address: '0xB70C08Cf5Afc879432A707c9efC2011c26021b47',
-      abiPath: '/contracts/CollateralManager.json',
-    }, {
-      name: 'ERC20Exposed',
-      address: '0x7d38fa09c75aE4bD196Bd8608eFd4f95Ff734896',
-      abiPath: '/contracts/ERC20Exposed.json',
-    }],
+    contractData: [],
   }),
   methods: {
     async connect() {
-        if (!window.ethereum) {
-          alert('Please install metamask or another web3 provider');
-          return;
-        }
-        this.accounts = await window.ethereum.request(
-          { method: 'eth_requestAccounts' });
-        window.ethereum.on('accountsChanged',
-          accs => this.accounts = accs);
-        this.web3 = new Web3(window.ethereum);
-        this.connected = true;
+      if (!window.ethereum) {
+        alert('Please install metamask or another web3 provider');
+        return;
+      }
+      // get accounts
+      this.accounts = await window.ethereum.request(
+        { method: 'eth_requestAccounts' });
+      window.ethereum.on('accountsChanged',
+        accs => this.accounts = accs);
+      // build web3 obj
+      this.web3 = new Web3(window.ethereum);
+      // read contracts we can expect
+      /* this.contractData =  */
+      await this.fetchContractData();
+      this.connected = true;
     },
+    async fetchContractData() {
+      // Pattern: https://regexr.com/6ph9t
+      const regex = /Network: \w* \(id: (\d*)\)([\s\S]*?)(?=\n{2,})/gm;
+      let data = await fetch('/addresses.txt')
+        .then(res => res.text())
+      this.contractData = [...((data + "\n\n").matchAll(regex))]
+        .filter(m => +m[1] === +window.ethereum.networkVersion)
+        .map(m => m[2].trim().split('\n  ')).flat()
+        .map(cData => cData.split(': '))
+        .map(cArr => ({
+          name: cArr[0],
+          address: cArr[1],
+          abiPath: `/contracts/${cArr[0]}.json`,
+        })); 
+    }, 
   },
 }
 </script>
