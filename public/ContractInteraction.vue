@@ -3,9 +3,9 @@
   <h2>{{contract.name}} Contract at: 
     <code>{{ contract.address }}</code>
   </h2>
-  <button @click="toggleHidden">{{hidden ? 'Show' : 'Hide'}} Methods</button>
+  <button v-if="connected" @click="toggleHidden">{{hidden ? 'Show' : 'Hide'}} Methods</button>
   <h6>Status: {{connected ? 'Connected' : 'Disconnected'}}</h6>
-  <form v-if="!hidden"
+  <form v-if="!hidden || !connected"
     v-for="f in fields" :key="f.id" 
     @submit.prevent="handleDoMethod(f.id)"
   >
@@ -53,7 +53,8 @@ export default {
       alert('ERR: Interaction without web3 connection!');
       return;
     }
-    let resp = await this.web3.eth.getCode(this.contract.address);
+    let resp = await this.web3.eth.getCode(this.contract.address)
+      .catch(err => { alert(err); return '0x'; });
     if (resp === '0x') {
       alert(`ERR: No contract found at ${this.contract.address} (${this.contract.name})`);
       return;
@@ -88,6 +89,7 @@ export default {
     },
     connectEvents(cJ) {
       /* console.log(Object.keys(this.obj.events).filter((_, i) => i % 3 === 0)); */
+      console.log(`${this.contract.name}: Connecting Events`);
       this.obj.events.allEvents({})
         .on('connected', () => this.connected = true)
         .on('data', ev => {

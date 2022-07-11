@@ -7,12 +7,12 @@ The following networks are configured to match any network id ('*'):
 Closely inspect the deployed networks below, and use `truffle networks --clean` to remove any networks that don't match your configuration. You should not use the wildcard configuration ('*') for staging and production networks for which you intend to deploy your application.
 
 Network: UNKNOWN (id: 5777)
-  CollateralManager: 0xB70C08Cf5Afc879432A707c9efC2011c26021b47
-  ERC1155Exposed: 0x3fa35E095D70Fe3744dCC4ccc9696a4e8D61c7cc
-  ERC20Exposed: 0x7d38fa09c75aE4bD196Bd8608eFd4f95Ff734896
-  ERC721Exposed: 0x1e4048056B477F53A1A9D5ba12A2A05636cc29Cb
-  LBondManager: 0x4B8261805bED8c8fba882C6363B0210F8242ccBa
-  Migrations: 0x23C9644Fec8E6f6c355c9FD08a1b7DB59E206D09
+  CollateralManager: 0xDD5D7Bd43be613c21645E07d64a9e89cf59CaE55
+  ERC1155Exposed: 0xB137818778B420e30039ee9bD2C7299e8cDb18fe
+  ERC20Exposed: 0xc61df940d4f51F3AC45CBA8ded159F62C0679c8F
+  ERC721Exposed: 0x749791a4da478EF56f359711FFcd67C76dc9BFBa
+  LBondManager: 0xA4dc7D396F495624C8d35F860B9e2D634110F0b7
+  Migrations: 0x916F5FF59B155eef6460a45DB664dcEe5C40cDD9
 
 Network: test (id: 3072)
   CollateralManager: 0xdB4fCb8339676C545C75ad0032d9bFFec7DEd108
