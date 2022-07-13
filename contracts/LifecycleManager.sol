@@ -110,8 +110,15 @@ contract LifecycleManager is BondToken {
     }
 
     // PAYMENT RECEIVER FUNCTIONS
-    // discontinued due to discussion, refer commit a3cc493
+    // complex behavior discontinued due to discussion, refer
+    // to commit a3cc493 for last version
 
+    /**
+     * @notice Should not be generally called by a direct user
+     * @dev Handler function that get's called on any ERC1155
+     * transfer to this function -- accepts only transfers
+     * initiated by itself.
+     */
     function onERC1155Received(
         address operator,
         address,
@@ -124,6 +131,12 @@ contract LifecycleManager is BondToken {
         return 0x0;
     }
 
+    /**
+     * @notice Should not be generally called by a direct user
+     * @dev Handler function that get's called on any ERC721
+     * transfer to this function -- accepts only transfers
+     * initiated by itself.
+     */
     function onERC721Received(
         address operator,
         address,

@@ -5,6 +5,10 @@
   </h2>
   <button v-if="connected" @click="toggleHidden">{{hidden ? 'Show' : 'Hide'}} Methods</button>
   <h6>Status: {{connected ? 'Connected' : 'Disconnected'}}</h6>
+  <div v-if="events.length > 0">
+    <h4>Events emitted by this contract</h4>
+    <p v-for="e in events">{{e.event}}: ({{e.data}})</p>
+  </div>
   <form v-if="!hidden || !connected"
     v-for="f in fields" :key="f.id" 
     @submit.prevent="handleDoMethod(f.id)"
@@ -38,6 +42,7 @@ export default {
     hidden: true,
     obj: null,
     fields: [],
+    events: [],
     placeholders: {
       'uint256': '100',
       'uint256[]': '[100, 101]',
@@ -93,8 +98,14 @@ export default {
       this.obj.events.allEvents({})
         .on('connected', () => this.connected = true)
         .on('data', ev => {
-          console.log('Event:', ev);
-          alert('New Event');
+          console.log(`${ev.event} Event: `, ev);
+          this.events.push({
+            event: ev.event,
+            data: Object.fromEntries(Object.keys(ev.returnValues)
+              .filter(k => isNaN(k))
+              .map(k => [k, ev.returnValues[k]])
+            ),
+          });
         });
     },
     toggleHidden() {

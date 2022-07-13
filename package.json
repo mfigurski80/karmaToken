@@ -8,15 +8,15 @@
   },
   "scripts": {
     "build": "truffle compile --all",
+    "build:site": "npm run build; snowpack build",
     "dev": "truffle dev > /dev/null &",
+    "dev:site": "npm run dev && sleep 6; npm run deploy; truffle exec fundAccount.js; snowpack dev",
     "test": "truffle test",
     "coverage": "truffle run coverage",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
     "report-addresses": "truffle network && truffle network > public/addresses.txt",
     "deploy": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate; npm run report-addresses",
-    "deploy-testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test; npm run report-addresses",
-    "start": "npm run dev; sleep 6; npm deploy; snowpack dev",
-    "buildSite": "npm run build; snowpack build"
+    "deploy:testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test; npm run report-addresses"
   },
   "author": "",
   "license": "ISC",

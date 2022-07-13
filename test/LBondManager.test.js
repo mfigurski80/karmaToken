@@ -139,7 +139,7 @@ contract('LBondManager', accounts => {
         
     });
     
-    describe('generic read bond', () => {
+    describe('generic read/write bond', () => {
 
         it('reads a bond', async () => {
             const alp = '0x00FFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000';
@@ -165,10 +165,6 @@ contract('LBondManager', accounts => {
                 couponSize: 10, faceValue: 10,
                 beneficiary: accounts[0], minter: accounts[0]
             });
-            // console.log('         [][  Co  ][nP][cP][ cr ][      beneficiary');
-            // console.log(`Alpha: ${alp}`);
-            // console.log('         [  fv  ][    st    ][Pd][        minter');
-            // console.log(`Beta:  ${bet}`);
             const r = await instance.readBond(alp, bet);
             assert.equal(r.couponSize, 10);
             assert.equal(r.faceValue, 10);
@@ -176,8 +172,34 @@ contract('LBondManager', accounts => {
             assert.equal(r.flag, false);
             assert.equal(r.periodDuration, 60 * 60);
             assert.equal(r.startTime, now);
-        })
+        });
 
+        it.only('can generate both slots', async () => {
+            const now = Math.floor(Date.now() / 1000);
+            const alp = await instance.buildAlpha(
+                true, 10, 12, 1, 2, accounts[0]
+            );
+            const bet = await instance.buildBeta(
+                100, now, 60*60, accounts[1]
+            );
+            const b = await instance.readBond(alp, bet);
+            // console.log('         [][ Coup ][nP][cP][ cur][     beneficiary ...');
+            // console.log(`Alpha: ${alp}`);
+            // console.log('         [ face ][   start  ][Pd][     minter ...');
+            // console.log(`Beta:  ${bet}`);
+            // console.log(b);
+            assert.equal(b.flag, true);
+            assert.equal(b.couponSize, 10);
+            assert.equal(b.nPeriods, 12);
+            assert.equal(b.curPeriod, 1);
+            assert.equal(b.currencyRef, 2);
+            assert.equal(b.beneficiary, accounts[0]);
+            assert.equal(b.faceValue, 100);
+            assert.equal(b.startTime, now);
+            assert.equal(b.periodDuration, 60*60);
+            assert.equal(b.minter, accounts[1]);
+        });
     });
+
 
 });

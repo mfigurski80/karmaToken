@@ -15,6 +15,9 @@ struct Bond {
 }
 
 library LBondManager {
+    /**
+     * @dev describes the 7-bit format id that LBondManager accepts
+     */
     function supportedFormat() public pure returns (uint8) {
         return 0;
     }
@@ -148,7 +151,7 @@ library LBondManager {
     // NO DATA-SPECIFIC WRITING NEEDS TO HAPPEN IN BETA SLOT
 
     /* ###################
-     *    Generic Reads
+     *    Generic Reads + Writes
      * ################### */
 
     function fillBondFromAlpha(bytes32 alp, Bond memory b)
@@ -176,6 +179,12 @@ library LBondManager {
         return b;
     }
 
+    /**
+     * @notice Reads full bond from given alpha and
+     * beta parts
+     * @param alp Alpha part of the bond data 
+     * @param bet Beta part of the bond data
+     */
     function readBond(bytes32 alp, bytes32 bet)
         public
         pure
@@ -184,4 +193,111 @@ library LBondManager {
         b = fillBondFromAlpha(alp, b);
         b = fillBondFromBeta(bet, b);
     }
+
+    function buildAlpha(
+      bool flag,
+      uint256 couponSize,
+      uint16 nPeriods,
+      uint16 curPeriod,
+      uint32 currencyRef,
+      address beneficiary
+    )
+      public
+      pure
+      returns (bytes32 alp)
+    {
+      uint8 flagNFormat = flag ? 1 : 0;
+
+      uint32 couponSizeMult = 0; 
+      uint32 couponSizeEnc = uint32(couponSize); 
+      if (couponSize > 2**30) {
+        couponSizeMult = 1;
+        couponSizeEnc = uint32(couponSize / 1 gwei);
+      }
+      if (couponSize > 1 gwei * 2**30) {
+        couponSizeMult = 2;
+        couponSizeEnc = uint32(couponSize / (1 ether / 1000));
+      }
+      if (couponSize > 1 ether * 2**30 / 1000) {
+        couponSizeMult = 3;
+        couponSizeEnc = uint32(couponSize / 1 ether);
+      }
+      require(couponSizeEnc < 2**30,
+        "LBondManager: couponSize too large to encode");
+      couponSizeEnc = (couponSizeEnc) | (couponSizeMult << 30);
+
+      require(currencyRef < 2**24, 
+        "LBondManager: currencyRef too large to encode");
+      uint24 currencyRefEnc = uint24(currencyRef);
+
+      return bytes32(abi.encodePacked(
+        flagNFormat, couponSizeEnc, nPeriods, curPeriod, currencyRefEnc, beneficiary
+      ));
+    }
+
+    function buildBeta(
+      uint256 faceValue,
+      uint64 startTime,
+      uint64 periodDuration,
+      address minter
+    ) public pure returns (bytes32 bet) {
+      uint32 faceValueMult = 0;
+      uint32 faceValueEnc = uint32(faceValue); 
+      if (faceValue > 2**30) {
+        faceValueMult = 1;
+        faceValueEnc = uint32(faceValue / 1 gwei);
+      }
+      if (faceValue > 1 gwei * 2**30) {
+        faceValueMult = 2;
+        faceValueEnc = uint32(faceValue / (1 ether / 1000));
+      }
+      if (faceValue > 1 ether * 2**30 / 1000) {
+        faceValueMult = 3;
+        faceValueEnc = uint32(faceValue / 1 ether);
+      }
+      require(faceValueEnc < 2**30,
+        "LBondManager: faceValue too large to encode");
+      faceValueEnc = (faceValueEnc) | (faceValueMult << 30);
+
+      uint48 startTimeEnc = uint48(startTime);
+      require(startTime < 2**48,
+        "LBondManager: startTime too large to encode");
+
+      uint16 periodDurationMult = 0;
+      uint16 periodDurationEnc = uint16(periodDuration);
+      if (periodDuration > 2**14) {
+        periodDurationMult = 1;
+        periodDurationEnc = uint16(periodDuration / 60);
+      }
+      if (periodDuration > 60 * 2**14) {
+        periodDurationMult = 2;
+        periodDurationEnc = uint16(periodDuration / (60*60));
+      }
+      if (periodDuration > 60 * 60 * 2**14) {
+        periodDurationMult = 3;
+        periodDurationEnc = uint16(periodDuration / (60*60*24));
+      }
+      require(periodDurationEnc < 2**14,
+        "LBondManager: periodDuration too large to encode");
+      periodDurationEnc = (periodDurationEnc) | (periodDurationMult << 14);
+
+      return bytes32(abi.encodePacked(
+        faceValueEnc, startTimeEnc, periodDurationEnc, minter
+      ));
+    }
+
+    function buildBondBytes(Bond calldata b) 
+      external 
+      pure 
+      returns (bytes32 alp, bytes32 bet)
+    {
+      alp = buildAlpha(
+        b.flag, b.couponSize, b.nPeriods, b.curPeriod, 
+        b.currencyRef, b.beneficiary
+      );
+      bet = buildBeta(
+        b.faceValue, b.startTime, b.periodDuration, b.minter
+      );
+    }
+
 }
