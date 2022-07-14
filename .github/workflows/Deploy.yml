@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
-    runs-on: ubunutu-latest
+  contracts:
+    runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
 
@@ -21,7 +21,55 @@ jobs:
           node-version: 16.x
           cache: npm
 
+      - name: Install project dependencies
+        run: npm install
+
       - name: Deploy to Test Net
-        run: ls
+        run: npm run deploy:testnet
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: contract-abis
+          path: build
+        
+      - uses: actions/upload-artifact@v3
+        with:
+          name: address-report
+          path: public/addresses.txt
+  pages:
+    needs: contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: npm
+
+      - name: Install project dependencies
+        run: npm install
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: contract-abis
+
+      - uses: actions/download-artifacts@v3
+        with:
+          name: address-report
+
+      - name: Build site
+        run: npm run build:site
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.3.4
+        with:
+          folder: publicBuild
+
+
+
+
+
 
 

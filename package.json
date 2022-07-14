@@ -8,7 +8,7 @@
   },
   "scripts": {
     "build": "truffle compile --all",
-    "build:site": "npm run build; snowpack build",
+    "build:site": "snowpack build",
     "dev": "truffle dev > /dev/null &",
     "dev:site": "npm run dev; sleep 6; npm run deploy; truffle exec fundAccount.js; snowpack dev",
     "test": "truffle test",
