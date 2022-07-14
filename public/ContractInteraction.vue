@@ -6,7 +6,7 @@
   <button v-if="connected" @click="toggleHidden">{{hidden ? 'Show' : 'Hide'}} Methods</button>
   <h6>Status: {{connected ? 'Connected' : 'Disconnected'}}</h6>
   <div v-if="events.length > 0">
-    <h4>Events emitted by this contract</h4>
+    <h4>Events emitted by Your Transactions</h4>
     <p v-for="e in events" :key={e}>{{e.event}}: ({{e.data}})</p>
   </div>
   <div v-if="!hidden || !connected">
@@ -97,17 +97,18 @@ export default {
         }));
     },
     connectEvents(cJ) {
-      console.log(`${this.contract.name}: Connecting Events`);
-      this.obj.events.allEvents({})
-        .on('connected', () => this.connected = true)
-        .on('data', ev => {
-          console.log(`${ev.event} Event: `, ev);
-          alert(`New ${ev.event} Event!`);
-          this.events.push({
-            event: ev.event,
-            data: utils.removeNumberKeys(ev.returnValues),
-          });
-        });
+      this.connected=true;
+      /* console.log(`${this.contract.name}: Connecting Events`); */
+      /* this.obj.events.allEvents({}) */
+      /* .on('connected', () => this.connected = true) */
+      /* .on('data', ev => { */
+      /* console.log(`${ev.event} Event: `, ev); */
+      /* alert(`New ${ev.event} Event!`); */
+      /* this.events.push({ */
+      /* event: ev.event, */
+      /* data: utils.removeNumberKeys(ev.returnValues), */
+      /* }); */
+      /* };); */
     },
     toggleHidden() {
       this.hidden = !this.hidden;
@@ -141,6 +142,12 @@ export default {
       });
       m.response = res;
       if (typeof res === 'object') m.response = utils.removeNumberKeys(res);
+      this.events = this.events.concat(res.events ? Object.keys(res.events)
+        .map(evKey => ({
+          event: res.events[evKey].event,
+          data: utils.removeNumberKeys(res.events[evKey].returnValues),
+        })) : []
+      );
       console.log('Response: ', res);
     },
   },
