@@ -36,6 +36,8 @@
 </template>
 
 <script>
+import * as utils from './utils.js';
+
 export default {
   name: 'ContractInteraction',
   props: ["contract", "web3", "accounts"],
@@ -95,18 +97,15 @@ export default {
         }));
     },
     connectEvents(cJ) {
-      /* console.log(Object.keys(this.obj.events).filter((_, i) => i % 3 === 0)); */
       console.log(`${this.contract.name}: Connecting Events`);
       this.obj.events.allEvents({})
         .on('connected', () => this.connected = true)
         .on('data', ev => {
           console.log(`${ev.event} Event: `, ev);
+          alert(`New ${ev.event} Event!`);
           this.events.push({
             event: ev.event,
-            data: Object.fromEntries(Object.keys(ev.returnValues)
-              .filter(k => isNaN(k))
-              .map(k => [k, ev.returnValues[k]])
-            ),
+            data: utils.removeNumberKeys(ev.returnValues),
           });
         });
     },
@@ -116,7 +115,16 @@ export default {
     async handleDoMethod(id) {
       // user submitted data for specific method to be performed
       const m = this.fields[id];
-      const inp = m.inputs.map(inp => inp.value);
+      // call a formatting function unless type is not recognized
+      const formattingFns = ({
+        'bool': v => v === 'true' || v === 'True',
+        'uint': v => Math.abs(+v),
+        'int': v => +v,
+      });
+      const inp = m.inputs
+        .map(inp => 
+          (formattingFns[inp.type.replace(/\d/g, '')] || (v => v))(inp.value));
+      // decide whether to send or call request
       let prom = this.obj.methods[m.name](...inp);
       if (m.constant) { // just inspect data
         console.log(`Calling ${m.name}(${inp})`);
@@ -132,6 +140,7 @@ export default {
         return;
       });
       m.response = res;
+      if (typeof res === 'object') m.response = utils.removeNumberKeys(res);
       console.log('Response: ', res);
     },
   },

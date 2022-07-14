@@ -15,8 +15,8 @@
     "coverage": "truffle run coverage",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
     "report-addresses": "truffle network && truffle network > public/addresses.txt",
-    "deploy": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate; npm run report-addresses",
-    "deploy:testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test; npm run report-addresses"
+    "deploy": "npm run build; DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset; npm run report-addresses",
+    "deploy:testnet": "npm run build; DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset; npm run report-addresses"
   },
   "author": "",
   "license": "ISC",
