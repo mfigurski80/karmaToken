@@ -35,7 +35,7 @@ jobs:
         run: npm install
 
       - name: Launch truffle development chain
-        run: npm run-script dev
+        run: npm run-script dev; sleep 6
 
       - name: Run tests
         run: npm run-script test
@@ -59,12 +59,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Setup Node.js Environment
         uses: actions/setup-node@v2.3.0
         with:
           node-version: 16.x
           cache: npm
+
       - name: Install project dependencies
         run: npm install
+
       - name: Run Code Coverage Reporter
         run: npm run-script coverage

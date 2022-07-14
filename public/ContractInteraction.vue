@@ -7,30 +7,32 @@
   <h6>Status: {{connected ? 'Connected' : 'Disconnected'}}</h6>
   <div v-if="events.length > 0">
     <h4>Events emitted by this contract</h4>
-    <p v-for="e in events">{{e.event}}: ({{e.data}})</p>
+    <p v-for="e in events" :key={e}>{{e.event}}: ({{e.data}})</p>
   </div>
-  <form v-if="!hidden || !connected"
-    v-for="f in fields" :key="f.id" 
-    @submit.prevent="handleDoMethod(f.id)"
-  >
-    <hr :style="{ borderStyle: 'dotted' }" />
-    <h4>Function: <code>{{f.name}}</code></h4>
-    <p>{{f.notice}}</p>
-    <p>{{f.details}}</p>
-    <label v-if="f.payable">Wei to send: <input placeholder="10000"
-      v-model.number="f.payableValue"
-    /></label>
-    <div v-for="i in f.inputs">
+  <div v-if="!hidden || !connected">
+    <form 
+      v-for="f in fields" :key="f.id" 
+      @submit.prevent="handleDoMethod(f.id)"
+    >
+      <hr :style="{ borderStyle: 'dotted' }" />
+      <h4>Function: <code>{{f.name}}</code></h4>
+      <p>{{f.notice}}</p>
+      <p>{{f.details}}</p>
+      <label v-if="f.payable">Wei to send: <input placeholder="10000"
+        v-model.number="f.payableValue"
+      /></label>
+      <div v-for="i in f.inputs" :key="i.name">
 
-      <label>Parameter <b>{{i.name}}</b> ({{i.type}}) -- {{i.description}} <input
-        v-model='i.value'
-        :placeholder="placeholders[i.type]"
-      /></label> 
+        <label>Parameter <b>{{i.name}}</b> ({{i.type}}) -- {{i.description}} <input
+          v-model='i.value'
+          :placeholder="placeholders[i.type]"
+        /></label> 
 
-    </div>
-    <button type="submit">Call Method</button>
-    <p v-if="f.response">Last Response: {{f.response}}</p>
-  </form>
+      </div>
+      <button type="submit">Call Method</button>
+      <p v-if="f.response">Last Response: {{f.response}}</p>
+    </form>
+  </div>
 </template>
 
 <script>

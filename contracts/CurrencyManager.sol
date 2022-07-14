@@ -23,22 +23,21 @@ struct Currency {
 }
 
 /**
- * @title Contract that maintains an internal currency listings
+ * @title 💴 Currency contract that maintains an internal currency listings
  * @notice This listing is referred to in all future bonds and
  * collateral structures, used to figure out payment.
  */
 contract CurrencyManager {
     // TODO: generic addCurrency?
-    // TODO: check if address being added implements correct interface
 
     /**
-     * @notice Array holding currency listing. Note that position 0
-     * will always be taken by the Ethereum currency type, as
-     * ensured by the constructor.
+     * @notice Array holding currency listing.
+     * @dev Note that position 0 will always be taken by the Ethereum
+     * currency type, as ensured by the constructor.
      */
     Currency[] public currencies;
 
-    /// @notice new currency has been added to internal listing
+    /// @notice New currency has been added to internal listing
     event CurrencyAdded(
         uint256 id,
         CurrencyType currencyType,
@@ -104,7 +103,7 @@ contract CurrencyManager {
     }
 
     /**
-     * @dev transfers any supported currency using it's own interface
+     * @dev Safely tansfer any supported currency using its interface
      * @param cur Currency type to transfer
      * @param from Which address to transfer from
      * @param to Which address to transfer to

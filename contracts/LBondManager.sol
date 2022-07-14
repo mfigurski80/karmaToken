@@ -14,6 +14,11 @@ struct Bond {
     address minter;
 }
 
+/**
+ * @title 🗜️ Library containing utils for reading and writing bonds
+ * @notice Bonds are bit-compressed in storage -- must be read by
+ * this library
+ */
 library LBondManager {
     /**
      * @dev describes the 7-bit format id that LBondManager accepts
@@ -180,9 +185,8 @@ library LBondManager {
     }
 
     /**
-     * @notice Reads full bond from given alpha and
-     * beta parts
-     * @param alp Alpha part of the bond data 
+     * @notice Read full bond from given alpha and beta parts
+     * @param alp Alpha part of the bond data
      * @param bet Beta part of the bond data
      */
     function readBond(bytes32 alp, bytes32 bet)
@@ -194,110 +198,164 @@ library LBondManager {
         b = fillBondFromBeta(bet, b);
     }
 
+    /**
+     * @notice Build bond alpha bytes from parts
+     * @param flag Boolean describing if bond is defaulted
+     * (usually starts as false)
+     * @param couponSize Amount to pay each period
+     * @param nPeriods Number of periods until completion
+     * @param curPeriod Current period of the bond (usually
+     * starts at 0)
+     * @param currencyRef Id of currency to expect payments
+     * to be made in
+     * @param beneficiary Account address of recipient of all
+     * payments
+     * @return alp Alpha bytes32 used to represent the first
+     * part of the bond
+     * @dev Note that setting curPeriod to something greater
+     * than nPeriods means bond will be immediately interpreted
+     * as 'completed'.
+     * @dev Some fields may be encoded with smaller resolution
+     * than may be apparent to decrease storage space -- these
+     * include: couponSize
+     */
     function buildAlpha(
-      bool flag,
-      uint256 couponSize,
-      uint16 nPeriods,
-      uint16 curPeriod,
-      uint32 currencyRef,
-      address beneficiary
-    )
-      public
-      pure
-      returns (bytes32 alp)
-    {
-      uint8 flagNFormat = flag ? 1 : 0;
+        bool flag,
+        uint256 couponSize,
+        uint16 nPeriods,
+        uint16 curPeriod,
+        uint32 currencyRef,
+        address beneficiary
+    ) public pure returns (bytes32 alp) {
+        uint8 flagNFormat = flag ? 1 : 0;
 
-      uint32 couponSizeMult = 0; 
-      uint32 couponSizeEnc = uint32(couponSize); 
-      if (couponSize > 2**30) {
-        couponSizeMult = 1;
-        couponSizeEnc = uint32(couponSize / 1 gwei);
-      }
-      if (couponSize > 1 gwei * 2**30) {
-        couponSizeMult = 2;
-        couponSizeEnc = uint32(couponSize / (1 ether / 1000));
-      }
-      if (couponSize > 1 ether * 2**30 / 1000) {
-        couponSizeMult = 3;
-        couponSizeEnc = uint32(couponSize / 1 ether);
-      }
-      require(couponSizeEnc < 2**30,
-        "LBondManager: couponSize too large to encode");
-      couponSizeEnc = (couponSizeEnc) | (couponSizeMult << 30);
+        uint32 couponSizeMult = 0;
+        uint32 couponSizeEnc = uint32(couponSize);
+        if (couponSize > 2**30) {
+            couponSizeMult = 1;
+            couponSizeEnc = uint32(couponSize / 1 gwei);
+        }
+        if (couponSize > 1 gwei * 2**30) {
+            couponSizeMult = 2;
+            couponSizeEnc = uint32(couponSize / (1 ether / 1000));
+        }
+        if (couponSize > (1 ether * 2**30) / 1000) {
+            couponSizeMult = 3;
+            couponSizeEnc = uint32(couponSize / 1 ether);
+        }
+        require(
+            couponSizeEnc < 2**30,
+            "LBondManager: couponSize too large to encode"
+        );
+        couponSizeEnc = (couponSizeEnc) | (couponSizeMult << 30);
 
-      require(currencyRef < 2**24, 
-        "LBondManager: currencyRef too large to encode");
-      uint24 currencyRefEnc = uint24(currencyRef);
+        require(
+            currencyRef < 2**24,
+            "LBondManager: currencyRef too large to encode"
+        );
+        uint24 currencyRefEnc = uint24(currencyRef);
 
-      return bytes32(abi.encodePacked(
-        flagNFormat, couponSizeEnc, nPeriods, curPeriod, currencyRefEnc, beneficiary
-      ));
+        return
+            bytes32(
+                abi.encodePacked(
+                    flagNFormat,
+                    couponSizeEnc,
+                    nPeriods,
+                    curPeriod,
+                    currencyRefEnc,
+                    beneficiary
+                )
+            );
     }
 
+    /**
+     * @notice BUild bond beta bytes from parts
+     * @param faceValue Amount to pay at end of bond
+     * @param startTime Time this bond begins at, in
+     * seconds since 1970
+     * @param periodDuration How long between each period of
+     * the bond, in seconds
+     * @param minter Account address of the bond creator
+     * @dev Some fields may be encoded with smaller resolution
+     * than may be apparent to decrease storage space -- these
+     * include: faceValue and periodDuration
+     */
     function buildBeta(
-      uint256 faceValue,
-      uint64 startTime,
-      uint64 periodDuration,
-      address minter
+        uint256 faceValue,
+        uint64 startTime,
+        uint64 periodDuration,
+        address minter
     ) public pure returns (bytes32 bet) {
-      uint32 faceValueMult = 0;
-      uint32 faceValueEnc = uint32(faceValue); 
-      if (faceValue > 2**30) {
-        faceValueMult = 1;
-        faceValueEnc = uint32(faceValue / 1 gwei);
-      }
-      if (faceValue > 1 gwei * 2**30) {
-        faceValueMult = 2;
-        faceValueEnc = uint32(faceValue / (1 ether / 1000));
-      }
-      if (faceValue > 1 ether * 2**30 / 1000) {
-        faceValueMult = 3;
-        faceValueEnc = uint32(faceValue / 1 ether);
-      }
-      require(faceValueEnc < 2**30,
-        "LBondManager: faceValue too large to encode");
-      faceValueEnc = (faceValueEnc) | (faceValueMult << 30);
+        uint32 faceValueMult = 0;
+        uint32 faceValueEnc = uint32(faceValue);
+        if (faceValue > 2**30) {
+            faceValueMult = 1;
+            faceValueEnc = uint32(faceValue / 1 gwei);
+        }
+        if (faceValue > 1 gwei * 2**30) {
+            faceValueMult = 2;
+            faceValueEnc = uint32(faceValue / (1 ether / 1000));
+        }
+        if (faceValue > (1 ether * 2**30) / 1000) {
+            faceValueMult = 3;
+            faceValueEnc = uint32(faceValue / 1 ether);
+        }
+        require(
+            faceValueEnc < 2**30,
+            "LBondManager: faceValue too large to encode"
+        );
+        faceValueEnc = (faceValueEnc) | (faceValueMult << 30);
 
-      uint48 startTimeEnc = uint48(startTime);
-      require(startTime < 2**48,
-        "LBondManager: startTime too large to encode");
+        uint48 startTimeEnc = uint48(startTime);
+        require(
+            startTime < 2**48,
+            "LBondManager: startTime too large to encode"
+        );
 
-      uint16 periodDurationMult = 0;
-      uint16 periodDurationEnc = uint16(periodDuration);
-      if (periodDuration > 2**14) {
-        periodDurationMult = 1;
-        periodDurationEnc = uint16(periodDuration / 60);
-      }
-      if (periodDuration > 60 * 2**14) {
-        periodDurationMult = 2;
-        periodDurationEnc = uint16(periodDuration / (60*60));
-      }
-      if (periodDuration > 60 * 60 * 2**14) {
-        periodDurationMult = 3;
-        periodDurationEnc = uint16(periodDuration / (60*60*24));
-      }
-      require(periodDurationEnc < 2**14,
-        "LBondManager: periodDuration too large to encode");
-      periodDurationEnc = (periodDurationEnc) | (periodDurationMult << 14);
+        uint16 periodDurationMult = 0;
+        uint16 periodDurationEnc = uint16(periodDuration);
+        if (periodDuration > 2**14) {
+            periodDurationMult = 1;
+            periodDurationEnc = uint16(periodDuration / 60);
+        }
+        if (periodDuration > 60 * 2**14) {
+            periodDurationMult = 2;
+            periodDurationEnc = uint16(periodDuration / (60 * 60));
+        }
+        if (periodDuration > 60 * 60 * 2**14) {
+            periodDurationMult = 3;
+            periodDurationEnc = uint16(periodDuration / (60 * 60 * 24));
+        }
+        require(
+            periodDurationEnc < 2**14,
+            "LBondManager: periodDuration too large to encode"
+        );
+        periodDurationEnc = (periodDurationEnc) | (periodDurationMult << 14);
 
-      return bytes32(abi.encodePacked(
-        faceValueEnc, startTimeEnc, periodDurationEnc, minter
-      ));
+        return
+            bytes32(
+                abi.encodePacked(
+                    faceValueEnc,
+                    startTimeEnc,
+                    periodDurationEnc,
+                    minter
+                )
+            );
     }
 
-    function buildBondBytes(Bond calldata b) 
-      external 
-      pure 
-      returns (bytes32 alp, bytes32 bet)
+    function buildBondBytes(Bond calldata b)
+        external
+        pure
+        returns (bytes32 alp, bytes32 bet)
     {
-      alp = buildAlpha(
-        b.flag, b.couponSize, b.nPeriods, b.curPeriod, 
-        b.currencyRef, b.beneficiary
-      );
-      bet = buildBeta(
-        b.faceValue, b.startTime, b.periodDuration, b.minter
-      );
+        alp = buildAlpha(
+            b.flag,
+            b.couponSize,
+            b.nPeriods,
+            b.curPeriod,
+            b.currencyRef,
+            b.beneficiary
+        );
+        bet = buildBeta(b.faceValue, b.startTime, b.periodDuration, b.minter);
     }
-
 }

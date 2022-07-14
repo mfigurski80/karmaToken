@@ -10,16 +10,27 @@ struct Collateral {
     uint256 currencyRef;
 }
 
+/**
+ * @title 🫀 CollateralManager contract for handling bond
+ * collateral.
+ */
 contract CollateralManager is LifecycleManager {
     using LBondManager for bytes32;
 
+    /**
+     * @notice Mapping holding collaterals associated with
+     * each bond id
+     */
     mapping(uint256 => Collateral[]) public collateral;
 
+    // TODO: add field for amount or nft id?
+    /// @notice New collateral has been attached to bond
     event CollateralAdded(
         uint256 bondId,
         uint256 collateralId,
         CurrencyType collateralType
     );
+    /// @notice Collateral has been released from bond
     event CollateralReleased(uint256 bondId, uint256 collateralId, address to);
 
     constructor(
@@ -30,23 +41,45 @@ contract CollateralManager is LifecycleManager {
         LifecycleManager(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
     {}
 
+    /**
+     * @notice Add a generic currency collateral to a bond
+     * @param id Id of bond to attach collateral to
+     * @param currencyRef Id of currency collateral is
+     * denominated in
+     * @param valueOrId Either the amount of tokens to attach,
+     * or the NFT id being attached (depending on currency)
+     */
     function addCollateral(
         uint256 id,
         uint256 currencyRef,
         uint256 valueOrId
     ) external payable {
+        // TODO: add from paramenter?
         collateral[id].push(Collateral(valueOrId, currencyRef));
         CurrencyType typ = CurrencyType.Ether;
-        if (currencyRef == 0) { // ether special case
+        if (currencyRef == 0) {
+            // ether special case
             assert(msg.value == valueOrId);
         } else {
             Currency storage c = currencies[currencyRef];
             typ = c.currencyType;
-            _transferGenericCurrency(c, msg.sender, address(this), valueOrId, "");
+            _transferGenericCurrency(
+                c,
+                msg.sender,
+                address(this),
+                valueOrId,
+                ""
+            );
         }
         emit CollateralAdded(id, collateral[id].length - 1, typ);
     }
 
+    /**
+     * @dev Internal method to check if user is allowed
+     * to release collateral from a bond
+     * @param bondId Id of bond to check for
+     * @param operator Account address to authorize
+     */
     function _isAuthorizedToReleaseCollateral(uint256 bondId, address operator)
         internal
         view
@@ -83,7 +116,9 @@ contract CollateralManager is LifecycleManager {
         for (uint256 i = 0; i < bondIds.length; i++) {
             uint256 bondId = bondIds[i];
             // Check if this is an un-cached bond?
-            if (lastAuthorizedBond != bondId || lastAuthorizedBond == 2**256-1) {
+            if (
+                lastAuthorizedBond != bondId || lastAuthorizedBond == 2**256 - 1
+            ) {
                 // It is! Authorize new release
                 require(
                     _isAuthorizedToReleaseCollateral(bondId, msg.sender),
@@ -91,8 +126,8 @@ contract CollateralManager is LifecycleManager {
                 );
                 lastAuthorizedBond = bondId;
             }
-            // Get bond collateral (last in array), remove from storage 
-            uint256 collateralId = collateral[bondId].length - 1; 
+            // Get bond collateral (last in array), remove from storage
+            uint256 collateralId = collateral[bondId].length - 1;
             Collateral memory c = collateral[bondId][collateralId];
             collateral[bondId].pop();
             require(
@@ -100,7 +135,10 @@ contract CollateralManager is LifecycleManager {
                 "CollateralManager: this collateral has already been released"
             );
             // Check if Collateral refers to a un-cached currency
-            if (lastCurrencyRef != c.currencyRef || lastCurrencyRef == 2**256-1) {
+            if (
+                lastCurrencyRef != c.currencyRef ||
+                lastCurrencyRef == 2**256 - 1
+            ) {
                 // It does! Re-load cached currency
                 currency = currencies[c.currencyRef];
                 lastCurrencyRef = c.currencyRef;
@@ -111,7 +149,7 @@ contract CollateralManager is LifecycleManager {
                 address(this),
                 to,
                 c.amountOrId,
-                data 
+                data
             );
             emit CollateralReleased(bondId, collateralId, to);
         }
@@ -125,5 +163,5 @@ contract CollateralManager is LifecycleManager {
         assert(collateral[id].length == 0);
         delete collateral[id];
         super.destroyBond(id);
-    } 
+    }
 }

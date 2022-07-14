@@ -10,7 +10,7 @@
     "build": "truffle compile --all",
     "build:site": "npm run build; snowpack build",
     "dev": "truffle dev > /dev/null &",
-    "dev:site": "npm run dev && sleep 6; npm run deploy; truffle exec fundAccount.js; snowpack dev",
+    "dev:site": "npm run dev; sleep 6; npm run deploy; truffle exec fundAccount.js; snowpack dev",
     "test": "truffle test",
     "coverage": "truffle run coverage",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",

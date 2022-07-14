@@ -7,9 +7,9 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 /**
- * @dev 🦓 LifecycleManager contract exposing methods related to bringing
- * a bond through it's full lifecycle of servicing, repayment, and
- * potentially default.
+ * @title 🦓 LifecycleManager contract exposing methods related to
+ * bringing a bond through it's full lifecycle of servicing,
+ * repayment, and   potentially default.
  */
 contract LifecycleManager is BondToken {
     using LBondManager for bytes32;
@@ -34,7 +34,7 @@ contract LifecycleManager is BondToken {
     /**
      * @dev Internal method contains logic for updating bond periods
      * @param b Bond structure with alpha elements filled
-     * @param alpha bytes32 of first bond slot data
+     * @param alpha First bond slot data
      * @param id Id of bond to apply service payments to
      * @param value Amount of service payments to apply
      */
@@ -68,17 +68,17 @@ contract LifecycleManager is BondToken {
     }
 
     /**
-     * @notice Services a specific bond with generic currency
-     * @param id uint256 index of bond to service
-     * @param from address account to take value from
-     * @param value amount to apply to the bond, or the NFT id
-     * to transfer
-     * @param data bytes to send with the transaction
-     * 
-     * @dev For ether transactions, from and value still have
-     * to match or exceed the ether sent and the message sender
-     * @dev Note that call data will not get forwarded in all
-     * cases
+     * @notice Service a specific bond with generic currency
+     * @param id Id of bond to service
+     * @param from Account address to take value from
+     * @param value Either the amount to apply to the bond, or
+     * the NFT id to transfer as service payment
+     * @param data Additonal bytes to send with the transaction
+     *
+     * @dev For ether transactions, from and value still have to
+     * match or exceed the ether sent and the message sender
+     * @dev Note that call data will only get forwarded for
+     * supporting currencies
      */
     function serviceBond(
         uint256 id,
@@ -86,13 +86,19 @@ contract LifecycleManager is BondToken {
         uint256 value,
         bytes calldata data
     ) public payable {
+        // TODO: if someone approves this contract as manager,
+        // can I just take their money by making them the 'from'?
         // read bond
         Bond memory b;
-        bytes32 alpha = bonds[id*2]; // READ A
+        bytes32 alpha = bonds[id * 2]; // READ A
         b = alpha.fillBondFromAlpha(b);
-        require(b.flag == false, "LifecycleManager: cannot service defaulted bond");
-        if (b.currencyRef == 0) { // special case for ether
-            assert(msg.value >= value); 
+        require(
+            b.flag == false,
+            "LifecycleManager: cannot service defaulted bond"
+        );
+        if (b.currencyRef == 0) {
+            // special case for ether
+            assert(msg.value >= value);
             assert(msg.sender == from);
             _updateBondPeriod(b, alpha, id, value);
             (bool success, ) = b.beneficiary.call{value: value}(data);
@@ -102,8 +108,7 @@ contract LifecycleManager is BondToken {
             CurrencyType typ = c.currencyType;
             if (typ == CurrencyType.ERC721 || typ == CurrencyType.ERC1155NFT)
                 _updateBondPeriod(b, alpha, id, 1);
-            else
-                _updateBondPeriod(b, alpha, id, value);
+            else _updateBondPeriod(b, alpha, id, value);
             _transferGenericCurrency(c, from, b.beneficiary, value, data);
         }
         emit BondServiced(id, from, b.curPeriod);
@@ -114,7 +119,7 @@ contract LifecycleManager is BondToken {
     // to commit a3cc493 for last version
 
     /**
-     * @notice Should not be generally called by a direct user
+     * @notice SHOULD NOT be generally called by a direct user
      * @dev Handler function that get's called on any ERC1155
      * transfer to this function -- accepts only transfers
      * initiated by itself.
@@ -132,7 +137,7 @@ contract LifecycleManager is BondToken {
     }
 
     /**
-     * @notice Should not be generally called by a direct user
+     * @notice SHOULD NOT be generally called by a direct user
      * @dev Handler function that get's called on any ERC721
      * transfer to this function -- accepts only transfers
      * initiated by itself.
@@ -150,8 +155,9 @@ contract LifecycleManager is BondToken {
     // OTHER BOND MANAGEMENT
 
     /**
-     * @dev call bond to mark it as in default. Can only be performed
-     * by token owner or authorized operator.
+     * @notice Call bond to mark it as 'in default'.
+     * @dev Can only be performed by token owner or authorized
+     * operator.
      * @param id Id of bond to check for default
      */
     function callBond(uint256 id) public onlyValidOperator(id) {
@@ -174,9 +180,9 @@ contract LifecycleManager is BondToken {
     }
 
     /**
-     * @notice set bond as complete and forfeight future payments. Can only
-     * be performed by token owner or authorized operator.
-     * @param id uint256 bond index
+     * @notice Set bond as complete and forfeight future payments
+     * @dev Can only be performed by token owner or authorized operator.
+     * @param id Bond id
      */
     function forgiveBond(uint256 id) public onlyValidOperator(id) {
         bytes32 alpha = bonds[id * 2];
@@ -186,14 +192,16 @@ contract LifecycleManager is BondToken {
     }
 
     /**
-     * @notice destroy bond and all related resource, refunding gas
-     * @param id uin256 bond index
-     * @dev Needs to be overriden to remove collateral as well
+     * @notice Destroy bond and all related resource, refunding gas
+     * @dev Can only be performed by token owner or authorized operator.
+     * @param id Bond id
      */
     function destroyBond(uint256 id) public virtual onlyValidOperator(id) {
         // Note: raw version implies owner can destroy at any time
         // frees 4 slots, writes to one
-        delete bonds[id * 2]; 
+        // EXPECT this to be overriden by further funcitons as desctruction
+        // becomes conditioned on more things
+        delete bonds[id * 2];
         delete bonds[id * 2 + 1];
         address owner = _owners[id];
         delete _owners[id];
