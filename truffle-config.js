@@ -50,9 +50,11 @@ module.exports = {
       //  gasPrice: 1,
     },
     test: {
+      networkCheckTimeout: 20000,
       host: "173.62.205.157",
       port: 8545,
-      network_id: "3072"
+      network_id: "3072",
+      skipDryRun: true,
     }
     // Another network with more advanced options...
     // advanced: {

@@ -1,4 +1,4 @@
-name: Deploy Testnet
+name: Deploy To Testnet
 
 on:
   push:
@@ -10,54 +10,62 @@ on:
   workflow_dispatch:
 
 jobs:
-  contracts:
+
+  deploy-contracts:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-
       - name: Setup Node.js Environment
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: npm
-
       - name: Install project dependencies
-        run: npm install
+        run: npm ci 
+      - uses: c-hive/gha-npm-cache@v1
 
-      - name: Deploy to Test Net
-        run: npm run deploy:testnet
-
+      - name: Build Contracts
+        run: npm run build
       - uses: actions/upload-artifact@v3
         with:
           name: contract-abis
           path: build
-        
+
+      - name: Deploy to Test Net
+        run: npm run deploy:testnet
+
+      - name: Report Addresses
+        run: npm run report-addresses
       - uses: actions/upload-artifact@v3
         with:
           name: address-report
           path: public/addresses.txt
-  pages:
-    needs: contracts
+
+  deploy-pages:
+    needs: deploy-contracts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
       - name: Setup Node.js Environment
         uses: actions/setup-node@v3
         with:
           node-version: 16.x
           cache: npm
-
+      - uses: c-hive/gha-npm-cache@v1
       - name: Install project dependencies
-        run: npm install
+        run: npm ci 
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v3.0.0
         with:
           name: contract-abis
-
-      - uses: actions/download-artifacts@v3
+          path: build
+      - uses: actions/download-artifact@v3.0.0
         with:
           name: address-report
+          path: public
+
+      - name: Create code coverage report
+        run: npm run coverage
 
       - name: Build site
         run: npm run build:site

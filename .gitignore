@@ -1,9 +1,11 @@
 node_modules
 build
 publicBuild
+public/addresses.txt
 .vscode
 .env
 coverage.json
 coverage/
 .env
 .do
+
