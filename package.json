@@ -10,13 +10,14 @@
     "build": "truffle compile --all",
     "build:site": "snowpack build",
     "dev": "truffle dev > /dev/null &",
-    "dev:site": "npm run dev; sleep 6; npm run deploy; truffle exec fundAccount.js; snowpack dev",
+    "dev:site": "snowpack dev",
+    "dev:fund-account": "truffle exec fundAccount.js",
     "test": "truffle test",
     "coverage": "truffle run coverage",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
     "report-addresses": "truffle network && truffle network > public/addresses.txt",
-    "deploy": "npm run build; DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset; npm run report-addresses",
-    "deploy:testnet": "npm run build; DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset; npm run report-addresses"
+    "deploy": "npm run build; DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset",
+    "deploy:testnet": "npm run build; DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset"
   },
   "author": "",
   "license": "ISC",
