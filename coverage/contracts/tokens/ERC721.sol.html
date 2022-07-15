@@ -1,49 +1,44 @@
-<!doctype html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <title>Code coverage report for contracts/tokens/ERC721.sol</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="../../prettify.css" />
-    <link rel="stylesheet" href="../../base.css" />
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../prettify.css">
+    <link rel="stylesheet" href="../../base.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style type='text/css'>
-        .coverage-summary .sorter {
-            background-image: url(../../sort-arrow-sprite.png);
-        }
-    </style>
+    <style>.coverage-summary .sorter{background-image:url(../../sort-arrow-sprite.png)}
+</style>
 </head>
 <body>
-<div class='wrapper'>
-  <div class='pad1'>
+<div class="wrapper">
+  <div class="pad1">
     <h1>
       <a href="../../index.html">all files</a> / <a href="index.html">contracts/tokens/</a> ERC721.sol
     </h1>
-    <div class='clearfix'>
-      <div class='fl pad1y space-right2'>
+    <div class="clearfix">
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>0/50</span>
+        <span class="fraction">0/50</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/22</span>
+        <span class="fraction">0/22</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/21</span>
+        <span class="fraction">0/21</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>0/53</span>
+        <span class="fraction">0/53</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class="status-line low"></div>
 <pre><table class="coverage">
-<tr><td class="line-count quiet">1
+<tbody><tr><td class="line-count quiet">1
 2
 3
 4
@@ -835,9 +830,9 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     /**
      * @dev Checks is msg sender is listed as a valid operator
      */
-<span class="fstat-no" title="function not covered" >    modifier onlyValidOperator(uint256 id) {</span>
-<span class="cstat-no" title="statement not covered" >        address owner = _owners[id];</span>
-<span class="cstat-no" title="statement not covered" >        require(</span>
+<span class="fstat-no" title="function not covered">    modifier onlyValidOperator(uint256 id) {</span>
+<span class="cstat-no" title="statement not covered">        address owner = _owners[id];</span>
+<span class="cstat-no" title="statement not covered">        require(</span>
             msg.sender == owner ||
                 _operatorApprovals[owner][msg.sender] ||
                 msg.sender == _tokenApprovals[id],
@@ -846,54 +841,54 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
         _;
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    modifier onlyTokenOwner(uint256 id) {</span>
-<span class="cstat-no" title="statement not covered" >        require(msg.sender == _owners[id], "ERC721: called is not owner")</span>;
+<span class="fstat-no" title="function not covered">    modifier onlyTokenOwner(uint256 id) {</span>
+<span class="cstat-no" title="statement not covered">        require(msg.sender == _owners[id], "ERC721: called is not owner")</span>;
         _;
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function _ownerOrOperatorOf(</span>
+<span class="fstat-no" title="function not covered">    function _ownerOrOperatorOf(</span>
         uint256 id,
         address owner,
         address operator
     ) internal view returns (bool) {
-<span class="cstat-no" title="statement not covered" >        return</span>
+<span class="cstat-no" title="statement not covered">        return</span>
             operator == owner ||
             _operatorApprovals[owner][operator] ||
             operator == _tokenApprovals[id];
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function _minterOrOperatorOf(address minter, address operator)</span>
+<span class="fstat-no" title="function not covered">    function _minterOrOperatorOf(address minter, address operator)</span>
         internal
         view
         returns (bool)
     {
-<span class="cstat-no" title="statement not covered" >        return operator == minter || _operatorApprovals[minter][operator];</span>
+<span class="cstat-no" title="statement not covered">        return operator == minter || _operatorApprovals[minter][operator];</span>
     }
 &nbsp;
     /**
      * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
      */
-<span class="fstat-no" title="function not covered" >    constructor(</span>
+<span class="fstat-no" title="function not covered">    constructor(</span>
         string memory name_,
         string memory symbol_,
         string memory uri_
     ) {
-<span class="cstat-no" title="statement not covered" >        name = name_</span>;
-<span class="cstat-no" title="statement not covered" >        symbol = symbol_</span>;
-<span class="cstat-no" title="statement not covered" >        _uri = uri_</span>;
+<span class="cstat-no" title="statement not covered">        name = name_</span>;
+<span class="cstat-no" title="statement not covered">        symbol = symbol_</span>;
+<span class="cstat-no" title="statement not covered">        _uri = uri_</span>;
     }
 &nbsp;
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-<span class="fstat-no" title="function not covered" >    function supportsInterface(bytes4 interfaceId)</span>
+<span class="fstat-no" title="function not covered">    function supportsInterface(bytes4 interfaceId)</span>
         public
         view
         virtual
         override(ERC165, IERC165)
         returns (bool)
     {
-<span class="cstat-no" title="statement not covered" >        return</span>
+<span class="cstat-no" title="statement not covered">        return</span>
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
             super.supportsInterface(interfaceId);
@@ -902,76 +897,76 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
     /**
      * @dev See {IERC721-balanceOf}.
      */
-<span class="fstat-no" title="function not covered" >    function balanceOf(address owner)</span>
+<span class="fstat-no" title="function not covered">    function balanceOf(address owner)</span>
         public
         view
         virtual
         override
         returns (uint256)
     {
-<span class="cstat-no" title="statement not covered" >        require(</span>
+<span class="cstat-no" title="statement not covered">        require(</span>
             owner != address(0),
             "ERC721: balance query for the zero address"
         );
-<span class="cstat-no" title="statement not covered" >        return _balances[owner];</span>
+<span class="cstat-no" title="statement not covered">        return _balances[owner];</span>
     }
 &nbsp;
     /**
      * @dev See {IERC721-ownerOf}.
      */
-<span class="fstat-no" title="function not covered" >    function ownerOf(uint256 tokenId)</span>
+<span class="fstat-no" title="function not covered">    function ownerOf(uint256 tokenId)</span>
         public
         view
         virtual
         override
         returns (address)
     {
-<span class="cstat-no" title="statement not covered" >        return _owners[tokenId];</span>
+<span class="cstat-no" title="statement not covered">        return _owners[tokenId];</span>
     }
 &nbsp;
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-<span class="fstat-no" title="function not covered" >    function tokenURI(uint256)</span>
+<span class="fstat-no" title="function not covered">    function tokenURI(uint256)</span>
         public
         view
         virtual
         override
         returns (string memory)
     {
-<span class="cstat-no" title="statement not covered" >        return _uri;</span>
+<span class="cstat-no" title="statement not covered">        return _uri;</span>
     }
 &nbsp;
     /**
      * @dev See {IERC721-approve}.
      */
-<span class="fstat-no" title="function not covered" >    function approve(address to, uint256 tokenId)</span>
+<span class="fstat-no" title="function not covered">    function approve(address to, uint256 tokenId)</span>
         public
         virtual
         override
         onlyTokenOwner(tokenId)
     {
-<span class="cstat-no" title="statement not covered" >        address owner = _owners[tokenId];</span>
-<span class="cstat-no" title="statement not covered" >        require(to != owner, "ERC721: approval to current owner")</span>;
-<span class="cstat-no" title="statement not covered" >        _approve(to, tokenId)</span>;
+<span class="cstat-no" title="statement not covered">        address owner = _owners[tokenId];</span>
+<span class="cstat-no" title="statement not covered">        require(to != owner, "ERC721: approval to current owner")</span>;
+<span class="cstat-no" title="statement not covered">        _approve(to, tokenId)</span>;
     }
 &nbsp;
     /**
      * @dev See {IERC721-getApproved}.
      */
-<span class="fstat-no" title="function not covered" >    function getApproved(uint256 tokenId)</span>
+<span class="fstat-no" title="function not covered">    function getApproved(uint256 tokenId)</span>
         public
         view
         virtual
         override
         returns (address)
     {
-<span class="cstat-no" title="statement not covered" >        require(</span>
+<span class="cstat-no" title="statement not covered">        require(</span>
             _owners[tokenId] != address(0),
             "ERC721: approved query for nonexistent token"
         );
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        return _tokenApprovals[tokenId];</span>
+<span class="cstat-no" title="statement not covered">        return _tokenApprovals[tokenId];</span>
     }
 &nbsp;
     /**
@@ -979,49 +974,49 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      *
      * Emits a {ApprovalForAll} event.
      */
-<span class="fstat-no" title="function not covered" >    function setApprovalForAll(address operator, bool approved)</span>
+<span class="fstat-no" title="function not covered">    function setApprovalForAll(address operator, bool approved)</span>
         public
         virtual
         override
     {
         // require(msg.sender != operator, "ERC721: approve to caller");
-<span class="cstat-no" title="statement not covered" >        _operatorApprovals[msg.sender][operator] = approved</span>;
-<span class="cstat-no" title="statement not covered" >        emit ApprovalForAll(msg.sender, operator, approved);</span>
+<span class="cstat-no" title="statement not covered">        _operatorApprovals[msg.sender][operator] = approved</span>;
+<span class="cstat-no" title="statement not covered">        emit ApprovalForAll(msg.sender, operator, approved);</span>
     }
 &nbsp;
     /**
      * @dev See {IERC721-isApprovedForAll}.
      */
-<span class="fstat-no" title="function not covered" >    function isApprovedForAll(address owner, address operator)</span>
+<span class="fstat-no" title="function not covered">    function isApprovedForAll(address owner, address operator)</span>
         public
         view
         virtual
         override
         returns (bool)
     {
-<span class="cstat-no" title="statement not covered" >        return _operatorApprovals[owner][operator];</span>
+<span class="cstat-no" title="statement not covered">        return _operatorApprovals[owner][operator];</span>
     }
 &nbsp;
     /**
      * @dev See {IERC721-transferFrom}.
      */
-<span class="fstat-no" title="function not covered" >    function transferFrom(</span>
+<span class="fstat-no" title="function not covered">    function transferFrom(</span>
         address from,
         address to,
         uint256 tokenId
     ) public virtual override onlyValidOperator(tokenId) {
-<span class="cstat-no" title="statement not covered" >        _transfer(from, to, tokenId)</span>;
+<span class="cstat-no" title="statement not covered">        _transfer(from, to, tokenId)</span>;
     }
 &nbsp;
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
-<span class="fstat-no" title="function not covered" >    function safeTransferFrom(</span>
+<span class="fstat-no" title="function not covered">    function safeTransferFrom(</span>
         address from,
         address to,
         uint256 tokenId
     ) public virtual override {
-<span class="cstat-no" title="statement not covered" >        safeTransferFrom(from, to, tokenId, "")</span>;
+<span class="cstat-no" title="statement not covered">        safeTransferFrom(from, to, tokenId, "")</span>;
     }
 &nbsp;
     /**
@@ -1042,14 +1037,14 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      *
      * Emits a {Transfer} event.
      */
-<span class="fstat-no" title="function not covered" >    function safeTransferFrom(</span>
+<span class="fstat-no" title="function not covered">    function safeTransferFrom(</span>
         address from,
         address to,
         uint256 tokenId,
         bytes memory _data
     ) public virtual override onlyValidOperator(tokenId) {
-<span class="cstat-no" title="statement not covered" >        _transfer(from, to, tokenId)</span>;
-<span class="cstat-no" title="statement not covered" >        _checkOnERC721Received(from, to, tokenId, _data)</span>;
+<span class="cstat-no" title="statement not covered">        _transfer(from, to, tokenId)</span>;
+<span class="cstat-no" title="statement not covered">        _checkOnERC721Received(from, to, tokenId, _data)</span>;
     }
 &nbsp;
     /**
@@ -1064,15 +1059,15 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      *
      * Emits a {Transfer} event.
      */
-<span class="fstat-no" title="function not covered" >    function _mint(address to, uint256 tokenId) internal virtual {</span>
-<span class="cstat-no" title="statement not covered" >        require(to != address(0), "ERC721: mint to the zero address")</span>;
-<span class="cstat-no" title="statement not covered" >        require(_owners[tokenId] == address(0), "ERC721: token already minted")</span>;
+<span class="fstat-no" title="function not covered">    function _mint(address to, uint256 tokenId) internal virtual {</span>
+<span class="cstat-no" title="statement not covered">        require(to != address(0), "ERC721: mint to the zero address")</span>;
+<span class="cstat-no" title="statement not covered">        require(_owners[tokenId] == address(0), "ERC721: token already minted")</span>;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        _balances[to] += 1</span>;
-<span class="cstat-no" title="statement not covered" >        _owners[tokenId] = to</span>;
+<span class="cstat-no" title="statement not covered">        _balances[to] += 1</span>;
+<span class="cstat-no" title="statement not covered">        _owners[tokenId] = to</span>;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        emit Transfer(address(0), to, tokenId);</span>
-<span class="cstat-no" title="statement not covered" >        _checkOnERC721Received(address(0), to, tokenId, "")</span>;
+<span class="cstat-no" title="statement not covered">        emit Transfer(address(0), to, tokenId);</span>
+<span class="cstat-no" title="statement not covered">        _checkOnERC721Received(address(0), to, tokenId, "")</span>;
     }
 &nbsp;
     /**
@@ -1085,16 +1080,16 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      *
      * Emits a {Transfer} event.
      */
-<span class="fstat-no" title="function not covered" >    function _burn(uint256 tokenId) internal virtual {</span>
-<span class="cstat-no" title="statement not covered" >        address owner = _owners[tokenId];</span>
+<span class="fstat-no" title="function not covered">    function _burn(uint256 tokenId) internal virtual {</span>
+<span class="cstat-no" title="statement not covered">        address owner = _owners[tokenId];</span>
 &nbsp;
         // Clear approvals
-<span class="cstat-no" title="statement not covered" >        _approve(address(0), tokenId)</span>;
+<span class="cstat-no" title="statement not covered">        _approve(address(0), tokenId)</span>;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        _balances[owner] -= 1</span>;
+<span class="cstat-no" title="statement not covered">        _balances[owner] -= 1</span>;
         delete _owners[tokenId];
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        emit Transfer(owner, address(0), tokenId);</span>
+<span class="cstat-no" title="statement not covered">        emit Transfer(owner, address(0), tokenId);</span>
     }
 &nbsp;
     /**
@@ -1108,25 +1103,25 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      *
      * Emits a {Transfer} event.
      */
-<span class="fstat-no" title="function not covered" >    function _transfer(</span>
+<span class="fstat-no" title="function not covered">    function _transfer(</span>
         address from,
         address to,
         uint256 tokenId
     ) internal virtual {
-<span class="cstat-no" title="statement not covered" >        require(</span>
+<span class="cstat-no" title="statement not covered">        require(</span>
             _owners[tokenId] == from,
             "ERC721: transfer of token that is not own"
         );
-<span class="cstat-no" title="statement not covered" >        require(to != address(0), "ERC721: transfer to the zero address")</span>;
+<span class="cstat-no" title="statement not covered">        require(to != address(0), "ERC721: transfer to the zero address")</span>;
 &nbsp;
         // Clear approvals from the previous owner
-<span class="cstat-no" title="statement not covered" >        _approve(address(0), tokenId)</span>;
+<span class="cstat-no" title="statement not covered">        _approve(address(0), tokenId)</span>;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        _balances[from] -= 1</span>;
-<span class="cstat-no" title="statement not covered" >        _balances[to] += 1</span>;
-<span class="cstat-no" title="statement not covered" >        _owners[tokenId] = to</span>;
+<span class="cstat-no" title="statement not covered">        _balances[from] -= 1</span>;
+<span class="cstat-no" title="statement not covered">        _balances[to] += 1</span>;
+<span class="cstat-no" title="statement not covered">        _owners[tokenId] = to</span>;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        emit Transfer(from, to, tokenId);</span>
+<span class="cstat-no" title="statement not covered">        emit Transfer(from, to, tokenId);</span>
     }
 &nbsp;
     /**
@@ -1134,9 +1129,9 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      *
      * Emits a {Approval} event.
      */
-<span class="fstat-no" title="function not covered" >    function _approve(address to, uint256 tokenId) internal virtual {</span>
-<span class="cstat-no" title="statement not covered" >        _tokenApprovals[tokenId] = to</span>;
-<span class="cstat-no" title="statement not covered" >        emit Approval(ERC721.ownerOf(tokenId), to, tokenId);</span>
+<span class="fstat-no" title="function not covered">    function _approve(address to, uint256 tokenId) internal virtual {</span>
+<span class="cstat-no" title="statement not covered">        _tokenApprovals[tokenId] = to</span>;
+<span class="cstat-no" title="statement not covered">        emit Approval(ERC721.ownerOf(tokenId), to, tokenId);</span>
     }
 &nbsp;
     /**
@@ -1148,14 +1143,14 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
      * @param tokenId uint256 ID of the token to be transferred
      * @param _data bytes optional data to send along with the call
      */
-<span class="fstat-no" title="function not covered" >    function _checkOnERC721Received(</span>
+<span class="fstat-no" title="function not covered">    function _checkOnERC721Received(</span>
         address from,
         address to,
         uint256 tokenId,
         bytes memory _data
     ) internal {
-<span class="cstat-no" title="statement not covered" >        if (to.code.length &gt; 0) {</span>
-<span class="cstat-no" title="statement not covered" >            try</span>
+<span class="cstat-no" title="statement not covered">        if (to.code.length &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered">            try</span>
                 IERC721Receiver(to).onERC721Received(
                     msg.sender,
                     from,
@@ -1163,26 +1158,26 @@ contract ERC721 is IERC721, IERC721Metadata, ERC165 {
                     _data
                 )
             returns (bytes4 retval) {
-<span class="cstat-no" title="statement not covered" >                if (retval != IERC721Receiver.onERC721Received.selector) {</span>
-<span class="cstat-no" title="statement not covered" >                    revert("ERC721: ERC721Receiver rejected token")</span>;
+<span class="cstat-no" title="statement not covered">                if (retval != IERC721Receiver.onERC721Received.selector) {</span>
+<span class="cstat-no" title="statement not covered">                    revert("ERC721: ERC721Receiver rejected token")</span>;
                 }
             } catch Error(string memory reason) {
-<span class="cstat-no" title="statement not covered" >                revert(reason)</span>;
+<span class="cstat-no" title="statement not covered">                revert(reason)</span>;
             } catch {
-<span class="cstat-no" title="statement not covered" >                revert("ERC721: transfer to non ERC721Receiver implementer")</span>;
+<span class="cstat-no" title="statement not covered">                revert("ERC721: transfer to non ERC721Receiver implementer")</span>;
             }
         }
     }
 }
 &nbsp;</pre></td></tr>
-</table></pre>
-<div class='push'></div><!-- for sticky footer -->
+</tbody></table></pre>
+<div class="push"></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
-<div class='footer quiet pad2 space-top1 center small'>
+<div class="footer quiet pad2 space-top1 center small">
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 13:51:18 GMT+0000 (Coordinated Universal Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 16:09:45 GMT+0000 (Coordinated Universal Time)
 </div>
-</div>
+
 <script src="../../prettify.js"></script>
 <script>
 window.onload = function () {
@@ -1192,5 +1187,6 @@ window.onload = function () {
 };
 </script>
 <script src="../../sorter.js"></script>
-</body>
-</html>
+
+
+</body></html>

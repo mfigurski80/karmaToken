@@ -22973,7 +22973,7 @@
   },
   "networks": {},
   "schemaVersion": "3.4.7",
-  "updatedAt": "2022-07-15T13:44:05.532Z",
+  "updatedAt": "2022-07-15T16:02:31.705Z",
   "devdoc": {
     "details": "BondToken contract holds a basic interface on top of ERC721 to manage the creation and reading of bonds. It's dependent on the LBondManager library to interpret the condensed 64 byte representation.",
     "kind": "dev",

@@ -1,49 +1,44 @@
-<!doctype html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <title>Code coverage report for contracts/MonetizedBondNFT.sol</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="../prettify.css" />
-    <link rel="stylesheet" href="../base.css" />
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../prettify.css">
+    <link rel="stylesheet" href="../base.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style type='text/css'>
-        .coverage-summary .sorter {
-            background-image: url(../sort-arrow-sprite.png);
-        }
-    </style>
+    <style>.coverage-summary .sorter{background-image:url(../sort-arrow-sprite.png)}
+</style>
 </head>
 <body>
-<div class='wrapper'>
-  <div class='pad1'>
+<div class="wrapper">
+  <div class="pad1">
     <h1>
       <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> MonetizedBondNFT.sol
     </h1>
-    <div class='clearfix'>
-      <div class='fl pad1y space-right2'>
+    <div class="clearfix">
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>0/8</span>
+        <span class="fraction">0/8</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/4</span>
+        <span class="fraction">0/4</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/5</span>
+        <span class="fraction">0/5</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>0/8</span>
+        <span class="fraction">0/8</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class="status-line low"></div>
 <pre><table class="coverage">
-<tr><td class="line-count quiet">1
+<tbody><tr><td class="line-count quiet">1
 2
 3
 4
@@ -259,7 +254,7 @@ contract MonetizedBondNFT is CollateralManager, Ownable {
     event MintFeeChanged(uint64 newFee);
     event ServiceFeeChanged(uint64 newFee);
 &nbsp;
-<span class="fstat-no" title="function not covered" >    constructor(</span>
+<span class="fstat-no" title="function not covered">    constructor(</span>
         string memory name,
         string memory symbol,
         string memory uri
@@ -272,9 +267,9 @@ contract MonetizedBondNFT is CollateralManager, Ownable {
      *  callable by owner.
      * @param newFee New Fee to apply to all mints
      */
-<span class="fstat-no" title="function not covered" >    function setMintFee(uint64 newFee) external onlyOwner {</span>
-<span class="cstat-no" title="statement not covered" >        mintFee = newFee</span>;
-<span class="cstat-no" title="statement not covered" >        emit MintFeeChanged(newFee);</span>
+<span class="fstat-no" title="function not covered">    function setMintFee(uint64 newFee) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered">        mintFee = newFee</span>;
+<span class="cstat-no" title="statement not covered">        emit MintFeeChanged(newFee);</span>
     }
 &nbsp;
     /**
@@ -282,9 +277,9 @@ contract MonetizedBondNFT is CollateralManager, Ownable {
      * callable by owner.
      * @param newFee New Fee to bite out of service payments.
      */
-<span class="fstat-no" title="function not covered" >    function setServiceFee(uint64 newFee) external onlyOwner {</span>
-<span class="cstat-no" title="statement not covered" >        serviceFee = newFee</span>;
-<span class="cstat-no" title="statement not covered" >        emit ServiceFeeChanged(newFee);</span>
+<span class="fstat-no" title="function not covered">    function setServiceFee(uint64 newFee) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered">        serviceFee = newFee</span>;
+<span class="cstat-no" title="statement not covered">        emit ServiceFeeChanged(newFee);</span>
     }
 &nbsp;
     /**
@@ -296,14 +291,14 @@ contract MonetizedBondNFT is CollateralManager, Ownable {
      * @param to Address to transfer ether to
      * @param data Additional calldata to attach
      */
-<span class="fstat-no" title="function not covered" >    function withdrawValue(</span>
+<span class="fstat-no" title="function not covered">    function withdrawValue(</span>
         uint256 n,
         address to,
         bytes memory data
     ) external onlyOwner {
         // solhint-disable-next-line avoid-low-level-calls
-<span class="cstat-no" title="statement not covered" >        (bool success, ) = to.call{value: n}(data);</span>
-<span class="cstat-no" title="statement not covered" >        require(success, "MonetizedBondNFT: withdraw failed")</span>;
+<span class="cstat-no" title="statement not covered">        (bool success, ) = to.call{value: n}(data);</span>
+<span class="cstat-no" title="statement not covered">        require(success, "MonetizedBondNFT: withdraw failed")</span>;
     }
 &nbsp;
     // OVERRIDES
@@ -311,12 +306,12 @@ contract MonetizedBondNFT is CollateralManager, Ownable {
     /**
      * @dev Ensure user pays minting fee when minting
      */
-<span class="fstat-no" title="function not covered" >    function mintBond(bytes32 alpha, bytes32 beta) public payable override {</span>
-<span class="cstat-no" title="statement not covered" >        require(</span>
+<span class="fstat-no" title="function not covered">    function mintBond(bytes32 alpha, bytes32 beta) public payable override {</span>
+<span class="cstat-no" title="statement not covered">        require(</span>
             msg.value &gt;= mintFee,
             "MonetizedLoanNFT: eth sent does not cover mint fee"
         );
-<span class="cstat-no" title="statement not covered" >        super.mintBond(alpha, beta)</span>;
+<span class="cstat-no" title="statement not covered">        super.mintBond(alpha, beta)</span>;
     }
 &nbsp;
     // /**
@@ -335,14 +330,14 @@ contract MonetizedBondNFT is CollateralManager, Ownable {
     // }
 }
 &nbsp;</pre></td></tr>
-</table></pre>
-<div class='push'></div><!-- for sticky footer -->
+</tbody></table></pre>
+<div class="push"></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
-<div class='footer quiet pad2 space-top1 center small'>
+<div class="footer quiet pad2 space-top1 center small">
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 13:51:18 GMT+0000 (Coordinated Universal Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 16:09:45 GMT+0000 (Coordinated Universal Time)
 </div>
-</div>
+
 <script src="../prettify.js"></script>
 <script>
 window.onload = function () {
@@ -352,5 +347,6 @@ window.onload = function () {
 };
 </script>
 <script src="../sorter.js"></script>
-</body>
-</html>
+
+
+</body></html>

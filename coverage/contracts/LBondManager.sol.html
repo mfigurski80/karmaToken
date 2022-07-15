@@ -1,49 +1,44 @@
-<!doctype html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <title>Code coverage report for contracts/LBondManager.sol</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="../prettify.css" />
-    <link rel="stylesheet" href="../base.css" />
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../prettify.css">
+    <link rel="stylesheet" href="../base.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style type='text/css'>
-        .coverage-summary .sorter {
-            background-image: url(../sort-arrow-sprite.png);
-        }
-    </style>
+    <style>.coverage-summary .sorter{background-image:url(../sort-arrow-sprite.png)}
+</style>
 </head>
 <body>
-<div class='wrapper'>
-  <div class='pad1'>
+<div class="wrapper">
+  <div class="pad1">
     <h1>
       <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> LBondManager.sol
     </h1>
-    <div class='clearfix'>
-      <div class='fl pad1y space-right2'>
+    <div class="clearfix">
+      <div class="fl pad1y space-right2">
         <span class="strong">66.67% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>70/105</span>
+        <span class="fraction">70/105</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">50% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>24/48</span>
+        <span class="fraction">24/48</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">78.95% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>15/19</span>
+        <span class="fraction">15/19</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">72.92% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>70/96</span>
+        <span class="fraction">70/96</span>
       </div>
     </div>
   </div>
-  <div class='status-line medium'></div>
+  <div class="status-line medium"></div>
 <pre><table class="coverage">
-<tr><td class="line-count quiet">1
+<tbody><tr><td class="line-count quiet">1
 2
 3
 4
@@ -808,7 +803,7 @@ library LBondManager {
         // read format + flag (8 bits)
         bytes1 packedFormatFlag = bytes1(alp);
         format = uint8(packedFormatFlag &gt;&gt; 1); // get first 7 bits
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(format == supportedFormat(), "Library: unsupported format");
+        <span class="missing-if-branch" title="else path not taken">E</span>require(format == supportedFormat(), "Library: unsupported format");
         flag = uint8(packedFormatFlag &amp; 0x01) == 1; // get last bit
     }
 &nbsp;
@@ -821,9 +816,9 @@ library LBondManager {
         bytes4 couponData = bytes4(alp &lt;&lt; 8); // skip 8 bits, get 32 bits
         uint8 couponMult = uint8(bytes1(couponData)) &gt;&gt; 6; // get first 2 bits
         couponSize = uint32(couponData) &amp; 0x3F;
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (couponMult == 1) <span class="cstat-no" title="statement not covered" >couponSize *= 1 gwei</span>;
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (couponMult == 2) <span class="cstat-no" title="statement not covered" >couponSize *= 1 ether / 1000</span>;
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (couponMult == 3) <span class="cstat-no" title="statement not covered" >couponSize *= 1 ether</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (couponMult == 1) <span class="cstat-no" title="statement not covered">couponSize *= 1 gwei</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (couponMult == 2) <span class="cstat-no" title="statement not covered">couponSize *= 1 ether / 1000</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (couponMult == 3) <span class="cstat-no" title="statement not covered">couponSize *= 1 ether</span>;
     }
 &nbsp;
     function readPeriodData(bytes32 alp)
@@ -862,9 +857,9 @@ library LBondManager {
         bytes4 valueData = bytes4(bet);
         uint8 valueMult = uint8(bytes1(bet)) &gt;&gt; 6; // get first two bits
         faceValue = uint32(valueData) &amp; 0x3FFFFFFF; // clear first two bits
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (valueMult == 1) <span class="cstat-no" title="statement not covered" >faceValue *= 1 gwei</span>;
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (valueMult == 2) <span class="cstat-no" title="statement not covered" >faceValue *= 1 ether / 1000</span>;
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (valueMult == 3) <span class="cstat-no" title="statement not covered" >faceValue *= 1 ether</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (valueMult == 1) <span class="cstat-no" title="statement not covered">faceValue *= 1 gwei</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (valueMult == 2) <span class="cstat-no" title="statement not covered">faceValue *= 1 ether / 1000</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (valueMult == 3) <span class="cstat-no" title="statement not covered">faceValue *= 1 ether</span>;
     }
 &nbsp;
     function readStartTime(bytes32 bet) public pure returns (uint64 startTime) {
@@ -882,9 +877,9 @@ library LBondManager {
         bytes2 durationData = bytes2(bet &lt;&lt; (32 + 48)); // skip face value and start time
         uint8 durationMult = uint8(bytes1(durationData)) &gt;&gt; 6; // get first two bits
         periodDuration = uint16(durationData) &amp; 0x3FFF; // clear first two bits
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (durationMult == 1) <span class="cstat-no" title="statement not covered" >periodDuration *= 60</span>; // in minutes?
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (durationMult == 2) <span class="cstat-no" title="statement not covered" >periodDuration *= 60 * 60</span>; // in hours?
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (durationMult == 3) <span class="cstat-no" title="statement not covered" >periodDuration *= 60 * 60 * 24</span>; // in days?
+        <span class="missing-if-branch" title="if path not taken">I</span>if (durationMult == 1) <span class="cstat-no" title="statement not covered">periodDuration *= 60</span>; // in minutes?
+        <span class="missing-if-branch" title="if path not taken">I</span>if (durationMult == 2) <span class="cstat-no" title="statement not covered">periodDuration *= 60 * 60</span>; // in hours?
+        <span class="missing-if-branch" title="if path not taken">I</span>if (durationMult == 3) <span class="cstat-no" title="statement not covered">periodDuration *= 60 * 60 * 24</span>; // in days?
     }
 &nbsp;
     function readMinter(bytes32 bet) public pure returns (address minter) {
@@ -897,27 +892,27 @@ library LBondManager {
 &nbsp;
     // WRITING ALPHA SLOT
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function writeFlag(bytes32 alp, bool flag) public pure returns (bytes32) {</span>
-<span class="cstat-no" title="statement not covered" >        alp &amp;= 0xFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</span>; // clear flag bit
-<span class="cstat-no" title="statement not covered" >        return alp | bytes32(bytes1(flag ? 1 : 0));</span>
+<span class="fstat-no" title="function not covered">    function writeFlag(bytes32 alp, bool flag) public pure returns (bytes32) {</span>
+<span class="cstat-no" title="statement not covered">        alp &amp;= 0xFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</span>; // clear flag bit
+<span class="cstat-no" title="statement not covered">        return alp | bytes32(bytes1(flag ? 1 : 0));</span>
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function writeCurPeriod(bytes32 alp, uint16 curPeriod)</span>
+<span class="fstat-no" title="function not covered">    function writeCurPeriod(bytes32 alp, uint16 curPeriod)</span>
         public
         pure
         returns (bytes32)
     {
-<span class="cstat-no" title="statement not covered" >        alp &amp;= 0xFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</span>;
-<span class="cstat-no" title="statement not covered" >        return alp | (bytes32(bytes2(curPeriod)) &gt;&gt; (8 + 32 + 16));</span>
+<span class="cstat-no" title="statement not covered">        alp &amp;= 0xFFFFFFFFFFFFFF0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF</span>;
+<span class="cstat-no" title="statement not covered">        return alp | (bytes32(bytes2(curPeriod)) &gt;&gt; (8 + 32 + 16));</span>
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function writeBeneficiary(bytes32 alp, address beneficiary)</span>
+<span class="fstat-no" title="function not covered">    function writeBeneficiary(bytes32 alp, address beneficiary)</span>
         public
         pure
         returns (bytes32)
     {
-<span class="cstat-no" title="statement not covered" >        alp &amp;= 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000</span>;
-<span class="cstat-no" title="statement not covered" >        return alp | (bytes32(bytes20(beneficiary)) &gt;&gt; (8 + 32 + 16 + 16 + 24));</span>
+<span class="cstat-no" title="statement not covered">        alp &amp;= 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000</span>;
+<span class="cstat-no" title="statement not covered">        return alp | (bytes32(bytes20(beneficiary)) &gt;&gt; (8 + 32 + 16 + 16 + 24));</span>
     }
 &nbsp;
     // NO DATA-SPECIFIC WRITING NEEDS TO HAPPEN IN BETA SLOT
@@ -998,25 +993,25 @@ library LBondManager {
 &nbsp;
         uint32 couponSizeMult = 0;
         uint32 couponSizeEnc = uint32(couponSize);
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (couponSize &gt; 2**30) {
-<span class="cstat-no" title="statement not covered" >            couponSizeMult = 1</span>;
-<span class="cstat-no" title="statement not covered" >            couponSizeEnc = uint32(couponSize / 1 gwei)</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (couponSize &gt; 2**30) {
+<span class="cstat-no" title="statement not covered">            couponSizeMult = 1</span>;
+<span class="cstat-no" title="statement not covered">            couponSizeEnc = uint32(couponSize / 1 gwei)</span>;
         }
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (couponSize &gt; 1 gwei * 2**30) {
-<span class="cstat-no" title="statement not covered" >            couponSizeMult = 2</span>;
-<span class="cstat-no" title="statement not covered" >            couponSizeEnc = uint32(couponSize / (1 ether / 1000))</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (couponSize &gt; 1 gwei * 2**30) {
+<span class="cstat-no" title="statement not covered">            couponSizeMult = 2</span>;
+<span class="cstat-no" title="statement not covered">            couponSizeEnc = uint32(couponSize / (1 ether / 1000))</span>;
         }
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (couponSize &gt; (1 ether * 2**30) / 1000) {
-<span class="cstat-no" title="statement not covered" >            couponSizeMult = 3</span>;
-<span class="cstat-no" title="statement not covered" >            couponSizeEnc = uint32(couponSize / 1 ether)</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (couponSize &gt; (1 ether * 2**30) / 1000) {
+<span class="cstat-no" title="statement not covered">            couponSizeMult = 3</span>;
+<span class="cstat-no" title="statement not covered">            couponSizeEnc = uint32(couponSize / 1 ether)</span>;
         }
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+        <span class="missing-if-branch" title="else path not taken">E</span>require(
             couponSizeEnc &lt; 2**30,
             "LBondManager: couponSize too large to encode"
         );
         couponSizeEnc = (couponSizeEnc) | (couponSizeMult &lt;&lt; 30);
 &nbsp;
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+        <span class="missing-if-branch" title="else path not taken">E</span>require(
             currencyRef &lt; 2**24,
             "LBondManager: currencyRef too large to encode"
         );
@@ -1055,45 +1050,45 @@ library LBondManager {
     ) public pure returns (bytes32 bet) {
         uint32 faceValueMult = 0;
         uint32 faceValueEnc = uint32(faceValue);
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (faceValue &gt; 2**30) {
-<span class="cstat-no" title="statement not covered" >            faceValueMult = 1</span>;
-<span class="cstat-no" title="statement not covered" >            faceValueEnc = uint32(faceValue / 1 gwei)</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (faceValue &gt; 2**30) {
+<span class="cstat-no" title="statement not covered">            faceValueMult = 1</span>;
+<span class="cstat-no" title="statement not covered">            faceValueEnc = uint32(faceValue / 1 gwei)</span>;
         }
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (faceValue &gt; 1 gwei * 2**30) {
-<span class="cstat-no" title="statement not covered" >            faceValueMult = 2</span>;
-<span class="cstat-no" title="statement not covered" >            faceValueEnc = uint32(faceValue / (1 ether / 1000))</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (faceValue &gt; 1 gwei * 2**30) {
+<span class="cstat-no" title="statement not covered">            faceValueMult = 2</span>;
+<span class="cstat-no" title="statement not covered">            faceValueEnc = uint32(faceValue / (1 ether / 1000))</span>;
         }
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (faceValue &gt; (1 ether * 2**30) / 1000) {
-<span class="cstat-no" title="statement not covered" >            faceValueMult = 3</span>;
-<span class="cstat-no" title="statement not covered" >            faceValueEnc = uint32(faceValue / 1 ether)</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (faceValue &gt; (1 ether * 2**30) / 1000) {
+<span class="cstat-no" title="statement not covered">            faceValueMult = 3</span>;
+<span class="cstat-no" title="statement not covered">            faceValueEnc = uint32(faceValue / 1 ether)</span>;
         }
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+        <span class="missing-if-branch" title="else path not taken">E</span>require(
             faceValueEnc &lt; 2**30,
             "LBondManager: faceValue too large to encode"
         );
         faceValueEnc = (faceValueEnc) | (faceValueMult &lt;&lt; 30);
 &nbsp;
         uint48 startTimeEnc = uint48(startTime);
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+        <span class="missing-if-branch" title="else path not taken">E</span>require(
             startTime &lt; 2**48,
             "LBondManager: startTime too large to encode"
         );
 &nbsp;
         uint16 periodDurationMult = 0;
         uint16 periodDurationEnc = uint16(periodDuration);
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (periodDuration &gt; 2**14) {
-<span class="cstat-no" title="statement not covered" >            periodDurationMult = 1</span>;
-<span class="cstat-no" title="statement not covered" >            periodDurationEnc = uint16(periodDuration / 60)</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (periodDuration &gt; 2**14) {
+<span class="cstat-no" title="statement not covered">            periodDurationMult = 1</span>;
+<span class="cstat-no" title="statement not covered">            periodDurationEnc = uint16(periodDuration / 60)</span>;
         }
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (periodDuration &gt; 60 * 2**14) {
-<span class="cstat-no" title="statement not covered" >            periodDurationMult = 2</span>;
-<span class="cstat-no" title="statement not covered" >            periodDurationEnc = uint16(periodDuration / (60 * 60))</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (periodDuration &gt; 60 * 2**14) {
+<span class="cstat-no" title="statement not covered">            periodDurationMult = 2</span>;
+<span class="cstat-no" title="statement not covered">            periodDurationEnc = uint16(periodDuration / (60 * 60))</span>;
         }
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (periodDuration &gt; 60 * 60 * 2**14) {
-<span class="cstat-no" title="statement not covered" >            periodDurationMult = 3</span>;
-<span class="cstat-no" title="statement not covered" >            periodDurationEnc = uint16(periodDuration / (60 * 60 * 24))</span>;
+        <span class="missing-if-branch" title="if path not taken">I</span>if (periodDuration &gt; 60 * 60 * 2**14) {
+<span class="cstat-no" title="statement not covered">            periodDurationMult = 3</span>;
+<span class="cstat-no" title="statement not covered">            periodDurationEnc = uint16(periodDuration / (60 * 60 * 24))</span>;
         }
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+        <span class="missing-if-branch" title="else path not taken">E</span>require(
             periodDurationEnc &lt; 2**14,
             "LBondManager: periodDuration too large to encode"
         );
@@ -1110,12 +1105,12 @@ library LBondManager {
             );
     }
 &nbsp;
-<span class="fstat-no" title="function not covered" >    function buildBondBytes(Bond calldata b)</span>
+<span class="fstat-no" title="function not covered">    function buildBondBytes(Bond calldata b)</span>
         external
         pure
         returns (bytes32 alp, bytes32 bet)
     {
-<span class="cstat-no" title="statement not covered" >        alp = buildAlpha(</span>
+<span class="cstat-no" title="statement not covered">        alp = buildAlpha(</span>
             b.flag,
             b.couponSize,
             b.nPeriods,
@@ -1123,18 +1118,18 @@ library LBondManager {
             b.currencyRef,
             b.beneficiary
         );
-<span class="cstat-no" title="statement not covered" >        bet = buildBeta(b.faceValue, b.startTime, b.periodDuration, b.minter)</span>;
+<span class="cstat-no" title="statement not covered">        bet = buildBeta(b.faceValue, b.startTime, b.periodDuration, b.minter)</span>;
     }
 }
 &nbsp;</pre></td></tr>
-</table></pre>
-<div class='push'></div><!-- for sticky footer -->
+</tbody></table></pre>
+<div class="push"></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
-<div class='footer quiet pad2 space-top1 center small'>
+<div class="footer quiet pad2 space-top1 center small">
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 13:51:18 GMT+0000 (Coordinated Universal Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 16:09:45 GMT+0000 (Coordinated Universal Time)
 </div>
-</div>
+
 <script src="../prettify.js"></script>
 <script>
 window.onload = function () {
@@ -1144,5 +1139,6 @@ window.onload = function () {
 };
 </script>
 <script src="../sorter.js"></script>
-</body>
-</html>
+
+
+</body></html>

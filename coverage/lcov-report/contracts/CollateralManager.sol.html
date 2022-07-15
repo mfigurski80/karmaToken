@@ -1,49 +1,44 @@
-<!doctype html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
     <title>Code coverage report for contracts/CollateralManager.sol</title>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="../prettify.css" />
-    <link rel="stylesheet" href="../base.css" />
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../prettify.css">
+    <link rel="stylesheet" href="../base.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style type='text/css'>
-        .coverage-summary .sorter {
-            background-image: url(../sort-arrow-sprite.png);
-        }
-    </style>
+    <style>.coverage-summary .sorter{background-image:url(../sort-arrow-sprite.png)}
+</style>
 </head>
 <body>
-<div class='wrapper'>
-  <div class='pad1'>
+<div class="wrapper">
+  <div class="pad1">
     <h1>
       <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> CollateralManager.sol
     </h1>
-    <div class='clearfix'>
-      <div class='fl pad1y space-right2'>
+    <div class="clearfix">
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>0/35</span>
+        <span class="fraction">0/35</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/12</span>
+        <span class="fraction">0/12</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/5</span>
+        <span class="fraction">0/5</span>
       </div>
-      <div class='fl pad1y space-right2'>
+      <div class="fl pad1y space-right2">
         <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>0/35</span>
+        <span class="fraction">0/35</span>
       </div>
     </div>
   </div>
-  <div class='status-line low'></div>
+  <div class="status-line low"></div>
 <pre><table class="coverage">
-<tr><td class="line-count quiet">1
+<tbody><tr><td class="line-count quiet">1
 2
 3
 4
@@ -412,7 +407,7 @@ contract CollateralManager is LifecycleManager {
     /// @notice Collateral has been released from bond
     event CollateralReleased(uint256 bondId, uint256 collateralId, address to);
 &nbsp;
-<span class="fstat-no" title="function not covered" >    constructor(</span>
+<span class="fstat-no" title="function not covered">    constructor(</span>
         string memory name,
         string memory symbol,
         string memory uri
@@ -428,21 +423,21 @@ contract CollateralManager is LifecycleManager {
      * @param valueOrId Either the amount of tokens to attach,
      * or the NFT id being attached (depending on currency)
      */
-<span class="fstat-no" title="function not covered" >    function addCollateral(</span>
+<span class="fstat-no" title="function not covered">    function addCollateral(</span>
         uint256 id,
         uint256 currencyRef,
         uint256 valueOrId
     ) external payable {
         // TODO: add from paramenter?
-<span class="cstat-no" title="statement not covered" >        collateral[id].push(Collateral(valueOrId, currencyRef))</span>;
-<span class="cstat-no" title="statement not covered" >        CurrencyType typ = CurrencyType.Ether;</span>
-<span class="cstat-no" title="statement not covered" >        if (currencyRef == 0) {</span>
+<span class="cstat-no" title="statement not covered">        collateral[id].push(Collateral(valueOrId, currencyRef))</span>;
+<span class="cstat-no" title="statement not covered">        CurrencyType typ = CurrencyType.Ether;</span>
+<span class="cstat-no" title="statement not covered">        if (currencyRef == 0) {</span>
             // ether special case
-<span class="cstat-no" title="statement not covered" >            assert(msg.value == valueOrId)</span>;
+<span class="cstat-no" title="statement not covered">            assert(msg.value == valueOrId)</span>;
         } else {
-<span class="cstat-no" title="statement not covered" >            Currency storage c = currencies[currencyRef];</span>
-<span class="cstat-no" title="statement not covered" >            typ = c.currencyType</span>;
-<span class="cstat-no" title="statement not covered" >            _transferGenericCurrency(</span>
+<span class="cstat-no" title="statement not covered">            Currency storage c = currencies[currencyRef];</span>
+<span class="cstat-no" title="statement not covered">            typ = c.currencyType</span>;
+<span class="cstat-no" title="statement not covered">            _transferGenericCurrency(</span>
                 c,
                 msg.sender,
                 address(this),
@@ -450,7 +445,7 @@ contract CollateralManager is LifecycleManager {
                 ""
             );
         }
-<span class="cstat-no" title="statement not covered" >        emit CollateralAdded(id, collateral[id].length - 1, typ);</span>
+<span class="cstat-no" title="statement not covered">        emit CollateralAdded(id, collateral[id].length - 1, typ);</span>
     }
 &nbsp;
     /**
@@ -459,20 +454,20 @@ contract CollateralManager is LifecycleManager {
      * @param bondId Id of bond to check for
      * @param operator Account address to authorize
      */
-<span class="fstat-no" title="function not covered" >    function _isAuthorizedToReleaseCollateral(uint256 bondId, address operator)</span>
+<span class="fstat-no" title="function not covered">    function _isAuthorizedToReleaseCollateral(uint256 bondId, address operator)</span>
         internal
         view
         returns (bool)
     {
-<span class="cstat-no" title="statement not covered" >        Bond memory b;</span>
+<span class="cstat-no" title="statement not covered">        Bond memory b;</span>
         // Check for default + bond ownership
-<span class="cstat-no" title="statement not covered" >        b = bonds[bondId * 2].fillBondFromAlpha(b)</span>;
-<span class="cstat-no" title="statement not covered" >        bool isOwner = _ownerOrOperatorOf(bondId, _owners[bondId], operator);</span>
-<span class="cstat-no" title="statement not covered" >        if (b.flag &amp;&amp; isOwner) <span class="cstat-no" title="statement not covered" >return true;</span></span>
+<span class="cstat-no" title="statement not covered">        b = bonds[bondId * 2].fillBondFromAlpha(b)</span>;
+<span class="cstat-no" title="statement not covered">        bool isOwner = _ownerOrOperatorOf(bondId, _owners[bondId], operator);</span>
+<span class="cstat-no" title="statement not covered">        if (b.flag &amp;&amp; isOwner) <span class="cstat-no" title="statement not covered">return true;</span></span>
         // Check for completed + bond minter
-<span class="cstat-no" title="statement not covered" >        b = bonds[bondId * 2 + 1].fillBondFromBeta(b)</span>;
-<span class="cstat-no" title="statement not covered" >        bool isMinter = _minterOrOperatorOf(b.minter, operator);</span>
-<span class="cstat-no" title="statement not covered" >        return (b.curPeriod &gt; b.nPeriods &amp;&amp; isMinter);</span>
+<span class="cstat-no" title="statement not covered">        b = bonds[bondId * 2 + 1].fillBondFromBeta(b)</span>;
+<span class="cstat-no" title="statement not covered">        bool isMinter = _minterOrOperatorOf(b.minter, operator);</span>
+<span class="cstat-no" title="statement not covered">        return (b.curPeriod &gt; b.nPeriods &amp;&amp; isMinter);</span>
     }
 &nbsp;
     /**
@@ -484,53 +479,53 @@ contract CollateralManager is LifecycleManager {
      * @param to address to direct all collaterals to
      * @param data bytes to forward with each transfer
      */
-<span class="fstat-no" title="function not covered" >    function safeBatchReleaseCollaterals(</span>
+<span class="fstat-no" title="function not covered">    function safeBatchReleaseCollaterals(</span>
         uint256[] memory bondIds,
         address to,
         bytes calldata data
     ) public {
-<span class="cstat-no" title="statement not covered" >        uint256 lastAuthorizedBond = 2**256 - 1;</span>
-<span class="cstat-no" title="statement not covered" >        uint256 lastCurrencyRef = 2**256 - 1;</span>
-<span class="cstat-no" title="statement not covered" >        Currency storage currency = currencies[0];</span> // TODO: figure out storage pointer
-<span class="cstat-no" title="statement not covered" >        for (uint256 i = 0; i &lt; bondIds.length; i++) {</span>
-<span class="cstat-no" title="statement not covered" >            uint256 bondId = bondIds[i];</span>
+<span class="cstat-no" title="statement not covered">        uint256 lastAuthorizedBond = 2**256 - 1;</span>
+<span class="cstat-no" title="statement not covered">        uint256 lastCurrencyRef = 2**256 - 1;</span>
+<span class="cstat-no" title="statement not covered">        Currency storage currency = currencies[0];</span> // TODO: figure out storage pointer
+<span class="cstat-no" title="statement not covered">        for (uint256 i = 0; i &lt; bondIds.length; i++) {</span>
+<span class="cstat-no" title="statement not covered">            uint256 bondId = bondIds[i];</span>
             // Check if this is an un-cached bond?
-<span class="cstat-no" title="statement not covered" >            if (</span>
+<span class="cstat-no" title="statement not covered">            if (</span>
                 lastAuthorizedBond != bondId || lastAuthorizedBond == 2**256 - 1
             ) {
                 // It is! Authorize new release
-<span class="cstat-no" title="statement not covered" >                require(</span>
+<span class="cstat-no" title="statement not covered">                require(</span>
                     _isAuthorizedToReleaseCollateral(bondId, msg.sender),
                     "CollateralManager: unauthorized to release collateral"
                 );
-<span class="cstat-no" title="statement not covered" >                lastAuthorizedBond = bondId</span>;
+<span class="cstat-no" title="statement not covered">                lastAuthorizedBond = bondId</span>;
             }
             // Get bond collateral (last in array), remove from storage
-<span class="cstat-no" title="statement not covered" >            uint256 collateralId = collateral[bondId].length - 1;</span>
-<span class="cstat-no" title="statement not covered" >            Collateral memory c = collateral[bondId][collateralId];</span>
-<span class="cstat-no" title="statement not covered" >            collateral[bondId].pop()</span>;
-<span class="cstat-no" title="statement not covered" >            require(</span>
+<span class="cstat-no" title="statement not covered">            uint256 collateralId = collateral[bondId].length - 1;</span>
+<span class="cstat-no" title="statement not covered">            Collateral memory c = collateral[bondId][collateralId];</span>
+<span class="cstat-no" title="statement not covered">            collateral[bondId].pop()</span>;
+<span class="cstat-no" title="statement not covered">            require(</span>
                 c.amountOrId &gt; 0,
                 "CollateralManager: this collateral has already been released"
             );
             // Check if Collateral refers to a un-cached currency
-<span class="cstat-no" title="statement not covered" >            if (</span>
+<span class="cstat-no" title="statement not covered">            if (</span>
                 lastCurrencyRef != c.currencyRef ||
                 lastCurrencyRef == 2**256 - 1
             ) {
                 // It does! Re-load cached currency
-<span class="cstat-no" title="statement not covered" >                currency = currencies[c.currencyRef]</span>;
-<span class="cstat-no" title="statement not covered" >                lastCurrencyRef = c.currencyRef</span>;
+<span class="cstat-no" title="statement not covered">                currency = currencies[c.currencyRef]</span>;
+<span class="cstat-no" title="statement not covered">                lastCurrencyRef = c.currencyRef</span>;
             }
             // Transfer collateral
-<span class="cstat-no" title="statement not covered" >            _transferGenericCurrency(</span>
+<span class="cstat-no" title="statement not covered">            _transferGenericCurrency(</span>
                 currency,
                 address(this),
                 to,
                 c.amountOrId,
                 data
             );
-<span class="cstat-no" title="statement not covered" >            emit CollateralReleased(bondId, collateralId, to);</span>
+<span class="cstat-no" title="statement not covered">            emit CollateralReleased(bondId, collateralId, to);</span>
         }
     }
 &nbsp;
@@ -538,21 +533,21 @@ contract CollateralManager is LifecycleManager {
      * @inheritdoc LifecycleManager
      * @notice Collateral must be entirely released to allow bond destruction
      */
-<span class="fstat-no" title="function not covered" >    function destroyBond(uint256 id) public override onlyValidOperator(id) {</span>
-<span class="cstat-no" title="statement not covered" >        assert(collateral[id].length == 0)</span>;
+<span class="fstat-no" title="function not covered">    function destroyBond(uint256 id) public override onlyValidOperator(id) {</span>
+<span class="cstat-no" title="statement not covered">        assert(collateral[id].length == 0)</span>;
         delete collateral[id];
-<span class="cstat-no" title="statement not covered" >        super.destroyBond(id)</span>;
+<span class="cstat-no" title="statement not covered">        super.destroyBond(id)</span>;
     }
 }
 &nbsp;</pre></td></tr>
-</table></pre>
-<div class='push'></div><!-- for sticky footer -->
+</tbody></table></pre>
+<div class="push"></div><!-- for sticky footer -->
 </div><!-- /wrapper -->
-<div class='footer quiet pad2 space-top1 center small'>
+<div class="footer quiet pad2 space-top1 center small">
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 13:51:18 GMT+0000 (Coordinated Universal Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 16:09:45 GMT+0000 (Coordinated Universal Time)
 </div>
-</div>
+
 <script src="../prettify.js"></script>
 <script>
 window.onload = function () {
@@ -562,5 +557,6 @@ window.onload = function () {
 };
 </script>
 <script src="../sorter.js"></script>
-</body>
-</html>
+
+
+</body></html>
