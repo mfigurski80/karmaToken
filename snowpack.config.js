@@ -23,4 +23,9 @@ module.exports = {
     out: 'publicBuild',
     /* ... */
   },
+  optimize: {
+    bundle: true,
+    minify: true,
+    target: 'es2020'
+  },
 };
