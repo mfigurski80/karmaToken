@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/LifecycleManager.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> LifecycleManager.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/44</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/22</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/44</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+&nbsp;
+import "./BondToken.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+&nbsp;
+/**
+ * @title 🦓 LifecycleManager contract exposing methods related to
+ * bringing a bond through it's full lifecycle of servicing,
+ * repayment, and   potentially default.
+ */
+contract LifecycleManager is BondToken {
+    using LBondManager for bytes32;
+&nbsp;
+    /// @notice new bond payment has been posted
+    event BondServiced(uint256 id, address operator, uint64 toPeriod);
+    /// @notice bond has been entirely repayed
+    event BondCompleted(uint256 id);
+    /// @notice bond payments have been failed
+    event BondDefaulted(uint256 id);
+&nbsp;
+<span class="fstat-no" title="function not covered" >    constructor(</span>
+        string memory name,
+        string memory symbol,
+        string memory uri
+    )
+        BondToken(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
+    {}
+&nbsp;
+    // SERVICE PAYMENT METHODS
+&nbsp;
+    /**
+     * @dev Internal method contains logic for updating bond periods
+     * @param b Bond structure with alpha elements filled
+     * @param alpha First bond slot data
+     * @param id Id of bond to apply service payments to
+     * @param value Amount of service payments to apply
+     */
+<span class="fstat-no" title="function not covered" >    function _updateBondPeriod(</span>
+        Bond memory b,
+        bytes32 alpha,
+        uint256 id,
+        uint256 value
+    ) internal {
+        // figure out period change
+<span class="cstat-no" title="statement not covered" >        uint16 addedPeriods = uint16(value / b.couponSize);</span>
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            addedPeriods &gt; 0,
+            "LifecycleManager: service payment insufficient"
+        );
+<span class="cstat-no" title="statement not covered" >        b.curPeriod += addedPeriods</span>;
+<span class="cstat-no" title="statement not covered" >        if (b.curPeriod &gt; b.nPeriods) {</span>
+            // might be complete... read beta to find face value
+<span class="cstat-no" title="statement not covered" >            if (</span>
+                (b.curPeriod - b.nPeriods) * b.couponSize &gt;=
+                bonds[id * 2 + 1].readFaceValue()
+            ) {
+<span class="cstat-no" title="statement not covered" >                b.curPeriod = b.nPeriods + 1</span>;
+<span class="cstat-no" title="statement not covered" >                emit BondCompleted(id);</span>
+            } else <span class="cstat-no" title="statement not covered" >b.curPeriod = b.nPeriods</span>;
+        }
+<span class="cstat-no" title="statement not covered" >        bonds[id * 2] = alpha.writeCurPeriod(b.curPeriod)</span>;
+        // presumably, after return:
+        // calling function should check for matching currency
+        // and pay bond holder whatever he is due in that currency
+    }
+&nbsp;
+    /**
+     * @notice Service a specific bond with generic currency
+     * @param id Id of bond to service
+     * @param from Account address to take value from
+     * @param value Either the amount to apply to the bond, or
+     * the NFT id to transfer as service payment
+     * @param data Additonal bytes to send with the transaction
+     *
+     * @dev For ether transactions, from and value still have to
+     * match or exceed the ether sent and the message sender
+     * @dev Note that call data will only get forwarded for
+     * supporting currencies
+     */
+<span class="fstat-no" title="function not covered" >    function serviceBond(</span>
+        uint256 id,
+        address from,
+        uint256 value,
+        bytes calldata data
+    ) public payable {
+        // TODO: if someone approves this contract as manager,
+        // can I just take their money by making them the 'from'?
+        // read bond
+<span class="cstat-no" title="statement not covered" >        Bond memory b;</span>
+<span class="cstat-no" title="statement not covered" >        bytes32 alpha = bonds[id * 2];</span> // READ A
+<span class="cstat-no" title="statement not covered" >        b = alpha.fillBondFromAlpha(b)</span>;
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            b.flag == false,
+            "LifecycleManager: cannot service defaulted bond"
+        );
+<span class="cstat-no" title="statement not covered" >        if (b.currencyRef == 0) {</span>
+            // special case for ether
+<span class="cstat-no" title="statement not covered" >            assert(msg.value &gt;= value)</span>;
+<span class="cstat-no" title="statement not covered" >            assert(msg.sender == from)</span>;
+<span class="cstat-no" title="statement not covered" >            _updateBondPeriod(b, alpha, id, value)</span>;
+<span class="cstat-no" title="statement not covered" >            (bool success, ) = b.beneficiary.call{value: value}(data);</span>
+<span class="cstat-no" title="statement not covered" >            require(success, "LifecycleManager: ether transaction failed")</span>;
+        } else {
+<span class="cstat-no" title="statement not covered" >            Currency storage c = currencies[b.currencyRef];</span>
+<span class="cstat-no" title="statement not covered" >            CurrencyType typ = c.currencyType;</span>
+<span class="cstat-no" title="statement not covered" >            if (typ == CurrencyType.ERC721 || typ == CurrencyType.ERC1155NFT)</span>
+<span class="cstat-no" title="statement not covered" >                _updateBondPeriod(b, alpha, id, 1)</span>;
+            else <span class="cstat-no" title="statement not covered" >_updateBondPeriod(b, alpha, id, value)</span>;
+<span class="cstat-no" title="statement not covered" >            _transferGenericCurrency(c, from, b.beneficiary, value, data)</span>;
+        }
+<span class="cstat-no" title="statement not covered" >        emit BondServiced(id, from, b.curPeriod);</span>
+    }
+&nbsp;
+    // PAYMENT RECEIVER FUNCTIONS
+    // complex behavior discontinued due to discussion, refer
+    // to commit a3cc493 for last version
+&nbsp;
+    /**
+     * @notice SHOULD NOT be generally called by a direct user
+     * @dev Handler function that get's called on any ERC1155
+     * transfer to this function -- accepts only transfers
+     * initiated by itself.
+     */
+<span class="fstat-no" title="function not covered" >    function onERC1155Received(</span>
+        address operator,
+        address,
+        uint256,
+        uint256,
+        bytes calldata
+    ) external view returns (bytes4) {
+        // for ERC1155 single transfers
+<span class="cstat-no" title="statement not covered" >        if (operator == address(this)) <span class="cstat-no" title="statement not covered" >return 0xf23a6e61;</span></span>
+<span class="cstat-no" title="statement not covered" >        return 0x0;</span>
+    }
+&nbsp;
+    /**
+     * @notice SHOULD NOT be generally called by a direct user
+     * @dev Handler function that get's called on any ERC721
+     * transfer to this function -- accepts only transfers
+     * initiated by itself.
+     */
+<span class="fstat-no" title="function not covered" >    function onERC721Received(</span>
+        address operator,
+        address,
+        uint256,
+        bytes calldata
+    ) external view returns (bytes4) {
+<span class="cstat-no" title="statement not covered" >        if (operator == address(this)) <span class="cstat-no" title="statement not covered" >return this.onERC721Received.selector;</span></span>
+<span class="cstat-no" title="statement not covered" >        return 0x0;</span>
+    }
+&nbsp;
+    // OTHER BOND MANAGEMENT
+&nbsp;
+    /**
+     * @notice Call bond to mark it as 'in default'.
+     * @dev Can only be performed by token owner or authorized
+     * operator.
+     * @param id Id of bond to check for default
+     */
+<span class="fstat-no" title="function not covered" >    function callBond(uint256 id) public onlyValidOperator(id) {</span>
+        // check if bond is overdue
+<span class="cstat-no" title="statement not covered" >        bytes32 alpha = bonds[id * 2];</span>
+<span class="cstat-no" title="statement not covered" >        Bond memory b = alpha.fillBondFromAlpha(</span>
+            Bond(false, 0, 0, 0, 0, 0, 0, 0, address(0), address(0))
+        );
+<span class="cstat-no" title="statement not covered" >        require( // check if bond is done</span>
+            b.curPeriod &lt;= b.nPeriods,
+            "LifecycleManager: cannot call completed bond"
+        );
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            b.curPeriod * b.periodDuration &lt; block.timestamp - b.startTime,
+            "LifecycleManager: bond not overdue"
+        );
+        // mark defaulted
+<span class="cstat-no" title="statement not covered" >        bonds[id * 2] = alpha.writeFlag(true)</span>;
+<span class="cstat-no" title="statement not covered" >        emit BondDefaulted(id);</span>
+    }
+&nbsp;
+    /**
+     * @notice Set bond as complete and forfeight future payments
+     * @dev Can only be performed by token owner or authorized operator.
+     * @param id Bond id
+     */
+<span class="fstat-no" title="function not covered" >    function forgiveBond(uint256 id) public onlyValidOperator(id) {</span>
+<span class="cstat-no" title="statement not covered" >        bytes32 alpha = bonds[id * 2];</span>
+<span class="cstat-no" title="statement not covered" >        (uint16 per, ) = alpha.readPeriodData();</span>
+<span class="cstat-no" title="statement not covered" >        bonds[id * 2] = alpha.writeCurPeriod(per + 1)</span>;
+<span class="cstat-no" title="statement not covered" >        emit BondCompleted(id);</span>
+    }
+&nbsp;
+    /**
+     * @notice Destroy bond and all related resource, refunding gas
+     * @dev Can only be performed by token owner or authorized operator.
+     * @param id Bond id
+     */
+<span class="fstat-no" title="function not covered" >    function destroyBond(uint256 id) public virtual onlyValidOperator(id) {</span>
+        // Note: raw version implies owner can destroy at any time
+        // frees 4 slots, writes to one
+        // EXPECT this to be overriden by further funcitons as desctruction
+        // becomes conditioned on more things
+        delete bonds[id * 2];
+        delete bonds[id * 2 + 1];
+<span class="cstat-no" title="statement not covered" >        address owner = _owners[id];</span>
+        delete _owners[id];
+        delete _tokenApprovals[id];
+<span class="cstat-no" title="statement not covered" >        _balances[owner] -= 1</span>;
+    }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 13:51:18 GMT+0000 (Coordinated Universal Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

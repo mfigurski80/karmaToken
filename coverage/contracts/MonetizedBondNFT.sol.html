@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/MonetizedBondNFT.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> MonetizedBondNFT.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>0/8</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>0/4</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>0/5</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">0% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>0/8</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line low'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.0;
+&nbsp;
+import "./CollateralManager.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+&nbsp;
+contract MonetizedBondNFT is CollateralManager, Ownable {
+    /**
+     * @dev fee control for minting, specified in wei. Ranges from 18 eth (2**64) to
+     * 0, where the next-smallest is 1 wei. Default .001 ether is ~ $1.15 (Jun 2022)
+     */
+    uint64 public mintFee = .001 ether;
+    /**
+     * @dev fee control for servicing, specified in parts to 1 billion. Ranges from
+     * 18,446,744,073% to 0, where the next-smallest 0.0000001%. Default 1 million
+     * is 0.1%.
+     */
+    uint64 public serviceFee = 1_000_000;
+&nbsp;
+    event MintFeeChanged(uint64 newFee);
+    event ServiceFeeChanged(uint64 newFee);
+&nbsp;
+<span class="fstat-no" title="function not covered" >    constructor(</span>
+        string memory name,
+        string memory symbol,
+        string memory uri
+    )
+        CollateralManager(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
+    {}
+&nbsp;
+    /**
+     * @dev Sets initial mint fee (when minter is creating). Only
+     *  callable by owner.
+     * @param newFee New Fee to apply to all mints
+     */
+<span class="fstat-no" title="function not covered" >    function setMintFee(uint64 newFee) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        mintFee = newFee</span>;
+<span class="cstat-no" title="statement not covered" >        emit MintFeeChanged(newFee);</span>
+    }
+&nbsp;
+    /**
+     * @dev Sets service fee (when minter is paying). Only
+     * callable by owner.
+     * @param newFee New Fee to bite out of service payments.
+     */
+<span class="fstat-no" title="function not covered" >    function setServiceFee(uint64 newFee) external onlyOwner {</span>
+<span class="cstat-no" title="statement not covered" >        serviceFee = newFee</span>;
+<span class="cstat-no" title="statement not covered" >        emit ServiceFeeChanged(newFee);</span>
+    }
+&nbsp;
+    /**
+     * @dev Retrieves fees to an alternative account, callable by owner.
+     * Assumes that contract holds only ether related to fees -- no bond
+     * or collateral has any references to ethereum stored in this
+     * contract. This assumption is FALSE due to collateral storage
+     * @param n Count of wei to transfer. Must be below total paid
+     * @param to Address to transfer ether to
+     * @param data Additional calldata to attach
+     */
+<span class="fstat-no" title="function not covered" >    function withdrawValue(</span>
+        uint256 n,
+        address to,
+        bytes memory data
+    ) external onlyOwner {
+        // solhint-disable-next-line avoid-low-level-calls
+<span class="cstat-no" title="statement not covered" >        (bool success, ) = to.call{value: n}(data);</span>
+<span class="cstat-no" title="statement not covered" >        require(success, "MonetizedBondNFT: withdraw failed")</span>;
+    }
+&nbsp;
+    // OVERRIDES
+&nbsp;
+    /**
+     * @dev Ensure user pays minting fee when minting
+     */
+<span class="fstat-no" title="function not covered" >    function mintBond(bytes32 alpha, bytes32 beta) public payable override {</span>
+<span class="cstat-no" title="statement not covered" >        require(</span>
+            msg.value &gt;= mintFee,
+            "MonetizedLoanNFT: eth sent does not cover mint fee"
+        );
+<span class="cstat-no" title="statement not covered" >        super.mintBond(alpha, beta)</span>;
+    }
+&nbsp;
+    // /**
+    //  * @dev Ensure user pays service fee when servicing, but be aware value
+    //  *  might be different based on what they're doing
+    //  */
+    // function serviceLoan(uint256 id) public payable override {
+    //     uint256 fee = (msg.value * serviceFee) / 1_000_000_000;
+    //     if ((msg.value * serviceFee) % 1_000_000_000 &gt; 0) fee++; // round up fee
+    //     uint256 trueValue = msg.value - fee;
+    //     require(
+    //         trueValue &gt;= bonds[id].couponSize,
+    //         "MonetizedLoanNFT: ether sent cannot cover service fee and minimum payment"
+    //     );
+    //     super.serviceLoan(id);
+    // }
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 15 2022 13:51:18 GMT+0000 (Coordinated Universal Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>
