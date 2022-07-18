@@ -53,10 +53,10 @@ library LBondManager {
         // read mult + coupon size (32 bits)
         bytes4 couponData = bytes4(alp << 8); // skip 8 bits, get 32 bits
         uint8 couponMult = uint8(bytes1(couponData)) >> 6; // get first 2 bits
-        couponSize = uint32(couponData) & 0x3F;
+        couponSize = uint32(couponData) & 0x3FFFFFFF;
         if (couponMult == 1) couponSize *= 1 gwei;
-        if (couponMult == 2) couponSize *= 1 ether / 1000;
-        if (couponMult == 3) couponSize *= 1 ether;
+        else if (couponMult == 2) couponSize *= 1 ether / 1000;
+        else if (couponMult == 3) couponSize *= 1 ether;
     }
 
     function readPeriodData(bytes32 alp)
@@ -231,17 +231,15 @@ library LBondManager {
 
         uint32 couponSizeMult = 0;
         uint32 couponSizeEnc = uint32(couponSize);
-        if (couponSize > 2**30) {
-            couponSizeMult = 1;
-            couponSizeEnc = uint32(couponSize / 1 gwei);
-        }
-        if (couponSize > 1 gwei * 2**30) {
-            couponSizeMult = 2;
-            couponSizeEnc = uint32(couponSize / (1 ether / 1000));
-        }
         if (couponSize > (1 ether * 2**30) / 1000) {
             couponSizeMult = 3;
             couponSizeEnc = uint32(couponSize / 1 ether);
+        } else if (couponSize > 1 gwei * 2**30) {
+            couponSizeMult = 2;
+            couponSizeEnc = uint32(couponSize / (1 ether / 1000));
+        } else if (couponSize > 2**30) {
+            couponSizeMult = 1;
+            couponSizeEnc = uint32(couponSize / 1 gwei);
         }
         require(
             couponSizeEnc < 2**30,
