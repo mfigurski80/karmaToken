@@ -13,7 +13,8 @@
     "dev:site": "snowpack dev",
     "dev:fund-account": "truffle exec fundAccount.js",
     "test": "truffle test",
-    "coverage": "truffle run coverage",
+    "coverage:DEPR": "truffle run coverage",
+    "coverage": "mkdir coverage; echo '<p>Coverage is temporarily deprecated</p>' > coverage/index.html",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
     "report-addresses": "truffle network && truffle network > public/addresses.txt",
     "deploy": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset",
@@ -33,7 +34,7 @@
     "dotenv": "^16.0.1",
     "eth-gas-reporter": "^0.2.22",
     "solhint": "^3.3.6",
-    "solidity-coverage": "^0.7.17",
+    "solidity-coverage": "^0.7.21",
     "truffle": "^5.5.3",
     "truffle-assertions": "^0.9.2",
     "truffle-contract-size": "^2.0.1"
