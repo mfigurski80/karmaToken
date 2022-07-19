@@ -44,6 +44,7 @@ contract CollateralManager is LifecycleManager {
     /**
      * @notice Add a generic currency collateral to a bond
      * @param id Id of bond to attach collateral to
+     * @param from Account to pull collateral from
      * @param currencyRef Id of currency collateral is
      * denominated in
      * @param valueOrId Either the amount of tokens to attach,
@@ -51,10 +52,10 @@ contract CollateralManager is LifecycleManager {
      */
     function addCollateral(
         uint256 id,
+        address from,
         uint256 currencyRef,
         uint256 valueOrId
-    ) external payable {
-        // TODO: add from paramenter?
+    ) external payable onlyOperatorFor(from) {
         collateral[id].push(Collateral(valueOrId, currencyRef));
         CurrencyType typ = CurrencyType.Ether;
         if (currencyRef == 0) {
@@ -65,7 +66,7 @@ contract CollateralManager is LifecycleManager {
             typ = c.currencyType;
             _transferGenericCurrency(
                 c,
-                msg.sender,
+                from,
                 address(this),
                 valueOrId,
                 ""

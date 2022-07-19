@@ -29,6 +29,11 @@ contract LifecycleManager is BondToken {
         BondToken(name, symbol, uri) // solhint-disable-next-line no-empty-blocks
     {}
 
+    modifier onlyOperatorFor(address subject) {
+      require(msg.sender == subject || _operatorApprovals[subject][msg.sender], "LifecycleManager: caller is not approved");
+      _;
+    }
+
     // SERVICE PAYMENT METHODS
 
     /**
@@ -85,7 +90,7 @@ contract LifecycleManager is BondToken {
         address from,
         uint256 value,
         bytes calldata data
-    ) public payable {
+    ) public payable onlyOperatorFor(from) {
         // TODO: if someone approves this contract as manager,
         // can I just take their money by making them the 'from'?
         // read bond

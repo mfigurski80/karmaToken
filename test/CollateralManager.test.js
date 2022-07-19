@@ -42,7 +42,7 @@ contract('CollateralManager', accounts => {
                 .then(tx => getEvent(tx, 'Transfer'))
                 .then(ev => ev.tokenId);
             const oldBalance = await web3.eth.getBalance(instance.address);
-            let ev = await instance.addCollateral(bondId, 0, 2, {value: 2})
+            let ev = await instance.addCollateral(bondId, accounts[0], 0, 2, {value: 2})
                 .then(tx => getEvent(tx, 'CollateralAdded'));
             assert.equal(+ev.bondId, +bondId);
             assert.equal(+ev.collateralType, CURRENCY_TYPE.ETHER);
@@ -61,7 +61,7 @@ contract('CollateralManager', accounts => {
             let bondEvent = await instance.mintBond(bondBytes[0], bondBytes[1])
                 .then(tx => getEvent(tx, 'Transfer'));
             //  associate some erc20 collateral
-            let ev = await instance.addCollateral(bondEvent.tokenId, currencyEvent.id, 10)
+            let ev = await instance.addCollateral(bondEvent.tokenId, accounts[0], currencyEvent.id, 10)
                 .then(tx => getEvent(tx, 'CollateralAdded'));
             assert.equal(+ev.bondId, +bondEvent.tokenId);
             assert.equal(ev.collateralType, CURRENCY_TYPE.ERC20);
@@ -80,7 +80,7 @@ contract('CollateralManager', accounts => {
             let bondEvent = await instance.mintBond(bondBytes[0], bondBytes[1])
                 .then(tx => getEvent(tx, 'Transfer'));
             //  associate some erc721 collateral
-            let ev = await instance.addCollateral(bondEvent.tokenId, currencyEvent.id, NFT_ID)
+            let ev = await instance.addCollateral(bondEvent.tokenId, accounts[0], currencyEvent.id, NFT_ID)
                 .then(tx => getEvent(tx, 'CollateralAdded'));
             assert.equal(+ev.bondId, +bondEvent.tokenId);
             assert.equal(ev.collateralType, CURRENCY_TYPE.ERC721);
@@ -101,7 +101,7 @@ contract('CollateralManager', accounts => {
             let bondEvent = await instance.mintBond(bondBytes[0], bondBytes[1])
                 .then(tx => getEvent(tx, 'Transfer'));
             //  associate some erc1155 collateral
-            let ev = await instance.addCollateral(bondEvent.tokenId, currencyEvent.id, 10)
+            let ev = await instance.addCollateral(bondEvent.tokenId, accounts[0], currencyEvent.id, 10)
                 .then(tx => getEvent(tx, 'CollateralAdded'));
             assert.equal(+ev.bondId, +bondEvent.tokenId);
             assert.equal(ev.collateralType, CURRENCY_TYPE.ERC1155Token);
@@ -120,7 +120,7 @@ contract('CollateralManager', accounts => {
             let bondEvent = await instance.mintBond(bondBytes[0], bondBytes[1])
                 .then(tx => getEvent(tx, 'Transfer'));
             //  associate some erc1155 collateral
-            let ev = await instance.addCollateral(bondEvent.tokenId, currencyEvent.id, NFT_ID)
+            let ev = await instance.addCollateral(bondEvent.tokenId, accounts[0], currencyEvent.id, NFT_ID)
                 .then(tx => getEvent(tx, 'CollateralAdded'));
             assert.equal(ev.bondId.toNumber(), bondEvent.tokenId.toNumber());
             assert.equal(ev.collateralType, CURRENCY_TYPE.ERC1155NFT);
@@ -147,7 +147,7 @@ contract('CollateralManager', accounts => {
                 .then(tx => getEvent(tx, 'CurrencyAdded'));
             bondEvent = await instance.mintBond(bondBytes[0], bondBytes[1])
                 .then(tx => getEvent(tx, 'Transfer'));
-            collateralEvent = await instance.addCollateral(bondEvent.tokenId, currencyEvent.id, 100)
+            collateralEvent = await instance.addCollateral(bondEvent.tokenId, accounts[0], currencyEvent.id, 100)
                 .then(tx => getEvent(tx, 'CollateralAdded'));
         });
 
@@ -233,12 +233,14 @@ contract('CollateralManager', accounts => {
             await erc1155Instance.mint(OPERATOR, 10, 100);
             let { id } = await instance.addERC1155TokenCurrency(erc1155Instance.address, 10)
                 .then(tx => getEvent(tx, 'CurrencyAdded'));
-            collateralIds.push(await instance.addCollateral(bondId, id, 100)
+            collateralIds.push(await instance
+              .addCollateral(bondId, accounts[0], id, 100)
                 .then(tx => getEvent(tx, 'CollateralAdded')));
             await erc1155Instance.mint(OPERATOR, 11, 100);
             ({ id } = await instance.addERC1155TokenCurrency(erc1155Instance.address, 11)
                 .then(tx => getEvent(tx, 'CurrencyAdded')));
-            collateralIds.push(await instance.addCollateral(bondId, id, 100)
+            collateralIds.push(await instance
+              .addCollateral(bondId, accounts[0], id, 100)
                 .then(tx => getEvent(tx, 'CollateralAdded')));
 
             // 2x ERC1155NFT
@@ -246,9 +248,9 @@ contract('CollateralManager', accounts => {
             await erc1155Instance.mint(OPERATOR, 13, 1);
             ({ id } = await instance.addERC1155NFTCurrency(erc1155Instance.address)
                 .then(tx => getEvent(tx, 'CurrencyAdded')));
-            collateralIds.push(await instance.addCollateral(bondId, id, 12)
+            collateralIds.push(await instance.addCollateral(bondId, accounts[0], id, 12)
                 .then(tx => getEvent(tx, 'CollateralAdded')));
-            collateralIds.push(await instance.addCollateral(bondId, id, 13)
+            collateralIds.push(await instance.addCollateral(bondId, accounts[0], id, 13)
                 .then(tx => getEvent(tx, 'CollateralAdded')));
 
             // did it all get there?
@@ -290,7 +292,7 @@ contract('CollateralManager', accounts => {
             // register as collaterals -- 2 erc1155Tokens to each bond
             let collateralIds = await Promise.all(currencyIds.map(async (curId, i) => {
                 let bondId = bondIds[i % bondIds.length]; // choose bond
-                return instance.addCollateral(bondId, curId, 100)
+                return instance.addCollateral(bondId, accounts[0], curId, 100)
                     .then(tx => getEvent(tx, 'CollateralAdded'))
                     .then(ev => ev.collateralId);
             }));
@@ -304,7 +306,7 @@ contract('CollateralManager', accounts => {
             // re-register collaterals -- 2 erc1155Tokens to each bond
             collateralIds = await Promise.all(currencyIds.map(async (curId, i) => {
                 let bondId = bondIds[i % bondIds.length]; // choose bond
-                return instance.addCollateral(bondId, curId, 100)
+                return instance.addCollateral(bondId, accounts[0], curId, 100)
                     .then(tx => getEvent(tx, 'CollateralAdded'))
                     .then(ev => ev.collateralId);
             }));
@@ -327,7 +329,7 @@ contract('CollateralManager', accounts => {
             const bondId = await instance.mintBond(bondBytes[0], bondBytes[1])
                 .then(tx => getEvent(tx, 'Transfer'))
                 .then(ev => ev.tokenId.toNumber());
-            const collateralId = await instance.addCollateral(bondId, 0, 10, {value: 10})
+            const collateralId = await instance.addCollateral(bondId, accounts[0], 0, 10, {value: 10})
                 .then(tx => getEvent(tx, 'CollateralAdded'))
                 .then(ev => ev.collateralId);
             let err = await getRevert(instance.destroyBond(bondId));
@@ -340,7 +342,7 @@ contract('CollateralManager', accounts => {
                 .then(tx => getEvent(tx, 'Transfer'))
                 .then(ev => ev.tokenId.toNumber());
             const oldBalance = await instance.balanceOf(accounts[0]);
-            const collateralId = await instance.addCollateral(bondId, 0, 10, {value: 10})
+            const collateralId = await instance.addCollateral(bondId, accounts[0], 0, 10, {value: 10})
                 .then(tx => getEvent(tx, 'CollateralAdded'))
                 .then(ev => ev.collateralId);
             await instance.forgiveBond(bondId);
