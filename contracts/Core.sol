@@ -4,7 +4,8 @@ pragma solidity ^0.8.0;
 import "./MonetizedBondNFT.sol";
 
 /**
- * @title 📃 Core Bond contract
+ * @title 📃 Core Bond contract, containing all the methods and
+ * data to create, read, update, delete bond financial primitives
  */
 contract Core is MonetizedBondNFT {
   constructor(

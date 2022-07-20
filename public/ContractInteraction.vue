@@ -3,6 +3,7 @@
   <h2>{{contract.name}} Contract at: 
     <code>{{ contract.address }}</code>
   </h2>
+  <p>{{ description }}</p>
   <button v-if="connected" @click="toggleHidden">{{hidden ? 'Show' : 'Hide'}} Methods</button>
   <h6>Status: {{connected ? 'Connected' : 'Disconnected'}}</h6>
   <div v-if="events.length > 0">
@@ -45,6 +46,7 @@ export default {
     connected: false,
     hidden: true,
     obj: null,
+    description: '',
     fields: [],
     events: [],
     placeholders: {
@@ -74,6 +76,8 @@ export default {
     this.obj = new this.web3.eth.Contract(cJ.abi, this.contract.address);
     /* this.connected = true; */
     this.fields = this.parseMethods(cJ);
+    console.debug(cJ);
+    this.description = cJ.devdoc.title;
     this.connectEvents(cJ);
   },
   methods: {

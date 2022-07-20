@@ -81,7 +81,7 @@ contract LifecycleManager is BondToken {
      * @param data Additonal bytes to send with the transaction
      *
      * @dev For ether transactions, from and value still have to
-     * match or exceed the ether sent and the message sender
+     * match or exceed the ether sent and the message sender.
      * @dev Note that call data will only get forwarded for
      * supporting currencies
      */
