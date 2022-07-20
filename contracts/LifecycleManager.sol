@@ -91,9 +91,6 @@ contract LifecycleManager is BondToken {
         uint256 value,
         bytes calldata data
     ) public payable onlyOperatorFor(from) {
-        // TODO: if someone approves this contract as manager,
-        // can I just take their money by making them the 'from'?
-        // read bond
         Bond memory b;
         bytes32 alpha = bonds[id * 2]; // READ A
         b = alpha.fillBondFromAlpha(b);

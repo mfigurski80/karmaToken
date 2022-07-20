@@ -220,9 +220,13 @@ contract('LifecycleManager', accounts => {
       // try to service with victim's money
       let err = await getRevert(instance
         .serviceBond(bondId, victim, 1, 0x0, { from: owner })); 
-      console.log(err);
       assert.include(err.message, "approv");
 
+      // victim gives approval
+      await instance.setApprovalForAll(owner, true, { from: victim })
+        .then(tx => getEvent(tx, 'ApprovalForAll'));
+      await instance.serviceBond(bondId, victim, 1, 0x0, { from: owner })
+        .then(tx => getEvent(tx, 'BondServiced'));
     });
 
   });
