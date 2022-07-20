@@ -1,8 +1,8 @@
 {
-  "name": "karmaToken",
-  "version": "1.0.0",
+  "name": "@mfigurski80/bond-token",
+  "version": "0.7.0",
   "description": "",
-  "main": "truffle-config.js",
+  "main": "index.js",
   "directories": {
     "test": "test"
   },
@@ -21,10 +21,12 @@
     "report-addresses": "truffle network && truffle network > public/addresses.txt",
     "deploy:local": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset",
     "deploy:testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset",
-    "deploy:lan": "truffle migrate --network localTest --reset"
+    "deploy:lan": "truffle migrate --network localTest --reset",
+    "prepublishOnly": "npm run-script build && bash prepublish.sh"
   },
-  "author": "",
+  "author": "Mikolaj Figurski",
   "license": "ISC",
+  "files": ["dist"],
   "dependencies": {
     "@openzeppelin/contracts": "^4.2.0",
     "snowpack": "^3.8.8",

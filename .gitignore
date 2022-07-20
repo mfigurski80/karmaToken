@@ -1,7 +1,9 @@
 node_modules
 build
 publicBuild
+dist
 public/addresses.txt
+*.tgz
 .vscode
 .env
 coverage.json
