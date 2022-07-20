@@ -49,7 +49,7 @@ export default {
     async fetchContractData() {
       // Pattern: https://regexr.com/6ph9t
       const regex = /Network: \w* \(id: (\d*)\)([\s\S]*?)(?=\n{2,})/gm;
-      let data = await fetch('/addresses.txt')
+      let data = await fetch('addresses.txt')
         .then(res => res.text())
       this.contractData = [...((data + "\n\n").matchAll(regex))]
         .filter(m => +m[1] === +window.ethereum.networkVersion)
