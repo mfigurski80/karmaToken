@@ -17,8 +17,9 @@
     "coverage": "mkdir coverage; echo '<p>Coverage is temporarily deprecated</p>' > coverage/index.html",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",
     "report-addresses": "truffle network && truffle network > public/addresses.txt",
-    "deploy": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset",
-    "deploy:testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset"
+    "deploy:local": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset",
+    "deploy:testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset",
+    "deploy:lan": "truffle migrate --network localTest --reset"
   },
   "author": "",
   "license": "ISC",

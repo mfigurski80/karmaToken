@@ -55,7 +55,13 @@ module.exports = {
       port: 8545,
       network_id: "3072",
       skipDryRun: true,
-    }
+    },
+    localTest: {
+      networkCheckTimeout: 20000,
+      host: "10.7.8.120",
+      port: 8545,
+      network_id: "3072",
+    },
     // Another network with more advanced options...
     // advanced: {
     // port: 8777,             // Custom port
