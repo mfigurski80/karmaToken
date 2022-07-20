@@ -13,6 +13,8 @@
     "dev:site": "snowpack dev",
     "dev:fund-account": "truffle exec fundAccount.js",
     "test": "truffle test",
+    "test:ch": "bash -c \"comm -1 -2 <(git diff --name-only HEAD | grep -oP \\\"(?<=\\\\/)(\\\\w*)(?=\\\\.)\\\" | xargs -L 1 printf \\\"test/%s.test.js\\\\n\\\" | sort) <(ls ./test | xargs -L 1 printf \\\"test/%s\\\\n\\\") | xargs truffle test\"",
+    "test:prev-ch": "bash -c \"comm -1 -2 <(git diff --name-only HEAD~1 | grep -oP \\\"(?<=\\\\/)(\\\\w*)(?=\\\\.)\\\" | xargs -L 1 printf \\\"test/%s.test.js\\\\n\\\" | sort) <(ls ./test | xargs -L 1 printf \\\"test/%s\\\\n\\\") | xargs truffle test\"",
     "coverage:DEPR": "truffle run coverage",
     "coverage": "mkdir coverage; echo '<p>Coverage is temporarily deprecated</p>' > coverage/index.html",
     "lint": "solhint contracts/*.sol contracts/**/*.sol",

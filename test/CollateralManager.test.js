@@ -273,7 +273,7 @@ contract('CollateralManager', accounts => {
             });
         });
 
-        it('decreases gas costs with proper order', async () => {
+        it.skip('decreases gas costs with proper order', async () => {
             await erc1155Instance.setApprovalForAll(instance.address, true);	
 
             // create 2 bonds

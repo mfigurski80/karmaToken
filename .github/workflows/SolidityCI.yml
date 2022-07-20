@@ -32,7 +32,7 @@ jobs:
         run: npm run-script dev; sleep 6
 
       - name: Run tests
-        run: npm run-script test
+        run: npm run-script test:prev-ch
   lint:
     runs-on: ubuntu-latest
     steps:
