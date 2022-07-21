@@ -58,7 +58,7 @@ export default {
         .map(cArr => ({
           name: cArr[0],
           address: cArr[1],
-          abiPath: `/contracts/${cArr[0]}.json`,
+          abiPath: `contracts/${cArr[0]}.json`,
         })); 
     }, 
   },
