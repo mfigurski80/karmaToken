@@ -53,8 +53,10 @@ export default {
         .then(res => res.text())
       this.contractData = [...((data + "\n\n").matchAll(regex))]
         .filter(m => +m[1] === +window.ethereum.networkVersion)
-        .map(m => m[2].trim().split('\n  ')).flat()
+        .map(m => m[2].trim().split('\n  '))
+        .flat()
         .map(cData => cData.split(': '))
+        .filter(cArr => c[0] !== "No contracts deployed.");
         .map(cArr => ({
           name: cArr[0],
           address: cArr[1],
