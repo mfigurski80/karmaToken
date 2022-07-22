@@ -1,0 +1,25 @@
+{
+  "name": "@mfigurski80/bond-token",
+  "version": "0.7.1",
+  "description": "ABIs package for BOND token",
+  "main": "index.js",
+  "files": ["contracts"],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "bash prepublish.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mfigurski80/karmaToken.git"
+  },
+  "keywords": [
+    "NFT",
+    "web3"
+  ],
+  "author": "mfigurski80",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mfigurski80/karmaToken/issues"
+  },
+  "homepage": "https://github.com/mfigurski80/karmaToken/src#readme"
+}

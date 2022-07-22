@@ -3,6 +3,7 @@ build
 publicBuild
 dist
 public/addresses.txt
+package/contracts/*
 *.tgz
 .vscode
 .env
