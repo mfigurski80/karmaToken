@@ -1,0 +1,57 @@
+name: Update Website for Changes
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'master'
+    paths:
+      - '!contracts/*'
+      - '!migrations/*'
+      - 'public/*'
+
+jobs:
+
+  deploy-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+          cache: npm
+      - uses: c-hive/gha-npm-cache@v1
+      - name: Install project dependencies
+        run: npm ci 
+
+      - name: Download Contract ABIs Artifact 
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.github_token }}
+          workflow: Deploy.yml
+          workflow_conclusion: success
+          branch: master
+          name: contract-abis
+          path: build
+      - name: Download Address Report Artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.github_token }}
+          workflow: Deploy.yml
+          workflow_conclusion: success
+          branch: master
+          name: address-report 
+          path: public 
+
+      - name: Create code coverage report
+        run: npm run coverage
+
+      - name: Build site
+        run: npm run build:site
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.3.4
+        with:
+          folder: publicBuild
+
