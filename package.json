@@ -23,7 +23,7 @@
     "deploy:local": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset",
     "deploy:testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset",
     "deploy:lan": "truffle migrate --network localTest --reset",
-    "publish": "mkdir -p package/contracts && cp ./build/contracts/* package/contracts && cd package && npm publish --dry-run && rm -rf package/contracts"
+    "publish": "mkdir -p package/contracts && cp ./build/contracts/* package/contracts && cd package && npm publish && rm -rf package/contracts"
   },
   "author": "Mikolaj Figurski",
   "license": "ISC",

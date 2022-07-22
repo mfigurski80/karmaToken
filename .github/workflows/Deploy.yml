@@ -41,6 +41,11 @@ jobs:
           name: address-report
           path: public/addresses.txt
 
+      - name: Deploy Package
+        run: npm run-script publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   deploy-pages:
     needs: deploy-contracts
     runs-on: ubuntu-latest
