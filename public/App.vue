@@ -56,7 +56,7 @@ export default {
         .map(m => m[2].trim().split('\n  '))
         .flat()
         .map(cData => cData.split(': '))
-        .filter(cArr => c[0] !== "No contracts deployed.")
+        .filter(cArr => cArr[0] !== "No contracts deployed.")
         .map(cArr => ({
           name: cArr[0],
           address: cArr[1],
