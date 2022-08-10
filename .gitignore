@@ -3,7 +3,8 @@ build
 publicBuild
 dist
 public/addresses.txt
-package/contracts/*
+package/*.json
+package/contracts/*.json
 *.tgz
 .vscode
 .env

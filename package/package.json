@@ -1,9 +1,12 @@
 {
   "name": "@mfigurski80/bond-token",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "ABIs package for BOND token",
   "main": "index.js",
-  "files": ["contracts"],
+  "files": [
+    "contracts",
+    "addresses.json"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "bash prepublish.sh"

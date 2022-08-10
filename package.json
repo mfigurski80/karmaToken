@@ -12,7 +12,7 @@
     "build:site": "snowpack build",
     "dev": "truffle dev > /dev/null &",
     "dev:site": "snowpack dev",
-    "dev:fund-account": "truffle exec fundAccount.js",
+    "dev:fund-account": "truffle exec scripts/fundAccount.js",
     "test": "truffle test",
     "test:ch": "bash -c \"comm -1 -2 <(git diff --name-only HEAD | grep -oP \\\"(?<=\\\\/)(\\\\w*)(?=\\\\.)\\\" | xargs -L 1 printf \\\"test/%s.test.js\\\\n\\\" | sort) <(ls ./test | xargs -L 1 printf \\\"test/%s\\\\n\\\") | xargs truffle test\"",
     "test:prev-ch": "bash -c \"comm -1 -2 <(git diff --name-only HEAD~1 | grep -oP \\\"(?<=\\\\/)(\\\\w*)(?=\\\\.)\\\" | xargs -L 1 printf \\\"test/%s.test.js\\\\n\\\" | sort) <(ls ./test | xargs -L 1 printf \\\"test/%s\\\\n\\\") | xargs truffle test\"",
@@ -23,11 +23,13 @@
     "deploy:local": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --reset",
     "deploy:testnet": "DEPLOY_SUPPORTING_CONTRACTS='Y' truffle migrate --network test --reset",
     "deploy:lan": "truffle migrate --network localTest --reset",
-    "publish": "mkdir -p package/contracts && cp ./build/contracts/* package/contracts && cd package && npm publish && rm -rf package/contracts"
+    "publish": "cd package && npm publish"
   },
   "author": "Mikolaj Figurski",
   "license": "ISC",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "dependencies": {
     "@openzeppelin/contracts": "^4.2.0",
     "snowpack": "^3.8.8",
