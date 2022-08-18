@@ -18,24 +18,15 @@
  *
  */
 
-// const HDWalletProvider = require('@truffle/hdwallet-provider');
-//
-// const fs = require('fs');
-// const mnemonic = fs.readFileSync(".secret").toString().trim();
-
+const HDWalletProvider = require('@truffle/hdwallet-provider');
 require('dotenv').config();
 
-module.exports = {
-  /**
-   * Networks define how you connect to your ethereum client and let you set the
-   * defaults web3 uses to send transactions. If you don't specify one truffle
-   * will spin up a development blockchain for you on port 9545 when you
-   * run `develop` or `test`. You can ask a truffle command to use a specific
-   * network from the command line, e.g
-   *
-   * $ truffle test --network <network-name>
-   */
+const goerliProvider = new HDWalletProvider({
+  mnemonic: process.env.MNEMONIC, 
+  providerOrUrl: "https://goerli.infura.io/v3/" + process.env.INFURA_GORLI_API_KEY,
+});
 
+module.exports = {
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
     // if it's defined here and no other network is specified at the command line.
@@ -61,6 +52,11 @@ module.exports = {
       host: "10.7.8.120",
       port: 8545,
       network_id: "3072",
+    },
+    goerli: {
+      provider: () => goerliProvider,
+      network_id: "5",
+      gasPrice: 10000000000,
     },
     // Another network with more advanced options...
     // advanced: {
@@ -105,7 +101,7 @@ module.exports = {
   compilers: {
     solc: {
       version: "0.8.6",    // Fetch exact version from solc-bin (default: truffle's version)
-        docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
+      docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       settings: {          // See the solidity docs for advice about optimization and evmVersion
         optimizer: {
           enabled: true,

@@ -32,7 +32,7 @@ jobs:
           path: build
 
       - name: Deploy to Test Net
-        run: npm run deploy:testnet
+        run: npm run deploy:goerli
 
       - name: Report Addresses
         run: npm run report-addresses
