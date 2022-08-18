@@ -33,6 +33,9 @@ jobs:
 
       - name: Deploy to Test Net
         run: npm run deploy:goerli
+        env:
+          MNEMONIC: ${{ secrets.MNEMONIC }}
+          INFURA_GORLI_API_KEY: ${{ secrets.INFURA_GORLI_API_KEY }}
 
       - name: Report Addresses
         run: npm run report-addresses

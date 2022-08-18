@@ -33,6 +33,8 @@ jobs:
 
       - name: Run tests
         run: npm run-script test
+        env:
+          COINMARKETCAP_API_KEY: ${{ secrets.COINMARKETCAP_API_KEY }}
   lint:
     runs-on: ubuntu-latest
     steps:
