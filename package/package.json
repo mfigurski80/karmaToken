@@ -1,6 +1,6 @@
 {
   "name": "@mfigurski80/bond-token",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "ABIs package for BOND token",
   "main": "index.js",
   "files": [
